@@ -1,0 +1,36 @@
+{
+  "name": "naboris",
+  "version": "0.0.1",
+  "description": "Express-like HTTP server for ocaml/reasonml.  Based on httpaf and lwt.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "esy",
+    "build-server": "esy b dune build src/demo.exe"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shawn-mcginty/naboris.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shawn-mcginty/naboris/issues"
+  },
+  "homepage": "https://github.com/shawn-mcginty/naboris#readme",
+  "dependencies": {
+    "ocaml": "*",
+    "@opam/dune": "*",
+    "@opam/reason": "*",
+    "@opam/httpaf": "*",
+    "@opam/httpaf-lwt": "*",
+    "@opam/lwt": "*"
+  },
+  "resolutions": {
+    "@opam/httpaf": "anmonteiro/httpaf:httpaf.opam#57e9dd2",
+    "@opam/httpaf-lwt": "anmonteiro/httpaf:httpaf-lwt.opam#57e9dd2"
+  },
+  "devDependencies": {
+    "esy": "^0.5.6"
+  }
+}

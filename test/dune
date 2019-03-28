@@ -1,0 +1,3 @@
+(executable
+	(name fullServerTest)
+	(libraries naboris httpaf httpaf-lwt lwt lwt.unix))

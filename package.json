@@ -4,9 +4,10 @@
   "description": "Express-like HTTP server for ocaml/reasonml.  Based on httpaf and lwt.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "esy b dune exec ./test/fullServerTest.exe",
     "install": "esy",
-    "build-server": "esy b dune build src/demo.exe"
+    "build": "esy b dune build",
+    "clean": "esy b dune clean"
   },
   "repository": {
     "type": "git",

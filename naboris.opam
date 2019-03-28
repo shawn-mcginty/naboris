@@ -1,0 +1,16 @@
+opam-version: "0.0.1"
+maintainer: "Shawn McGinty <loltempast@gmail.com>"
+authors: [ "Shawn McGinty <loltempast@gmail.com>" ]
+license: "MIT"
+homepage: "https://github.com/shawn-mcginty/naboris"
+bug-reports: "https://github.com/shawn-mcginty/naboris/issues"
+dev-repo: "git+https://github.com/shawn-mcginty/naboris.git"
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name] {with-test}
+]
+depends: [
+  "ocaml" {>= "4.03.0"}
+  "dune" {build}
+]

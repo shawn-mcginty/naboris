@@ -24,3 +24,5 @@ setup.log
 
 _esy
 node_modules
+esy.lock
+naboris.install

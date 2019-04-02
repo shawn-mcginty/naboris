@@ -25,13 +25,16 @@
     "@opam/reason": "*",
     "@opam/httpaf": "*",
     "@opam/httpaf-lwt": "*",
-    "@opam/lwt": "*"
+    "@opam/lwt": "*",
+    "@opam/re": "*"
   },
   "resolutions": {
     "@opam/httpaf": "anmonteiro/httpaf:httpaf.opam#57e9dd2",
     "@opam/httpaf-lwt": "anmonteiro/httpaf:httpaf-lwt.opam#57e9dd2"
   },
   "devDependencies": {
-    "esy": "^0.5.6"
+    "esy": "^0.5.6",
+    "@opam/cohttp": "*",
+    "@opam/cohttp-lwt-unix": "*"
   }
 }

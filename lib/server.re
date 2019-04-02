@@ -1,47 +1,61 @@
-module Body = Httpaf.Body;
-module Headers = Httpaf.Headers;
-module Reqd = Httpaf.Reqd;
-module Response = Httpaf.Response;
-module Status = Httpaf.Status;
+module Req = Req;
+module Res = Res;
 
-type server = {
-	onListen: unit => unit
+type serverConfig = {
+	onListen: unit => unit,
+	routes: list(Router.route)
 };
 
-let buildConnectionHandler = (_server) => {
-	let request_handler = (_client_address: Unix.sockaddr, request_descriptor) => {
-			let response =
-				Response.create(
-					~headers=
-						Headers.of_list([
-							("Content-Type", "application/json"),
-							("Connection", "close"),
-						]),
-					`Not_found,
-				);
+let respondWithDefault = (requestDescriptor) => {
+	let response =
+		Httpaf.Response.create(
+			~headers=
+				Httpaf.Headers.of_list([
+					("Content-Type", "text/plain"),
+					("Connection", "close"),
+				]),
+			`Not_found,
+		);
 
-			let response_body =
-				Reqd.respond_with_streaming(request_descriptor, response);
+	let response_body =
+		Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
 
-			let respond = () =>
-				Body.write_string(response_body, "Page not found.");
+	let respond = () =>
+		Httpaf.Body.write_string(response_body, "Page not found.");
 
-			respond();
-		};
+	respond();
+};
+
+let buildConnectionHandler = (serverConfig) => {
+	let routeHandlers = Router.compileRoutes(serverConfig.routes);
+	let request_handler = (_client_address: Unix.sockaddr, request_descriptor: Httpaf.Reqd.t(Lwt_unix.file_descr)) => {
+		let request: Httpaf.Request.t = Httpaf.Reqd.request(request_descriptor);
+		let target = request.target;
+		let method = Method.ofHttpAfMethod(request.meth);
+
+		switch (Router.match(routeHandlers, target, method)) {
+		| Some(handler :Router.requestHandler) => {
+			let req = Req.fromReqd(request_descriptor);
+			let res = Res.default();
+			handler(req, res);
+		}
+		| None => respondWithDefault(request_descriptor);
+		}
+	};
 
 	let error_handler = (_client_address: Unix.sockaddr, ~request as _=?, error, start_response) => {
-			let response_body = start_response(Headers.empty);
+			let response_body = start_response(Httpaf.Headers.empty);
 
 			switch (error) {
 			| `Exn(exn) =>
-				Body.write_string(response_body, Printexc.to_string(exn));
-				Body.write_string(response_body, "\n");
+				Httpaf.Body.write_string(response_body, Printexc.to_string(exn));
+				Httpaf.Body.write_string(response_body, "\n");
 
-			| #Status.standard as error =>
-				Body.write_string(response_body, Status.default_reason_phrase(error))
+			| #Httpaf.Status.standard as error =>
+				Httpaf.Body.write_string(response_body, Httpaf.Status.default_reason_phrase(error))
 			};
 
-			Body.close_writer(response_body);
+			Httpaf.Body.close_writer(response_body);
 		};
 
 	Httpaf_lwt.Server.create_connection_handler(

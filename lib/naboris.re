@@ -1,9 +1,11 @@
 module Server = Server;
+module Req = Req;
+module Res = Res;
 
 open Lwt.Infix;
-let listen = (port, server: Server.server) => {
+let listen = (port, serverConfig: Server.serverConfig) => {
   let listenAddress = Unix.(ADDR_INET(inet_addr_loopback, port));
-  let connectionHandler = Server.buildConnectionHandler(server);
+  let connectionHandler = Server.buildConnectionHandler(serverConfig);
 
 	Lwt.async(() =>
 		Lwt_io.establish_server_with_client_socket(
@@ -11,13 +13,13 @@ let listen = (port, server: Server.server) => {
 			connectionHandler,
 		)
 		>>= (
-			_server => {
-				server.onListen();
+			(_server) => {
+				serverConfig.onListen();
 				Lwt.return_unit;
-      }
-    )
-  );
+			}
+		)
+	);
 
-  let (forever, _) = Lwt.wait();
-  Lwt_main.run(forever);
+	let (forever, _) = Lwt.wait();
+	Lwt_main.run(forever);
 };

@@ -2,12 +2,24 @@
   "name": "naboris",
   "version": "0.0.1",
   "description": "Express-like HTTP server for ocaml/reasonml.  Based on httpaf and lwt.",
-  "main": "index.js",
+  "esy": {
+    "build": [
+      ["dune"]
+    ],
+    "install": [
+      "esy-installer"
+    ],
+    "buildInSource": true
+  },
   "scripts": {
     "test": "esy b dune exec ./test/fullServerTest.exe",
     "install": "esy",
-    "build": "esy b dune build",
-    "clean": "esy b dune clean"
+    "build-main": "esy b dune build @install",
+    "build-test": "esy b dune build ./test/fullServerTest.exe @install",
+    "build": "npm run build-main && npm run build-test",
+    "clean": "esy b dune clean",
+    "clean-install": "rm -rf node_modules && rm -rf esy.lock && rm -rf _esy",
+    "clean-world": "npm run clean && npm run clean-install"
   },
   "repository": {
     "type": "git",
@@ -20,8 +32,8 @@
   },
   "homepage": "https://github.com/shawn-mcginty/naboris#readme",
   "dependencies": {
-    "ocaml": "*",
-    "@opam/dune": "*",
+    "@opam/ocamlfind": "*",
+    "@opam/dune": "<1.7",
     "@opam/reason": "*",
     "@opam/httpaf": "*",
     "@opam/httpaf-lwt": "*",
@@ -33,8 +45,12 @@
     "@opam/httpaf-lwt": "anmonteiro/httpaf:httpaf-lwt.opam#57e9dd2"
   },
   "devDependencies": {
+    "ocaml": "*",
     "esy": "^0.5.6",
     "@opam/cohttp": "*",
     "@opam/cohttp-lwt-unix": "*"
+  },
+  "peerDependencies": {
+    "ocaml": "~4.6.1"
   }
 }

@@ -8,9 +8,13 @@ dev-repo: "git+https://github.com/shawn-mcginty/naboris.git"
 build: [
   ["dune" "subst"] {pinned}
   ["dune" "build" "-p" name "-j" jobs]
-  ["dune" "runtest" "-p" name] {with-test}
 ]
 depends: [
   "ocaml" {>= "4.03.0"}
   "dune" {build}
+  "reason"
+  "httpaf"
+  "httpaf-lwt"
+  "lwt"
+  "re"
 ]

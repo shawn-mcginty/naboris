@@ -9,7 +9,3 @@ let flatMap = (f: 'a => option('b), opt: option('a)) =>
   | None => None
   | Some(x) => f(x)
   };
-
-let foo = () => {
-  print_string("Foo");
-};

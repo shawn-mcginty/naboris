@@ -106,4 +106,24 @@ let tests = [
       );
     },
   },
+  Spec.{
+    title: "Get \"/echo/:str1/multi/:str2\" matches and extracts param(s) properly",
+    test: () => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9991/echo/test 1/multi/test 2"),
+      )
+      >>= (
+        ((resp, bod)) => {
+          assert(resp.status == `OK);
+          Cohttp_lwt.Body.to_string(bod)
+          >>= (
+            bodyStr => {
+              AssertString.areSame(bodyStr, "test 1\ntest 2");
+              Lwt.return((TestResult.TestDone, 0.0));
+            }
+          );
+        }
+      );
+    },
+  },
 ];

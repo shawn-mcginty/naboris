@@ -99,6 +99,39 @@ let testServerConfig: Naboris.Server.serverConfig = {
         };
       },
     },
+    {
+      method: GET,
+      path: "/echo/:str1/multi/:str2",
+      requestHandler: (req, res) => {
+        let maybeStr1 =
+          List.find_opt(
+            x =>
+              switch (x) {
+              | ("str1", _) => true
+              | _ => false
+              },
+            req.params,
+          );
+        let maybeStr2 =
+          List.find_opt(
+            x =>
+              switch (x) {
+              | ("str2", _) => true
+              | _ => false
+              },
+            req.params,
+          );
+
+        let vals = [maybeStr1, maybeStr2];
+
+        switch (vals) {
+        | [Some((_x, str1)), Some((_y, str2))] =>
+          Naboris.Res.status(200, res)
+          |> Naboris.Res.html(req, str1 ++ "\n" ++ str2)
+        | _ => Naboris.Res.status(500, res) |> Naboris.Res.html(req, "fail")
+        };
+      },
+    },
   ],
 };
 

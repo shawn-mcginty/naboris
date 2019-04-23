@@ -49,7 +49,10 @@ let addArgIfNeeded = (node, args) =>
 let rec compilePathMatcher = (pathList, regexStr, args) => {
   switch (pathList) {
   | [] => (regexStr, args)
-  | [lastNode] => (regexStr ++ getLastNodeRegexStr(lastNode), addArgIfNeeded(lastNode, args))
+  | [lastNode] => (
+      regexStr ++ getLastNodeRegexStr(lastNode),
+      addArgIfNeeded(lastNode, args),
+    )
   | [headNode, ...rest] =>
     compilePathMatcher(
       rest,
@@ -96,7 +99,10 @@ let addNewMethod = (route, methods: list((Method.t, requestHandler))) => {
   switch (List.find_opt(((method, _)) => method == route.method, methods)) {
   | Some(_) =>
     raise(
-      DuplicateRoute("Duplicate route handler defined in server options for path " ++ route.path),
+      DuplicateRoute(
+        "Duplicate route handler defined in server options for path "
+        ++ route.path,
+      ),
     )
   | None => [getMethodHandler(route), ...methods]
   };
@@ -109,7 +115,8 @@ let addMethodToHandler = (route: route, handler: handler): handler => {
 let addMethodHandler = (route: route, handlers: list(handler)) =>
   List.map(
     (handler: handler) =>
-      handler.path == route.path ? addMethodToHandler(route, handler) : handler,
+      handler.path == route.path
+        ? addMethodToHandler(route, handler) : handler,
     handlers,
   );
 
@@ -129,13 +136,49 @@ let rec builder = (routes, handlers: list(handler)) => {
 
 let compileRoutes = (routes: list(route)) => builder(routes, []);
 
-let matchPath = (target, handler) => Re.Pcre.pmatch(~rex=handler.pathMatcher, target);
+let matchPath = (target, handler) =>
+  Re.Pcre.pmatch(~rex=handler.pathMatcher, target);
 
-let matchMethod = (method, handler) => List.find_opt(((m, _)) => m == method, handler.methods);
+let getParams = (handler: handler, target: string) =>
+  switch (Re.Pcre.extract(~rex=handler.pathMatcher, target) |> Array.to_list) {
+  | [_h, ...params] =>
+    /* skip the first one, it is not a capture group */
+    List.map(
+      p => (p.name, List.nth_opt(params, p.nodeIndex)),
+      handler.pathParams,
+    )
+    |> List.filter(((_, x)) =>
+         switch (x) {
+         | Some(_) => true
+         | _ => false
+         }
+       )
+    |> List.map(((x, y)) =>
+         switch (y) {
+         | Some(z) => (x, Uri.pct_decode(z))
+         | None => (x, "")
+         }
+       )
+    |> List.filter(((_, x)) =>
+         switch (x) {
+         | "" => false
+         | _ => true
+         }
+       )
+  | _ => []
+  };
 
-let match = (routeHandlers: list(handler), target: string, method): option(requestHandler) => {
+let matchMethod = (method, target, handler) =>
+  switch (List.find_opt(((m, _)) => m == method, handler.methods)) {
+  | Some((_meth, h)) => Some((h, getParams(handler, target)))
+  | None => None
+  };
+
+let match =
+    (routeHandlers: list(handler), target: string, method)
+    : option((requestHandler, list((string, string)))) => {
   let isMatchingPath = matchPath(target);
-  let getMatchingMehtod = matchMethod(method);
+  let getMatchingMehtod = matchMethod(method, target);
   let meth =
     routeHandlers
     |> List.find_opt(h => isMatchingPath(h))
@@ -143,6 +186,6 @@ let match = (routeHandlers: list(handler), target: string, method): option(reque
 
   switch (meth) {
   | None => None
-  | Some((_meth, handler)) => Some(handler)
+  | Some((handler, params)) => Some((handler, params))
   };
 };

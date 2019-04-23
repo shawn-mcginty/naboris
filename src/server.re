@@ -38,8 +38,8 @@ let buildConnectionHandler = serverConfig => {
     let method = Method.ofHttpAfMethod(request.meth);
 
     switch (Router.match(routeHandlers, target, method)) {
-    | Some((handler: Router.requestHandler)) =>
-      let req = Req.fromReqd(request_descriptor);
+    | Some((handler, params)) =>
+      let req = Req.fromReqd(request_descriptor, params);
       let res = Res.default();
       handler(req, res);
     | None => respondWithDefault(request_descriptor)

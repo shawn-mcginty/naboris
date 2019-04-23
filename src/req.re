@@ -1,3 +1,6 @@
-type t = {requestDescriptor: Httpaf.Reqd.t(Lwt_unix.file_descr)};
+type t = {
+  requestDescriptor: Httpaf.Reqd.t(Lwt_unix.file_descr),
+  params: list((string, string)),
+};
 
-let fromReqd = reqd => {requestDescriptor: reqd};
+let fromReqd = (reqd, params) => {requestDescriptor: reqd, params};

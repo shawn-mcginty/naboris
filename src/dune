@@ -1,6 +1,6 @@
 (library
 	(name naboris)
 	(public_name naboris)
-	(libraries httpaf httpaf-lwt lwt lwt.unix re)
+	(libraries httpaf httpaf-lwt lwt lwt.unix re uri)
 )
 (include_subdirs unqualified)

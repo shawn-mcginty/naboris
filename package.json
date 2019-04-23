@@ -38,7 +38,8 @@
     "@opam/httpaf": "*",
     "@opam/httpaf-lwt": "*",
     "@opam/lwt": "*",
-    "@opam/re": "*"
+    "@opam/re": "*",
+    "@opam/uri": "*"
   },
   "resolutions": {
     "@opam/httpaf": "anmonteiro/httpaf:httpaf.opam#57e9dd2",

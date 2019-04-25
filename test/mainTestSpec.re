@@ -126,4 +126,26 @@ let tests = [
       );
     },
   },
+  Spec.{
+    title: "Get \"/echo-query/query\" matches and extracts query params properly",
+    test: () => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string(
+          "http://localhost:9991/echo-query/query?q=foo&q2=bar&q3=baz",
+        ),
+      )
+      >>= (
+        ((resp, bod)) => {
+          assert(resp.status == `OK);
+          Cohttp_lwt.Body.to_string(bod)
+          >>= (
+            bodyStr => {
+              AssertString.areSame(bodyStr, "foo\nbar\nbaz");
+              Lwt.return((TestResult.TestDone, 0.0));
+            }
+          );
+        }
+      );
+    },
+  },
 ];

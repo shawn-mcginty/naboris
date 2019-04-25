@@ -174,9 +174,17 @@ let matchMethod = (method, target, handler) =>
   | None => None
   };
 
+let getQuery = targetUrl => Uri.query(Uri.of_string(targetUrl));
+
 let match =
     (routeHandlers: list(handler), target: string, method)
-    : option((requestHandler, list((string, string)))) => {
+    : option(
+        (
+          requestHandler,
+          list((string, string)),
+          list((string, list(string))),
+        ),
+      ) => {
   let isMatchingPath = matchPath(target);
   let getMatchingMehtod = matchMethod(method, target);
   let meth =
@@ -186,6 +194,6 @@ let match =
 
   switch (meth) {
   | None => None
-  | Some((handler, params)) => Some((handler, params))
+  | Some((handler, params)) => Some((handler, params, getQuery(target)))
   };
 };

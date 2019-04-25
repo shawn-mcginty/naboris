@@ -32,3 +32,13 @@ An express-like native http server for OCaml/ReasonML
                                                            
                           @@(          @@                  
 ```
+
+## Work in progress
+This repo is a side project that I've just started.  It is not in working condition at the moment.
+
+## To run tests
+
+```bash
+esy install
+npm run test
+```

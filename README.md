@@ -1,5 +1,5 @@
 # Naboris
-> An express-like native http server for OCaml/ReasonML
+An express-like native http server for OCaml/ReasonML
 
 ```
                                                            

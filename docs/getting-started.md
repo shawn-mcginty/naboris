@@ -1,7 +1,7 @@
 ## Getting Started
 
 ### Configure the server
-```js
+```reason
 let serverConfig: Naboris.Server.serverConfig = {
   onListen: () => {
     print_string("Yay your server has started!!\n\n");

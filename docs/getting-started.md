@@ -1,7 +1,7 @@
 ## Getting Started
 
 ### Configure the server
-```reasonml
+```reason
 let serverConfig: Naboris.Server.serverConfig = {
   onListen: () => {
     print_string("Yay your server has started!!\n\n");
@@ -27,7 +27,7 @@ let serverConfig: Naboris.Server.serverConfig = {
 
 ### Fire it up!
 
-```reasonml
+```reason
 let portNumber = 9991;
 
 Naboris.listen(portNumber, serverConfig);

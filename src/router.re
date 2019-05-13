@@ -32,9 +32,9 @@ let getNodeRegexStr = node =>
 
 let getLastNodeRegexStr = node =>
   if (isParamNode(node)) {
-    "\\/([^\\/\\?]+)";
+    "\\/([^\\/\\?]+)(\\?.+)?$";
   } else {
-    "\\/" ++ node;
+    "\\/" ++ node ++ "(\?.+)?$";
   };
 
 let addArgIfNeeded = (node, args) =>
@@ -86,6 +86,8 @@ let getMethodHandler = route => (route.method, route.requestHandler);
 let addNewPath = (route, handlers) => {
   let handlerPair = getMethodHandler(route);
   let (pathRegexStr, pathParams) = getPathRegex(route.path);
+  print_string(pathRegexStr);
+  print_string("\nyoyoyoma\n");
   let newHandler = {
     methods: [handlerPair],
     pathMatcher: Re.Pcre.regexp(pathRegexStr),
@@ -134,7 +136,7 @@ let rec builder = (routes, handlers: list(handler)) => {
   };
 };
 
-let compileRoutes = (routes: list(route)) => builder(routes, []);
+let compileRoutes = (routes: list(route)) => builder(List.rev(routes), []);
 
 let matchPath = (target, handler) =>
   Re.Pcre.pmatch(~rex=handler.pathMatcher, target);

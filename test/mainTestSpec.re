@@ -1,7 +1,5 @@
 open Lwt.Infix;
 
-module AssertString = AssertString;
-
 let tests = [
   Spec.{
     title: "Get \"/this-should-never-exist\" returns a 404 by default",
@@ -110,7 +108,7 @@ let tests = [
     title: "Get \"/echo/:str1/multi/:str2\" matches and extracts param(s) properly",
     test: () => {
       Cohttp_lwt_unix.Client.get(
-        Uri.of_string("http://localhost:9991/echo/test 1/multi/test 2"),
+        Uri.of_string("http://localhost:9991/echo/test 11/multi/test 2"),
       )
       >>= (
         ((resp, bod)) => {
@@ -118,7 +116,7 @@ let tests = [
           Cohttp_lwt.Body.to_string(bod)
           >>= (
             bodyStr => {
-              AssertString.areSame(bodyStr, "test 1\ntest 2");
+              AssertString.areSame(bodyStr, "test 11\ntest 2");
               Lwt.return((TestResult.TestDone, 0.0));
             }
           );
@@ -141,6 +139,29 @@ let tests = [
           >>= (
             bodyStr => {
               AssertString.areSame(bodyStr, "foo\nbar\nbaz");
+              Lwt.return((TestResult.TestDone, 0.0));
+            }
+          );
+        }
+      );
+    },
+  },
+  Spec.{
+    title: "Get \"/echo/pre-existing-route\" routes properly based on top to bottom priority",
+    test: () => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9991/echo/pre-existing-route"),
+      )
+      >>= (
+        ((resp, bod)) => {
+          assert(resp.status == `OK);
+          Cohttp_lwt.Body.to_string(bod)
+          >>= (
+            bodyStr => {
+              AssertString.areSame(
+                bodyStr,
+                "This route should take priority in the matcher.",
+              );
               Lwt.return((TestResult.TestDone, 0.0));
             }
           );

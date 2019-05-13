@@ -58,6 +58,17 @@ let testServerConfig: Naboris.Server.serverConfig = {
   routes: [
     {
       method: GET,
+      path: "/echo/pre-existing-route",
+      requestHandler: (req, res) => {
+        Naboris.Res.status(200, res)
+        |> Naboris.Res.html(
+             req,
+             "This route should take priority in the matcher.",
+           );
+      },
+    },
+    {
+      method: GET,
       path: "/html",
       requestHandler: (req, res) => {
         Naboris.Res.status(200, res)

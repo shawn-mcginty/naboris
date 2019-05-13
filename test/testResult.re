@@ -1,4 +1,4 @@
-type t = 
-	| TestTimeout
-	| SomeFailures
-	| TestDone;
+type t =
+  | TestTimeout
+  | SomeFailures
+  | TestDone;

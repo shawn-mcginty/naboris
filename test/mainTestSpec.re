@@ -169,4 +169,26 @@ let tests = [
       );
     },
   },
+  Spec.{
+    title: "Post \"/echo\" gets post body ast plain/text",
+    test: () => {
+      let expectedBody = "This is the string I expect to see from the body.";
+      Cohttp_lwt_unix.Client.post(
+        ~body=Cohttp_lwt.Body.of_string(expectedBody),
+        Uri.of_string("http://localhost:9991/echo"),
+      )
+      >>= (
+        ((resp, bod)) => {
+          assert(resp.status == `OK);
+          Cohttp_lwt.Body.to_string(bod)
+          >>= (
+            bodyStr => {
+              AssertString.areSame(bodyStr, expectedBody);
+              Lwt.return((TestResult.TestDone, 0.0));
+            }
+          );
+        }
+      );
+    },
+  },
 ];

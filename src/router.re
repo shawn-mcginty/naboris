@@ -86,8 +86,6 @@ let getMethodHandler = route => (route.method, route.requestHandler);
 let addNewPath = (route, handlers) => {
   let handlerPair = getMethodHandler(route);
   let (pathRegexStr, pathParams) = getPathRegex(route.path);
-  print_string(pathRegexStr);
-  print_string("\nyoyoyoma\n");
   let newHandler = {
     methods: [handlerPair],
     pathMatcher: Re.Pcre.regexp(pathRegexStr),

@@ -34,7 +34,7 @@ let getLastNodeRegexStr = node =>
   if (isParamNode(node)) {
     "\\/([^\\/\\?]+)(\\?.+)?$";
   } else {
-    "\\/" ++ node ++ "(\?.+)?$";
+    "\\/" ++ node ++ "(\\?.+)?$";
   };
 
 let addArgIfNeeded = (node, args) =>

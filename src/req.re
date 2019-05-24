@@ -1,4 +1,4 @@
-type t = {requestDescriptor: Httpaf.Reqd.t(Lwt_unix.file_descr)};
+type t = {requestDescriptor: Httpaf.Reqd.t};
 
 let getHeader = (headerKey, req) =>
   switch (Httpaf.Reqd.request(req.requestDescriptor)) {

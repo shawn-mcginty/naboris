@@ -36,14 +36,9 @@
     "@opam/dune": "*",
     "@opam/reason": "*",
     "@opam/httpaf": "*",
-    "@opam/httpaf-lwt": "*",
+    "@opam/httpaf-lwt-unix": "*",
     "@opam/lwt": "*",
-    "@opam/re": "*",
     "@opam/uri": "*"
-  },
-  "resolutions": {
-    "@opam/httpaf": "anmonteiro/httpaf:httpaf.opam#57e9dd2",
-    "@opam/httpaf-lwt": "anmonteiro/httpaf:httpaf-lwt.opam#57e9dd2"
   },
   "devDependencies": {
     "ocaml": "*",

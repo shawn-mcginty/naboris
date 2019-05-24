@@ -29,10 +29,7 @@ let respondWithDefault = requestDescriptor => {
 
 let buildConnectionHandler = serverConfig => {
   let request_handler =
-      (
-        _client_address: Unix.sockaddr,
-        request_descriptor: Httpaf.Reqd.t(Lwt_unix.file_descr),
-      ) => {
+      (_client_address: Unix.sockaddr, request_descriptor: Httpaf.Reqd.t) => {
     let request: Httpaf.Request.t = Httpaf.Reqd.request(request_descriptor);
     let target = request.target;
     let method = Method.ofHttpAfMethod(request.meth);
@@ -66,7 +63,7 @@ let buildConnectionHandler = serverConfig => {
     Httpaf.Body.close_writer(response_body);
   };
 
-  Httpaf_lwt.Server.create_connection_handler(
+  Httpaf_lwt_unix.Server.create_connection_handler(
     ~config=?None,
     ~request_handler,
     ~error_handler,

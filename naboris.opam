@@ -14,7 +14,7 @@ depends: [
   "dune" {build}
   "reason"
   "httpaf"
-  "httpaf-lwt"
+  "httpaf-lwt-unix"
   "lwt"
-  "re"
+  "uri"
 ]

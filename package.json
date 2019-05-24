@@ -32,7 +32,6 @@
   },
   "homepage": "https://github.com/shawn-mcginty/naboris#readme",
   "dependencies": {
-    "@opam/ocamlfind": "*",
     "@opam/dune": "*",
     "@opam/reason": "*",
     "@opam/httpaf": "*",

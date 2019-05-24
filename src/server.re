@@ -1,9 +1,10 @@
 module Req = Req;
 module Res = Res;
+module Router = Router;
 
 type serverConfig = {
   onListen: unit => unit,
-  routes: list(Router.route),
+  routeRequest: (Route.t, Req.t, Res.t) => Lwt.t(unit),
 };
 
 let respondWithDefault = requestDescriptor => {
@@ -27,7 +28,6 @@ let respondWithDefault = requestDescriptor => {
 };
 
 let buildConnectionHandler = serverConfig => {
-  let routeHandlers = Router.compileRoutes(serverConfig.routes);
   let request_handler =
       (
         _client_address: Unix.sockaddr,
@@ -36,14 +36,15 @@ let buildConnectionHandler = serverConfig => {
     let request: Httpaf.Request.t = Httpaf.Reqd.request(request_descriptor);
     let target = request.target;
     let method = Method.ofHttpAfMethod(request.meth);
+    let route = Router.generateRoute(target, method);
 
-    switch (Router.match(routeHandlers, target, method)) {
-    | Some((handler, params, query)) =>
-      let req = Req.fromReqd(request_descriptor, params, query);
-      let res = Res.default();
-      handler(req, res);
-    | None => respondWithDefault(request_descriptor)
-    };
+    let _promise =
+      serverConfig.routeRequest(
+        route,
+        Req.fromReqd(request_descriptor),
+        Res.default(),
+      );
+    ();
   };
 
   let error_handler =

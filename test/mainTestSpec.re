@@ -191,4 +191,24 @@ let tests = [
       );
     },
   },
+  Spec.{
+    title: "Get \"/static/:file_path\" matches and extracts query params properly",
+    test: () => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9991/static/text/text_file.txt"),
+      )
+      >>= (
+        ((resp, bod)) => {
+          assert(resp.status == `OK);
+          Cohttp_lwt.Body.to_string(bod)
+          >>= (
+            bodyStr => {
+              AssertString.areSame(bodyStr, "Hello world!");
+              Lwt.return((TestResult.TestDone, 0.0));
+            }
+          );
+        }
+      );
+    },
+  },
 ];

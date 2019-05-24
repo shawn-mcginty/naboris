@@ -47,6 +47,21 @@ and runTest = (test: Spec.t, rest, t, s, f) => {
   };
 };
 
+let echoQueryQuery = (req, res, query) => {
+  let maybeStr1 = Naboris.QueryMap.find_opt("q", query);
+  let maybeStr2 = Naboris.QueryMap.find_opt("q2", query);
+  let maybeStr3 = Naboris.QueryMap.find_opt("q3", query);
+
+  let vals = [maybeStr1, maybeStr2, maybeStr3];
+
+  switch (vals) {
+  | [Some([str1, ..._]), Some([str2, ..._]), Some([str3, ..._])] =>
+    Naboris.Res.status(200, res)
+    |> Naboris.Res.html(req, str1 ++ "\n" ++ str2 ++ "\n" ++ str3)
+  | _ => Naboris.Res.status(500, res) |> Naboris.Res.html(req, "fail")
+  };
+};
+
 let testServerConfig: Naboris.Server.serverConfig = {
   onListen: () => {
     print_string("🐫 Started a server on port 9991!\n\n");
@@ -55,141 +70,62 @@ let testServerConfig: Naboris.Server.serverConfig = {
     | _ => exit(1)
     };
   },
-  routes: [
-    {
-      method: GET,
-      path: "/echo/pre-existing-route",
-      requestHandler: (req, res) => {
-        Naboris.Res.status(200, res)
-        |> Naboris.Res.html(
-             req,
-             "This route should take priority in the matcher.",
-           );
-      },
+  routeRequest: (route, req, res) =>
+    switch (route.method, route.path) {
+    | (Naboris.Method.GET, ["echo", "pre-existing-route"]) =>
+      Naboris.Res.status(200, res)
+      |> Naboris.Res.html(
+           req,
+           "This route should take priority in the matcher.",
+         );
+      Lwt.return_unit;
+    | (Naboris.Method.GET, ["html"]) =>
+      Naboris.Res.status(200, res)
+      |> Naboris.Res.html(
+           req,
+           "<!doctype html><html><body>You made it.</body></html>",
+         );
+      Lwt.return_unit;
+    | (Naboris.Method.GET, ["user", _userId, "item", _itemId]) =>
+      Naboris.Res.status(200, res)
+      |> Naboris.Res.html(
+           req,
+           "<!doctype html><html><body>You want some user id and item</body></html>",
+         );
+      Lwt.return_unit;
+    | (Naboris.Method.GET, ["echo-query", "query"]) =>
+      echoQueryQuery(req, res, route.query);
+      Lwt.return_unit;
+    | (Naboris.Method.GET, ["echo", str]) =>
+      Naboris.Res.status(200, res) |> Naboris.Res.html(req, str);
+      Lwt.return_unit;
+    | (Naboris.Method.GET, ["echo", str1, "multi", str2]) =>
+      Naboris.Res.status(200, res)
+      |> Naboris.Res.html(req, str1 ++ "\n" ++ str2);
+      Lwt.return_unit;
+    | (POST, ["echo"]) =>
+      Lwt.bind(
+        Naboris.Req.getBody(req),
+        bodyStr => {
+          Naboris.Res.status(200, res) |> Naboris.Res.html(req, bodyStr);
+          Lwt.return_unit;
+        },
+      )
+    | (GET, ["static", ...staticPath]) =>
+      Naboris.Res.static(
+        Sys.getcwd() ++ "/test/test_assets",
+        staticPath,
+        req,
+        res,
+      )
+    | _ =>
+      Naboris.Res.status(404, res)
+      |> Naboris.Res.html(
+           req,
+           "<!doctype html><html><body>Page not found</body></html>",
+         );
+      Lwt.return_unit;
     },
-    {
-      method: GET,
-      path: "/html",
-      requestHandler: (req, res) => {
-        Naboris.Res.status(200, res)
-        |> Naboris.Res.html(
-             req,
-             "<!doctype html><html><body>You made it.</body></html>",
-           );
-      },
-    },
-    {
-      method: GET,
-      path: "/user/:userId/item/:itemId",
-      requestHandler: (req, res) => {
-        Naboris.Res.status(200, res)
-        |> Naboris.Res.html(
-             req,
-             "<!doctype html><html><body>You want some user id and item</body></html>",
-           );
-      },
-    },
-    {
-      method: GET,
-      path: "/echo-query/query",
-      requestHandler: (req, res) => {
-        let maybeStr1 =
-          List.find_opt(
-            x =>
-              switch (x) {
-              | ("q", _) => true
-              | _ => false
-              },
-            req.query,
-          );
-        let maybeStr2 =
-          List.find_opt(
-            x =>
-              switch (x) {
-              | ("q2", _) => true
-              | _ => false
-              },
-            req.query,
-          );
-        let maybeStr3 =
-          List.find_opt(
-            x =>
-              switch (x) {
-              | ("q3", _) => true
-              | _ => false
-              },
-            req.query,
-          );
-
-        let vals = [maybeStr1, maybeStr2, maybeStr3];
-
-        switch (vals) {
-        | [
-            Some((_, [str1, ..._])),
-            Some((_, [str2, ..._])),
-            Some((_, [str3, ..._])),
-          ] =>
-          Naboris.Res.status(200, res)
-          |> Naboris.Res.html(req, str1 ++ "\n" ++ str2 ++ "\n" ++ str3)
-        | _ => Naboris.Res.status(500, res) |> Naboris.Res.html(req, "fail")
-        };
-      },
-    },
-    {
-      method: GET,
-      path: "/echo/:str",
-      requestHandler: (req, res) => {
-        let maybeStr =
-          List.find_opt(
-            x =>
-              switch (x) {
-              | ("str", _) => true
-              | _ => false
-              },
-            req.params,
-          );
-
-        switch (maybeStr) {
-        | Some((_, str)) =>
-          Naboris.Res.status(200, res) |> Naboris.Res.html(req, str)
-        | _ => Naboris.Res.status(500, res) |> Naboris.Res.html(req, "fail")
-        };
-      },
-    },
-    {
-      method: GET,
-      path: "/echo/:str1/multi/:str2",
-      requestHandler: (req, res) => {
-        let maybeStr1 =
-          List.find_opt(
-            x =>
-              switch (x) {
-              | ("str1", _) => true
-              | _ => false
-              },
-            req.params,
-          );
-        let maybeStr2 =
-          List.find_opt(
-            x =>
-              switch (x) {
-              | ("str2", _) => true
-              | _ => false
-              },
-            req.params,
-          );
-
-        let vals = [maybeStr1, maybeStr2];
-
-        switch (vals) {
-        | [Some((_x, str1)), Some((_y, str2))] =>
-          Naboris.Res.status(200, res)
-          |> Naboris.Res.html(req, str1 ++ "\n" ++ str2)
-        | _ => Naboris.Res.status(500, res) |> Naboris.Res.html(req, "fail")
-        };
-      },
-    },
-  ],
 };
 
 let serverRunning = Naboris.listen(9991, testServerConfig);

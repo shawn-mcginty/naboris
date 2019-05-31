@@ -1,10 +1,14 @@
-dist: xenial
+os:
+  - linux
+  - osx
+dist:
+  - xenial
 language: node_js
 node_js:
   - "10"
 before_install:
   - npm install -g esy
 install:
-  - npm run install
+  - esy install -q
 before_script:
   - npm run build

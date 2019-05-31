@@ -1,4 +1,6 @@
-dist: xenial
+dist:
+  - xenial
+  - macos
 language: node_js
 node_js:
   - "10"

@@ -9,6 +9,6 @@ node_js:
 before_install:
   - npm install -g esy
 install:
-  - npm run install
+  - esy install -q
 before_script:
   - npm run build

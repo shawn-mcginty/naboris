@@ -1,6 +1,6 @@
 {
   "name": "naboris",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Express-like HTTP server for ocaml/reasonml.  Based on httpaf and lwt.",
   "esy": {
     "build": [

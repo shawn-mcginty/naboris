@@ -1,0 +1,10 @@
+dist: xenial
+language: node_js
+node_js:
+  - "10"
+before_install:
+  - npm install -g esy
+install:
+  - npm run install
+before_script:
+  - npm run build

@@ -16,9 +16,9 @@ build: [
 depends: [
   "ocaml" {>= "4.03.0"}
   "dune" {build}
-  "reason"
-  "httpaf"
-  "httpaf-lwt-unix"
-  "lwt"
-  "uri"
+  "reason" {>= "3.4.0"}
+  "httpaf" {>= "0.6.0"}
+  "httpaf-lwt-unix" {>= "0.6.0"}
+  "lwt" {>= "4.2.1"}
+  "uri" {>= "2.2.0"}
 ]

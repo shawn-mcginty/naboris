@@ -33,14 +33,14 @@
   "homepage": "https://github.com/shawn-mcginty/naboris#readme",
   "dependencies": {
     "@opam/dune": "*",
-    "@opam/reason": "*",
-    "@opam/httpaf": "*",
-    "@opam/httpaf-lwt-unix": "*",
-    "@opam/lwt": "*",
-    "@opam/uri": "*"
+    "@opam/reason": ">=3.4.0",
+    "@opam/httpaf": ">=0.6.0",
+    "@opam/httpaf-lwt-unix": ">=0.6.0",
+    "@opam/lwt": ">=4.2.1",
+    "@opam/uri": ">=2.2.0"
   },
   "devDependencies": {
-    "ocaml": "*",
+    "ocaml": "~4.6.1",
     "esy": "^0.5.6",
     "@opam/cohttp": "*",
     "@opam/cohttp-lwt-unix": "*"

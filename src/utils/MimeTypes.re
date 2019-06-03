@@ -4,7 +4,9 @@ let getExtension = filename => {
     | true => ""
     | _ =>
       switch (filename.[i]) {
-      | '.' => String.sub(filename, i, String.length(filename) - i)
+      | '.' =>
+        let nextIndex = i + 1;
+        String.sub(filename, nextIndex, String.length(filename) - nextIndex);
       | _ => findDot(i - 1)
       }
     };

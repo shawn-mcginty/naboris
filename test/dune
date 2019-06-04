@@ -1,4 +1,4 @@
 (executable
 	(name test)
-	(libraries naboris ounit))
+	(libraries (naboris oUnit)))
 (include_subdirs unqualified)

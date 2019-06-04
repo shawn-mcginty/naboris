@@ -62,12 +62,24 @@ let streamFileContentsToBody = (fullFilePath, responseBody) => {
 
 let static = (basePath, pathList, req: Req.t, res) => {
   let fullFilePath = Static.getFilePath(basePath, pathList);
-  let resWithHeaders =
-    addHeader(("Content-Type", MimeTypes.getMimeType(fullFilePath)), res)
-    |> addHeader(("Connection", "close"));
-  let response = createResponse(resWithHeaders);
-  let requestDescriptor = req.requestDescriptor;
-  let responseBody =
-    Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
-  streamFileContentsToBody(fullFilePath, responseBody);
+  switch (Sys.file_exists(fullFilePath)) {
+  | true =>
+    let resWithHeaders =
+      addHeader(("Content-Type", MimeTypes.getMimeType(fullFilePath)), res)
+      |> addHeader(("Connection", "close"));
+    let response = createResponse(resWithHeaders);
+    let requestDescriptor = req.requestDescriptor;
+    let responseBody =
+      Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
+    streamFileContentsToBody(fullFilePath, responseBody);
+  | _ =>
+    let resWithHeaders =
+      status(404, res) |> addHeader(("Connection", "close"));
+    let response = createResponse(resWithHeaders);
+    let responseBody =
+      Httpaf.Reqd.respond_with_streaming(req.requestDescriptor, response);
+    Httpaf.Body.write_string(responseBody, "Not found");
+    Httpaf.Body.close_writer(responseBody);
+    Lwt.return_unit;
+  };
 };

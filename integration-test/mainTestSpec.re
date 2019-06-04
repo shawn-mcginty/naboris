@@ -211,4 +211,20 @@ let tests = [
       );
     },
   },
+  Spec.{
+    title: "Get \"/static/:file_path\" returns 404 when file not found",
+    test: () => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string(
+          "http://localhost:9991/static/no/such/path/I_DO_NOT_EXIST",
+        ),
+      )
+      >>= (
+        ((resp, _)) => {
+          assert(resp.status == `Not_found);
+          Lwt.return((TestResult.TestDone, 0.0));
+        }
+      );
+    },
+  },
 ];

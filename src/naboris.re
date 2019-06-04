@@ -3,6 +3,7 @@ module Req = Req;
 module Res = Res;
 module Method = Method;
 module QueryMap = Query.QueryMap;
+module MimeTypes = MimeTypes;
 
 open Lwt.Infix;
 let listen = (port, serverConfig: Server.serverConfig) => {

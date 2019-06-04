@@ -12,10 +12,14 @@
     "buildInSource": true
   },
   "scripts": {
-    "test": "esy b dune exec ./test/fullServerTest.exe",
+    "test": "npm run unit-test && npm run int-test",
+    "unit-test": "esy b dune exec ./test/test.exe",
+    "int-test": "esy b dune exec ./integration-test/fullServerTest.exe",
     "install": "esy",
     "build-main": "esy b dune build @install",
-    "build-test": "esy b dune build ./test/fullServerTest.exe @install",
+    "build-unit-test": "esy b dune build ./test/test.exe @install",
+    "build-int-test": "esy b dune build ./integration-test/fullServerTest.exe @install",
+    "build-test": "npm run build-unit-test && npm run build-int-test",
     "build": "npm run build-main && npm run build-test",
     "clean": "esy b dune clean",
     "clean-install": "rm -rf node_modules && rm -rf esy.lock && rm -rf _esy",
@@ -37,7 +41,8 @@
     "@opam/httpaf": ">=0.6.0",
     "@opam/httpaf-lwt-unix": ">=0.6.0",
     "@opam/lwt": ">=4.2.1",
-    "@opam/uri": ">=2.2.0"
+    "@opam/uri": ">=2.2.0",
+    "@opam/ounit": "*"
   },
   "devDependencies": {
     "ocaml": "~4.6.1",

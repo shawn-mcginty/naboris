@@ -113,7 +113,7 @@ let testServerConfig: Naboris.Server.serverConfig = {
       )
     | (GET, ["static", ...staticPath]) =>
       Naboris.Res.static(
-        Sys.getcwd() ++ "/test/test_assets",
+        Sys.getcwd() ++ "/integration-test/test_assets",
         staticPath,
         req,
         res,

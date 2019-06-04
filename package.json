@@ -1,6 +1,6 @@
 {
   "name": "naboris",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Express-like HTTP server for ocaml/reasonml.  Based on httpaf and lwt.",
   "esy": {
     "build": [
@@ -41,14 +41,14 @@
     "@opam/httpaf": ">=0.6.0",
     "@opam/httpaf-lwt-unix": ">=0.6.0",
     "@opam/lwt": ">=4.2.1",
-    "@opam/uri": ">=2.2.0",
-    "@opam/ounit": "*"
+    "@opam/uri": ">=2.2.0"
   },
   "devDependencies": {
     "ocaml": "~4.6.1",
     "esy": "^0.5.6",
     "@opam/cohttp": "*",
-    "@opam/cohttp-lwt-unix": "*"
+    "@opam/cohttp-lwt-unix": "*",
+    "@opam/ounit": "*"
   },
   "peerDependencies": {
     "ocaml": "~4.6.1"

@@ -20,7 +20,7 @@ let status = (status: int, res: t) => {
   {...res, status};
 };
 
-let html = (req: Req.t, htmlBody: string, res: t) => {
+let html = (req: Req.t('a), htmlBody: string, res: t) => {
   let resWithHeaders =
     addHeader(("Content-Type", "text/html"), res)
     |> addHeader(("Connection", "close"));
@@ -60,7 +60,7 @@ let streamFileContentsToBody = (fullFilePath, responseBody) => {
   );
 };
 
-let static = (basePath, pathList, req: Req.t, res) => {
+let static = (basePath, pathList, req: Req.t('a), res) => {
   let fullFilePath = Static.getFilePath(basePath, pathList);
   switch (Sys.file_exists(fullFilePath)) {
   | true =>

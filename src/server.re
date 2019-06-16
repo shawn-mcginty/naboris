@@ -2,9 +2,14 @@ module Req = Req;
 module Res = Res;
 module Router = Router;
 
-type serverConfig = {
+type sessionConfig('sessionData) = {
+  onRequest: string => Lwt.t(Session.t('sessionData)),
+};
+
+type serverConfig('sessionData) = {
   onListen: unit => unit,
-  routeRequest: (Route.t, Req.t, Res.t) => Lwt.t(unit),
+  routeRequest: (Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit),
+  sessionConfig: option(sessionConfig('sessionData)),
 };
 
 let respondWithDefault = requestDescriptor => {

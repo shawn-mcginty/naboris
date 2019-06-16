@@ -4,9 +4,10 @@ module Res = Res;
 module Method = Method;
 module QueryMap = Query.QueryMap;
 module MimeTypes = MimeTypes;
+module Session = Session;
 
 open Lwt.Infix;
-let listen = (port, serverConfig: Server.serverConfig) => {
+let listen = (port, serverConfig: Server.serverConfig('a)) => {
   let listenAddress = Unix.(ADDR_INET(inet_addr_loopback, port));
   let connectionHandler = Server.buildConnectionHandler(serverConfig);
 

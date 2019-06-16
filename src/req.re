@@ -1,4 +1,7 @@
-type t = {requestDescriptor: Httpaf.Reqd.t};
+type t('sessionData) = {
+  requestDescriptor: Httpaf.Reqd.t,
+  session: option(Session.t('sessionData)),
+};
 
 let getHeader = (headerKey, req) =>
   switch (Httpaf.Reqd.request(req.requestDescriptor)) {
@@ -21,4 +24,15 @@ let getBody = ({requestDescriptor, _}) => {
   Lwt_stream.fold((a, b) => a ++ b, bodyStream, "");
 };
 
-let fromReqd = reqd => {requestDescriptor: reqd};
+let fromReqd = reqd => {requestDescriptor: reqd, session: None};
+
+let getSessionData = (req: t('a)) => {
+  switch (req.session) {
+  | None => None
+  | Some(session) => session.data
+  };
+};
+
+let setSessionData = (req, data) => {
+  {...req, session: Some(data)};
+};

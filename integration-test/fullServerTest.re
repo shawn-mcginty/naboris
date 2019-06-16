@@ -62,7 +62,7 @@ let echoQueryQuery = (req, res, query) => {
   };
 };
 
-let testServerConfig: Naboris.Server.serverConfig = {
+let testServerConfig: Naboris.Server.serverConfig(unit) = {
   onListen: () => {
     print_string("🐫 Started a server on port 9991!\n\n");
     switch (startTests(MainTestSpec.tests)) {
@@ -70,6 +70,7 @@ let testServerConfig: Naboris.Server.serverConfig = {
     | _ => exit(1)
     };
   },
+  sessionConfig: None,
   routeRequest: (route, req, res) =>
     switch (route.method, route.path) {
     | (Naboris.Method.GET, ["echo", "pre-existing-route"]) =>

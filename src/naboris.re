@@ -6,6 +6,7 @@ module QueryMap = Query.QueryMap;
 module MimeTypes = MimeTypes;
 module Session = Session;
 module SessionManager = SessionManager;
+module Cookie = Cookie;
 
 open Lwt.Infix;
 let listen = (port, serverConfig: Server.serverConfig('a)) => {

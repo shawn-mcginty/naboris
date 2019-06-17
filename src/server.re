@@ -43,7 +43,7 @@ let buildConnectionHandler = serverConfig => {
     let _promise =
       serverConfig.routeRequest(
         route,
-        Req.fromReqd(request_descriptor),
+        Req.fromReqd(request_descriptor, serverConfig.sessionConfig),
         Res.default(),
       );
     ();

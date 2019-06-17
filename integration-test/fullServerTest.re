@@ -131,6 +131,15 @@ let testServerConfig: Naboris.Server.serverConfig(TestSession.t) = {
         );
       Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
       Lwt.return_unit;
+    | (GET, ["who-am-i"]) =>
+      switch (Naboris.Req.getSessionData(req)) {
+      | None =>
+        Naboris.Res.status(404, res) |> Naboris.Res.text(req, "Not found")
+      | Some(userData) =>
+        Naboris.Res.status(200, res)
+        |> Naboris.Res.text(req, userData.username)
+      };
+      Lwt.return_unit;
     | (GET, ["static", ...staticPath]) =>
       Naboris.Res.static(
         Sys.getcwd() ++ "/integration-test/test_assets",

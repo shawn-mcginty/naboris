@@ -246,4 +246,55 @@ let tests = [
       );
     },
   },
+  Spec.{
+    title: "Handle no session",
+    test: () => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9991/who-am-i"),
+      )
+      >>= (
+        ((resp, _bod)) => {
+          assert(resp.status == `Not_found);
+          Lwt.return((TestResult.TestDone, 0.0));
+        }
+      );
+    },
+  },
+  Spec.{
+    title: "Access session data across multiple requests",
+    test: () => {
+      Cohttp_lwt_unix.Client.post(
+        Uri.of_string("http://localhost:9991/login"),
+      )
+      >>= (
+        ((resp, _bod)) => {
+          assert(resp.status == `OK);
+          let headers = Cohttp.Response.headers(resp);
+          switch (Cohttp.Header.get(headers, "Set-Cookie")) {
+          | Some(cookie) =>
+            let headers2 = Cohttp.Header.init_with("Cookie", cookie);
+            Cohttp_lwt_unix.Client.get(
+              ~headers=headers2,
+              Uri.of_string("http://localhost:9991/who-am-i"),
+            )
+            >>= (
+              ((resp2, bod)) => {
+                assert(resp2.status == `OK);
+                Cohttp_lwt.Body.to_string(bod)
+                >>= (
+                  bodyStr => {
+                    AssertString.areSame(bodyStr, "realsessionuser");
+                    Lwt.return((TestResult.TestDone, 0.0));
+                  }
+                );
+              }
+            );
+          | None =>
+            assert(false == true);
+            Lwt.return((TestResult.TestDone, 0.0));
+          };
+        }
+      );
+    },
+  },
 ];

@@ -1,1 +1,4 @@
-type t('sessionData) = {data: 'sessionData};
+type t('sessionData) = {
+  id: string,
+  data: 'sessionData,
+};

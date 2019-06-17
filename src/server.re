@@ -3,7 +3,7 @@ module Res = Res;
 module Router = Router;
 
 type sessionConfig('sessionData) = {
-  onRequest: string => Lwt.t(Session.t('sessionData)),
+  onRequest: string => Lwt.t(option('sessionData)),
 };
 
 type serverConfig('sessionData) = {

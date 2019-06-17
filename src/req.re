@@ -33,6 +33,6 @@ let getSessionData = (req: t('a)) => {
   };
 };
 
-let setSessionData = (req, data) => {
-  {...req, session: Some(data)};
+let setSessionData = (req, id, data) => {
+  {...req, session: Some({id, data})};
 };

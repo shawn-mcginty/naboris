@@ -24,15 +24,26 @@ let getBody = ({requestDescriptor, _}) => {
   Lwt_stream.fold((a, b) => a ++ b, bodyStream, "");
 };
 
-let fromReqd = reqd => {requestDescriptor: reqd, session: None};
-
-let getSessionData = (req: t('a)) => {
-  switch (req.session) {
-  | None => None
-  | Some(session) => session.data
+let fromReqd = (reqd, maybeSessionHandler) => {
+  let defaultReq = {requestDescriptor: reqd, session: None};
+  switch (maybeSessionHandler) {
+  | None => defaultReq
+  | Some(_sessionHandler) =>
+    let request = Httpaf.Reqd.request(reqd);
+    switch (Httpaf.Headers.get(request.headers, "Cookie")) {
+    | None => defaultReq
+    | Some(_cookie) => defaultReq
+    };
   };
 };
 
-let setSessionData = (req, id, data) => {
-  {...req, session: Some({id, data})};
+let getSessionData = req => {
+  switch (req.session) {
+  | None => None
+  | Some(session) => Some(session.data)
+  };
+};
+
+let setSessionData = (maybeSession, req) => {
+  {...req, session: maybeSession};
 };

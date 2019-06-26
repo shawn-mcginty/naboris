@@ -1,7 +1,7 @@
 {
   "name": "naboris",
   "version": "0.0.4",
-  "description": "Express-like HTTP server for ocaml/reasonml.  Based on httpaf and lwt.",
+  "description": "Simple HTTP server for ocaml/reasonml.  Based on httpaf and lwt.",
   "esy": {
     "build": [
       ["dune"]
@@ -9,13 +9,13 @@
     "install": [
       "esy-installer"
     ],
-    "buildInSource": true
+    "buildInSource": "_build"
   },
   "scripts": {
     "test": "npm run unit-test && npm run int-test",
     "unit-test": "esy b dune exec ./test/test.exe",
     "int-test": "esy b dune exec ./integration-test/fullServerTest.exe",
-    "install": "esy",
+    "install": "esy install",
     "build-main": "esy b dune build @install",
     "build-unit-test": "esy b dune build ./test/test.exe @install",
     "build-int-test": "esy b dune build ./integration-test/fullServerTest.exe @install",

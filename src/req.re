@@ -1,4 +1,7 @@
-type t = {requestDescriptor: Httpaf.Reqd.t};
+type t('sessionData) = {
+  requestDescriptor: Httpaf.Reqd.t,
+  session: option(Session.t('sessionData)),
+};
 
 let getHeader = (headerKey, req) =>
   switch (Httpaf.Reqd.request(req.requestDescriptor)) {
@@ -21,4 +24,26 @@ let getBody = ({requestDescriptor, _}) => {
   Lwt_stream.fold((a, b) => a ++ b, bodyStream, "");
 };
 
-let fromReqd = reqd => {requestDescriptor: reqd};
+let fromReqd = (reqd, maybeSessionHandler) => {
+  let defaultReq = {requestDescriptor: reqd, session: None};
+  switch (maybeSessionHandler) {
+  | None => defaultReq
+  | Some(_sessionHandler) =>
+    let request = Httpaf.Reqd.request(reqd);
+    switch (Httpaf.Headers.get(request.headers, "Cookie")) {
+    | None => defaultReq
+    | Some(_cookie) => defaultReq
+    };
+  };
+};
+
+let getSessionData = req => {
+  switch (req.session) {
+  | None => None
+  | Some(session) => Some(session.data)
+  };
+};
+
+let setSessionData = (maybeSession, req) => {
+  {...req, session: maybeSession};
+};

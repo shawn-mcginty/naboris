@@ -2,10 +2,7 @@ module Req = Req;
 module Res = Res;
 module Router = Router;
 
-type serverConfig = {
-  onListen: unit => unit,
-  routeRequest: (Route.t, Req.t, Res.t) => Lwt.t(unit),
-};
+open Lwt.Infix;
 
 let respondWithDefault = requestDescriptor => {
   let response =
@@ -27,7 +24,7 @@ let respondWithDefault = requestDescriptor => {
   respond();
 };
 
-let buildConnectionHandler = serverConfig => {
+let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
   let request_handler =
       (_client_address: Unix.sockaddr, request_descriptor: Httpaf.Reqd.t) => {
     let request: Httpaf.Request.t = Httpaf.Reqd.request(request_descriptor);
@@ -36,10 +33,12 @@ let buildConnectionHandler = serverConfig => {
     let route = Router.generateRoute(target, method);
 
     let _promise =
-      serverConfig.routeRequest(
-        route,
-        Req.fromReqd(request_descriptor),
-        Res.default(),
+      Req.fromReqd(request_descriptor, serverConfig.sessionConfig)
+      |> SessionManager.resumeSession(serverConfig)
+      >>= (
+        req => {
+          serverConfig.routeRequest(route, req, Res.default());
+        }
       );
     ();
   };

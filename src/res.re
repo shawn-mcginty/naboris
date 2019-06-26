@@ -20,7 +20,20 @@ let status = (status: int, res: t) => {
   {...res, status};
 };
 
-let html = (req: Req.t, htmlBody: string, res: t) => {
+let text = (req: Req.t('a), body: string, res: t) => {
+  let resWithHeaders =
+    addHeader(("Content-Type", "text/plain"), res)
+    |> addHeader(("Connection", "close"));
+  let response = createResponse(resWithHeaders);
+  let requestDescriptor = req.requestDescriptor;
+
+  let responseBody =
+    Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
+  Httpaf.Body.write_string(responseBody, body);
+  Httpaf.Body.close_writer(responseBody);
+};
+
+let html = (req: Req.t('a), htmlBody: string, res: t) => {
   let resWithHeaders =
     addHeader(("Content-Type", "text/html"), res)
     |> addHeader(("Connection", "close"));
@@ -60,7 +73,7 @@ let streamFileContentsToBody = (fullFilePath, responseBody) => {
   );
 };
 
-let static = (basePath, pathList, req: Req.t, res) => {
+let static = (basePath, pathList, req: Req.t('a), res) => {
   let fullFilePath = Static.getFilePath(basePath, pathList);
   switch (Sys.file_exists(fullFilePath)) {
   | true =>
@@ -82,4 +95,18 @@ let static = (basePath, pathList, req: Req.t, res) => {
     Httpaf.Body.close_writer(responseBody);
     Lwt.return_unit;
   };
+};
+
+let setSessionCookies = (newSessionId, res) => {
+  let setCookieKey = "Set-Cookie";
+  let thirtyDays = string_of_int(30 * 24 * 60 * 60);
+  let sessionIdKey = "nab.sid";
+
+  addHeader(
+    (
+      setCookieKey,
+      sessionIdKey ++ "=" ++ newSessionId ++ "; Max-Age=" ++ thirtyDays ++ ";",
+    ),
+    res,
+  );
 };

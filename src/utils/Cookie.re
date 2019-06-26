@@ -23,3 +23,9 @@ let rec getSessionId = cookieStr => {
     };
   };
 };
+
+let sessionIdOfReq = req =>
+  switch (Req.getHeader("Cookie", req)) {
+  | None => None
+  | Some(header) => getSessionId(header)
+  };

@@ -44,6 +44,6 @@ let getSessionData = req => {
   };
 };
 
-let setSessionData = (req, id, data) => {
-  {...req, session: Some({id, data})};
+let setSessionData = (maybeSession, req) => {
+  {...req, session: maybeSession};
 };

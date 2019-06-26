@@ -62,17 +62,17 @@ let echoQueryQuery = (req, res, query) => {
   };
 };
 
-let sessionConfig: Naboris.Server.sessionConfig(TestSession.t) = {
+let sessionConfig: Naboris.ServerConfig.sessionConfig(TestSession.t) = {
   onRequest: sessionId => {
     let userData = TestSession.{username: "realsessionuser"};
     switch (sessionId) {
-    | "real-session-id" => Lwt.return(Some(userData))
+    | Some(sid) =>
+      Lwt.return(Some(Naboris.Session.{id: sid, data: userData}))
     | _ => Lwt.return(None)
     };
   },
 };
-
-let testServerConfig: Naboris.Server.serverConfig(TestSession.t) = {
+let testServerConfig: Naboris.ServerConfig.t(TestSession.t) = {
   onListen: () => {
     print_string("🐫 Started a server on port 9991!\n\n");
     switch (startTests(MainTestSpec.tests)) {

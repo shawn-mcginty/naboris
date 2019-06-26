@@ -62,7 +62,17 @@ let echoQueryQuery = (req, res, query) => {
   };
 };
 
-let testServerConfig: Naboris.Server.serverConfig = {
+let sessionConfig: Naboris.Server.sessionConfig(TestSession.t) = {
+  onRequest: sessionId => {
+    let userData = TestSession.{username: "realsessionuser"};
+    switch (sessionId) {
+    | "real-session-id" => Lwt.return(Some(userData))
+    | _ => Lwt.return(None)
+    };
+  },
+};
+
+let testServerConfig: Naboris.Server.serverConfig(TestSession.t) = {
   onListen: () => {
     print_string("🐫 Started a server on port 9991!\n\n");
     switch (startTests(MainTestSpec.tests)) {
@@ -70,6 +80,7 @@ let testServerConfig: Naboris.Server.serverConfig = {
     | _ => exit(1)
     };
   },
+  sessionConfig: Some(sessionConfig),
   routeRequest: (route, req, res) =>
     switch (route.method, route.path) {
     | (Naboris.Method.GET, ["echo", "pre-existing-route"]) =>
@@ -111,6 +122,15 @@ let testServerConfig: Naboris.Server.serverConfig = {
           Lwt.return_unit;
         },
       )
+    | (POST, ["login"]) =>
+      let (req2, res2) =
+        Naboris.SessionManager.startSession(
+          req,
+          res,
+          TestSession.{username: "realsessionuser"},
+        );
+      Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
+      Lwt.return_unit;
     | (GET, ["static", ...staticPath]) =>
       Naboris.Res.static(
         Sys.getcwd() ++ "/integration-test/test_assets",

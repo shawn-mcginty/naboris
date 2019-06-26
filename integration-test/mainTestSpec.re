@@ -227,4 +227,23 @@ let tests = [
       );
     },
   },
+  Spec.{
+    title: "Can start a session",
+    test: () => {
+      Cohttp_lwt_unix.Client.post(
+        Uri.of_string("http://localhost:9991/login"),
+      )
+      >>= (
+        ((resp, _bod)) => {
+          assert(resp.status == `OK);
+          let headers = resp |> Cohttp.Response.headers;
+          switch (Cohttp.Header.get(headers, "Set-Cookie")) {
+          | Some(cookie) => assert(String.sub(cookie, 0, 7) == "nab.sid")
+          | None => assert(false == true)
+          };
+          Lwt.return((TestResult.TestDone, 0.0));
+        }
+      );
+    },
+  },
 ];

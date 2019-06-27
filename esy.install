@@ -1,7 +1,7 @@
 {
   "esy": {
     "build": [
-      "dune build -p src/#{self.name}",
+      "dune build -p src/#{self.name}"
     ],
     "install": [
       "dune install --prefix=#{self.install}"

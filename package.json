@@ -4,10 +4,10 @@
   "description": "Simple HTTP server for ocaml/reasonml.  Based on httpaf and lwt.",
   "esy": {
     "build": [
-      ["dune"]
+      "dune build -p src/#{self.name}"
     ],
     "install": [
-      "esy-installer"
+      "dune install --prefix=#{self.install}"
     ],
     "buildInSource": "_build"
   },

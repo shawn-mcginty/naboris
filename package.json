@@ -6,9 +6,6 @@
     "build": [
       "dune build -p #{self.name}"
     ],
-    "install": [
-      "dune install --prefix=#{self.install}"
-    ],
     "buildInSource": "_build"
   },
   "scripts": {

@@ -1,0 +1,7 @@
+{
+  "esy": {
+    "build": [
+      "dune build -p src/#{self.name}",
+    ]
+  }
+}

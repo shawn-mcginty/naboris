@@ -21,6 +21,7 @@ let listen = (port, serverConfig: ServerConfig.t('sessionData)) => {
     )
     >>= (
       _server => {
+        print_string("\nStarting Naboris with DEBUG on");
         serverConfig.onListen();
         Lwt.return_unit;
       }

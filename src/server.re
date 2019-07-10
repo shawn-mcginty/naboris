@@ -27,6 +27,7 @@ let respondWithDefault = requestDescriptor => {
 let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
   let request_handler =
       (_client_address: Unix.sockaddr, request_descriptor: Httpaf.Reqd.t) => {
+    print_string("\nDEBUG:    " ++ "Naboris - start request_handler");
     let request: Httpaf.Request.t = Httpaf.Reqd.request(request_descriptor);
     let target = request.target;
     let method = Method.ofHttpAfMethod(request.meth);
@@ -37,6 +38,9 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
       |> SessionManager.resumeSession(serverConfig)
       >>= (
         req => {
+          print_string(
+            "\nDEBUG:    " ++ "Naboris - start config.routeRequest",
+          );
           serverConfig.routeRequest(route, req, Res.default());
         }
       );

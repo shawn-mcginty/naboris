@@ -14,6 +14,7 @@
     "int-test": "esy b dune exec ./integration-test/fullServerTest.exe",
     "install": "esy install",
     "build-main": "esy b dune build @install",
+    "build-docs": "esy b dune build @doc",
     "build-unit-test": "esy b dune build ./test/test.exe @install",
     "build-int-test": "esy b dune build ./integration-test/fullServerTest.exe @install",
     "build-test": "npm run build-unit-test && npm run build-int-test",

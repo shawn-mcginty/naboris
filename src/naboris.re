@@ -29,5 +29,5 @@ let listen = (port, serverConfig: ServerConfig.t('sessionData)) => {
   );
 
   let (forever, _) = Lwt.wait();
-  Lwt_main.run(forever);
+  forever;
 };

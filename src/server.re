@@ -33,9 +33,11 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
     let method = Method.ofHttpAfMethod(request.meth);
     let route = Router.generateRoute(target, method);
 
-    Lwt.async(() =>
-      Req.fromReqd(request_descriptor, serverConfig.sessionConfig)
-      |> SessionManager.resumeSession(serverConfig)
+    Lwt.async(() => {
+      let rawReq =
+        Req.fromReqd(request_descriptor, serverConfig.sessionConfig);
+
+      SessionManager.resumeSession(serverConfig, rawReq)
       >>= (
         req => {
           print_string(
@@ -43,8 +45,8 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
           );
           serverConfig.routeRequest(route, req, Res.default());
         }
-      )
-    );
+      );
+    });
   };
 
   let error_handler =

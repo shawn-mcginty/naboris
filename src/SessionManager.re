@@ -30,11 +30,12 @@ let resumeSession = (serverConfig: ServerConfig.t('sessionData), req) => {
       "\nDEBUG:    "
       ++ "Naboris - SessionManager - has session config, get id from req and call onRequest",
     );
-    Cookie.sessionIdOfReq(req)
-    |> sessionConfig.onRequest
+    let sid = Cookie.sessionIdOfReq(req);
+    sessionConfig.onRequest(sid)
     >>= (
       maybeSessionData => {
-        Req.setSessionData(maybeSessionData, req) |> Lwt.return;
+        let req2 = Req.setSessionData(maybeSessionData, req);
+        Lwt.return(req2);
       }
     );
   };

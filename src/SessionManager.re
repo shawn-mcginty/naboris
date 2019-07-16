@@ -16,17 +16,17 @@ let startSession = (req, res, data) => {
 };
 
 let resumeSession = (serverConfig: ServerConfig.t('sessionData), req) => {
-  print_string(
+  print_endline(
     "\nDEBUG:    " ++ "Naboris - SessionManager - resumeSession start",
   );
   switch (serverConfig.sessionConfig) {
   | None =>
-    print_string(
+    print_endline(
       "\nDEBUG:    " ++ "Naboris - SessionManager - no session config, return",
     );
     Lwt.return(req);
   | Some(sessionConfig) =>
-    print_string(
+    print_endline(
       "\nDEBUG:    "
       ++ "Naboris - SessionManager - has session config, get id from req and call onRequest",
     );

@@ -1,4 +1,5 @@
 let rec getSessionId = cookieStr => {
+  print_endline("DEBUG: " ++ cookieStr);
   let sessionKey = "nab.sid=";
   let cookieLength = String.length(cookieStr);
   let keyLength = String.length(sessionKey);

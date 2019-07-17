@@ -1,5 +1,4 @@
 let rec getSessionId = cookieStr => {
-  print_endline("DEBUG: " ++ cookieStr);
   let sessionKey = "nab.sid=";
   let cookieLength = String.length(cookieStr);
   let keyLength = String.length(sessionKey);
@@ -9,7 +8,7 @@ let rec getSessionId = cookieStr => {
   | None => None
   | Some(i) =>
     let highestLen = keyLength + i;
-    if (String.length(cookieStr) < highestLen) {
+    if (cookieLength < highestLen) {
       None;
     } else if (String.sub(cookieStr, i, keyLength) == sessionKey) {
       let partialCookie =
@@ -20,7 +19,7 @@ let rec getSessionId = cookieStr => {
         Some(String.sub(partialCookie, startOfString, endOfCookie))
       };
     } else {
-      getSessionId(String.sub(cookieStr, i, cookieLength - i));
+      getSessionId(String.sub(cookieStr, i, cookieLength - (i + 1)));
     };
   };
 };

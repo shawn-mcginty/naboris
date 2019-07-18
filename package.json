@@ -1,13 +1,10 @@
 {
   "name": "naboris",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Simple HTTP server for ocaml/reasonml.  Based on httpaf and lwt.",
   "esy": {
     "build": [
-      ["dune"]
-    ],
-    "install": [
-      "esy-installer"
+      "dune build -p #{self.name}"
     ],
     "buildInSource": "_build"
   },
@@ -17,6 +14,7 @@
     "int-test": "esy b dune exec ./integration-test/fullServerTest.exe",
     "install": "esy install",
     "build-main": "esy b dune build @install",
+    "build-docs": "esy b dune build @doc",
     "build-unit-test": "esy b dune build ./test/test.exe @install",
     "build-int-test": "esy b dune build ./integration-test/fullServerTest.exe @install",
     "build-test": "npm run build-unit-test && npm run build-int-test",
@@ -48,7 +46,8 @@
     "esy": "^0.5.6",
     "@opam/cohttp": "*",
     "@opam/cohttp-lwt-unix": "*",
-    "@opam/ounit": "*"
+    "@opam/ounit": "*",
+    "@opam/odoc": "*"
   },
   "peerDependencies": {
     "ocaml": "~4.6.1"

@@ -140,6 +140,13 @@ let testServerConfig: Naboris.ServerConfig.t(TestSession.t) = {
         |> Naboris.Res.text(req, userData.username)
       };
       Lwt.return_unit;
+    | (GET, ["redir-launch"]) =>
+      Naboris.Res.redirect("/redir-landing", req, res);
+      Lwt.return_unit;
+    | (GET, ["redir-landing"]) =>
+      Naboris.Res.status(200, res)
+      |> Naboris.Res.text(req, "You have landed.");
+      Lwt.return_unit;
     | (GET, ["static", ...staticPath]) =>
       Naboris.Res.static(
         Sys.getcwd() ++ "/integration-test/test_assets",

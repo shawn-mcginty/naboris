@@ -13,4 +13,12 @@ let testSuite = () => [
       };
     }
   ),
+  "utils/Cookie.getSessionId fix recursion bug"
+  >:: (
+    _ => {
+      let cookieStr = "nnect.sid=s%3AadVKe5fVEcZVq4X5ZUrMen2U88jmjy4f.LOwere3akcgCno7WDqinHgL%2BXWXVp2SgbHZzv7%2Btbt4";
+      let maybeCookie = Naboris.Cookie.getSessionId(cookieStr);
+      assert_equal(None, maybeCookie);
+    }
+  ),
 ];

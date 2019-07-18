@@ -16,20 +16,9 @@ let startSession = (req, res, data) => {
 };
 
 let resumeSession = (serverConfig: ServerConfig.t('sessionData), req) => {
-  print_endline(
-    "\nDEBUG:    " ++ "Naboris - SessionManager - resumeSession start",
-  );
   switch (serverConfig.sessionConfig) {
-  | None =>
-    print_endline(
-      "\nDEBUG:    " ++ "Naboris - SessionManager - no session config, return",
-    );
-    Lwt.return(req);
+  | None => Lwt.return(req)
   | Some(sessionConfig) =>
-    print_endline(
-      "\nDEBUG:    "
-      ++ "Naboris - SessionManager - has session config, get id from req and call onRequest",
-    );
     let sid = Cookie.sessionIdOfReq(req);
     sessionConfig.onRequest(sid)
     >>= (

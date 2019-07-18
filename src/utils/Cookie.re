@@ -25,18 +25,8 @@ let rec getSessionId = cookieStr => {
 };
 
 let sessionIdOfReq = req => {
-  print_endline("\nDEBUG:    " ++ "Naboris - Cookie - sessionIdOfReq start");
   switch (Req.getHeader("Cookie", req)) {
-  | None =>
-    print_endline(
-      "\nDEBUG:    " ++ "Naboris - Cookie - sessionIdOfReq no cookie header",
-    );
-    None;
-  | Some(header) =>
-    print_endline(
-      "\nDEBUG:    "
-      ++ "Naboris - Cookie - sessionIdOfReq some header get sessionId",
-    );
-    getSessionId(header);
+  | None => None
+  | Some(header) => getSessionId(header)
   };
 };

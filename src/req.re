@@ -26,30 +26,13 @@ let getBody = ({requestDescriptor, _}) => {
 
 let fromReqd = (reqd, maybeSessionHandler) => {
   let defaultReq = {requestDescriptor: reqd, session: None};
-  print_endline("\nDEBUG:    " ++ "Naboris - Req - start fromReqd");
   switch (maybeSessionHandler) {
   | None => defaultReq
   | Some(_sessionHandler) =>
-    print_endline(
-      "\nDEBUG:    "
-      ++ "Naboris - Req - fromReqd has sessionHandler get request",
-    );
     let request = Httpaf.Reqd.request(reqd);
-    print_endline(
-      "\nDEBUG:    "
-      ++ "Naboris - Req - fromReqd has sessionHandler get cookie header",
-    );
     switch (Httpaf.Headers.get(request.headers, "Cookie")) {
-    | None =>
-      print_endline(
-        "\nDEBUG:    " ++ "Naboris - Req - fromReqd no cookie found",
-      );
-      defaultReq;
-    | Some(_cookie) =>
-      print_endline(
-        "\nDEBUG:    " ++ "Naboris - Req - fromReqd cookie found",
-      );
-      defaultReq;
+    | None => defaultReq
+    | Some(_cookie) => defaultReq
     };
   };
 };

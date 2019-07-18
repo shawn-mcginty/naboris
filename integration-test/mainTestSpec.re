@@ -297,4 +297,22 @@ let tests = [
       );
     },
   },
+  Spec.{
+    title: "Redirects properly",
+    test: () => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9991/redir-launch"),
+      )
+      >>= (
+        ((resp, _bod)) => {
+          assert(resp.status == `Found);
+          switch (Cohttp.Header.get(resp.headers, "Location")) {
+          | Some(loc) => assert(loc == "/redir-landing")
+          | _ => assert(false == true)
+          };
+          Lwt.return((TestResult.TestDone, 0.0));
+        }
+      );
+    },
+  },
 ];

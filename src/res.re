@@ -110,3 +110,7 @@ let setSessionCookies = (newSessionId, res) => {
     res,
   );
 };
+
+let redirect = (path, req, res) => {
+  status(302, res) |> addHeader(("Location", path)) |> text(req, "Found");
+};

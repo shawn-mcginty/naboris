@@ -15,15 +15,17 @@ let startSession = (req, res, data) => {
   (req2, res2);
 };
 
-let resumeSession = (serverConfig: ServerConfig.t('sessionData), req) =>
+let resumeSession = (serverConfig: ServerConfig.t('sessionData), req) => {
   switch (serverConfig.sessionConfig) {
   | None => Lwt.return(req)
   | Some(sessionConfig) =>
-    Cookie.sessionIdOfReq(req)
-    |> sessionConfig.onRequest
+    let sid = Cookie.sessionIdOfReq(req);
+    sessionConfig.onRequest(sid)
     >>= (
       maybeSessionData => {
-        Req.setSessionData(maybeSessionData, req) |> Lwt.return;
+        let req2 = Req.setSessionData(maybeSessionData, req);
+        Lwt.return(req2);
       }
-    )
+    );
   };
+};

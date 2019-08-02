@@ -13,13 +13,14 @@ let rec getSessionId = cookieStr => {
     } else if (String.sub(cookieStr, i, keyLength) == sessionKey) {
       let partialCookie =
         String.sub(cookieStr, highestLen, cookieLength - highestLen);
+
       switch (String.index_opt(partialCookie, ';')) {
-      | None => None
+      | None => Some(partialCookie)
       | Some(endOfCookie) =>
         Some(String.sub(partialCookie, startOfString, endOfCookie))
       };
     } else {
-      getSessionId(String.sub(cookieStr, i, cookieLength - (i + 1)));
+      getSessionId(String.sub(cookieStr, i + 1, cookieLength - (i + 1)));
     };
   };
 };

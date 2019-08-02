@@ -1,6 +1,8 @@
 # Naboris
 An express-like native http server for OCaml/ReasonML
 
+[![Build Status](https://travis-ci.com/shawn-mcginty/naboris.svg?branch=master)](https://travis-ci.com/shawn-mcginty/naboris)
+
 ```
                                                            
  @@@@@  @@@@  @@@@@                                        

@@ -4,9 +4,13 @@ module Res = Res;
 module Method = Method;
 module QueryMap = Query.QueryMap;
 module MimeTypes = MimeTypes;
+module Session = Session;
+module SessionManager = SessionManager;
+module Cookie = Cookie;
+module ServerConfig = ServerConfig;
 
 open Lwt.Infix;
-let listen = (port, serverConfig: Server.serverConfig) => {
+let listen = (port, serverConfig: ServerConfig.t('sessionData)) => {
   let listenAddress = Unix.(ADDR_INET(inet_addr_loopback, port));
   let connectionHandler = Server.buildConnectionHandler(serverConfig);
 
@@ -24,5 +28,5 @@ let listen = (port, serverConfig: Server.serverConfig) => {
   );
 
   let (forever, _) = Lwt.wait();
-  Lwt_main.run(forever);
+  forever;
 };

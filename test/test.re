@@ -1,4 +1,4 @@
-open OUnit;
+open OUnit2;
 
 let suite =
   "NaborisTest"

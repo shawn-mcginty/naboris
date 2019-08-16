@@ -16,7 +16,7 @@
   "scripts": {
     "gen-prod-json": "sed -i '' 's/\"BISECT_ENABLE\": \"YES\"/\"BISECT_ENABLE\": \"NO\"/g' package.json",
     "gen-test-json": "sed -i '' 's/\"BISECT_ENABLE\": \"NO\"/\"BISECT_ENABLE\": \"YES\"/g' package.json",
-    "test": "npm run unit-test && npm run int-test",
+    "test": "npm run unit-test",
     "unit-test": "esy b dune runtest",
     "int-test": "esy b dune exec ./integration-test/fullServerTest.exe",
     "install": "esy install",

@@ -16,6 +16,20 @@ let tests = [
     },
   },
   Spec.{
+    title: "Get \"/this-should-never-exist\" returns a 404 by default",
+    test: () => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9992/this-should-never-exist"),
+      )
+      >>= (
+        ((resp, _bod)) => {
+          assert(resp.status == `Not_found);
+          Lwt.return((TestResult.TestDone, 0.0));
+        }
+      );
+    },
+  },
+  Spec.{
     title: "Get \"/html\" returns a 200 and html document",
     test: () => {
       Cohttp_lwt_unix.Client.get(Uri.of_string("http://localhost:9991/html"))

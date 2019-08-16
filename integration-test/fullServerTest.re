@@ -164,7 +164,26 @@ let testServerConfig: Naboris.ServerConfig.t(TestSession.t) = {
     },
 };
 
-let serverRunning = Naboris.listen(9991, testServerConfig);
+let testServerConfig2: Naboris.ServerConfig.t(TestSession.t) = {
+  onListen: () => {
+    print_string("🐫 Started a server on port 9992!\n\n");
+    let _foo = Naboris.listen(9991, testServerConfig);
+    ();
+  },
+  sessionConfig: None,
+  routeRequest: (route, req, res) =>
+    switch (route.method, route.path) {
+    | _ =>
+      Naboris.Res.status(404, res)
+      |> Naboris.Res.html(
+           req,
+           "<!doctype html><html><body>Page not found</body></html>",
+         );
+      Lwt.return_unit;
+    },
+};
+
+let serverRunning = Naboris.listen(9992, testServerConfig2);
 
 let run = () => {
   switch (Lwt.pick([mainTimeout, serverRunning]) |> Lwt_main.run) {

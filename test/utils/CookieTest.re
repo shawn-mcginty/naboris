@@ -1,4 +1,4 @@
-open OUnit;
+open OUnit2;
 
 let testSuite = () => [
   "utils/Cookie.getSessionId returns the id from the ugly string"

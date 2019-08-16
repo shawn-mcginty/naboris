@@ -6,22 +6,33 @@
     "build": [
       "dune build -p #{self.name}"
     ],
-    "buildInSource": "_build"
+    "buildInSource": "_build",
+    "buildEnv": {
+      "BISECT_ENABLE": "NO",
+      "BISECT_SILENT": "ERR",
+      "BISECT_FILE": "#{self.target_dir}/bisect"
+    }
   },
   "scripts": {
+    "gen-prod-json": "sed -i '' 's/\"BISECT_ENABLE\": \"YES\"/\"BISECT_ENABLE\": \"NO\"/g' package.json",
+    "gen-test-json": "sed -i '' 's/\"BISECT_ENABLE\": \"NO\"/\"BISECT_ENABLE\": \"YES\"/g' package.json",
     "test": "npm run unit-test && npm run int-test",
-    "unit-test": "esy b dune exec ./test/test.exe",
+    "unit-test": "esy b dune runtest",
     "int-test": "esy b dune exec ./integration-test/fullServerTest.exe",
     "install": "esy install",
+    "install-globals": "npm install -g esy",
     "build-main": "esy b dune build @install",
     "build-docs": "esy b dune build @doc",
     "build-unit-test": "esy b dune build ./test/test.exe @install",
     "build-int-test": "esy b dune build ./integration-test/fullServerTest.exe @install",
     "build-test": "npm run build-unit-test && npm run build-int-test",
     "build": "npm run build-main && npm run build-test",
-    "clean": "esy b dune clean",
+    "clean": "rm -f esy.json && find . -name 'bisect*.out' | xargs rm && esy b dune clean",
     "clean-install": "rm -rf node_modules && rm -rf esy.lock && rm -rf _esy",
-    "clean-world": "npm run clean && npm run clean-install"
+    "clean-world": "npm run clean && npm run clean-install",
+    "coco-report-html": "esy bisect-ppx-report -I _build/default/ -html _coverage/ `find . -name 'bisect*.out'`",
+    "coco-report": "esy bisect-ppx-report -I _build/default/ -text -  -summary-only `find . -name 'bisect*.out'`",
+    "test-coco": "npm run clean && npm run gen-test-json && npm run test && npm run coco-report && npm run gen-prod-json"
   },
   "repository": {
     "type": "git",
@@ -47,7 +58,8 @@
     "@opam/cohttp": "*",
     "@opam/cohttp-lwt-unix": "*",
     "@opam/ounit": "*",
-    "@opam/odoc": "*"
+    "@opam/odoc": "*",
+    "@opam/bisect_ppx": "*"
   },
   "peerDependencies": {
     "ocaml": "~4.6.1"

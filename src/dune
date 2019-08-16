@@ -1,6 +1,7 @@
 (library
 	(name naboris)
 	(public_name naboris)
+	(preprocess (pps bisect_ppx -conditional))
 	(libraries httpaf httpaf-lwt-unix lwt lwt.unix re uri)
 )
 (include_subdirs unqualified)

@@ -8,7 +8,7 @@
     ],
     "buildInSource": "_build",
     "buildEnv": {
-      "BISECT_ENABLE": "NO",
+      "BISECT_ENABLE": "YES",
       "BISECT_SILENT": "ERR",
       "BISECT_FILE": "#{self.target_dir}/bisect"
     }
@@ -18,16 +18,11 @@
     "gen-test-json": "sed -i '' 's/\"BISECT_ENABLE\": \"NO\"/\"BISECT_ENABLE\": \"YES\"/g' package.json",
     "test": "npm run unit-test",
     "unit-test": "esy b dune runtest",
-    "int-test": "esy b dune exec ./integration-test/fullServerTest.exe",
     "install": "esy install",
     "install-globals": "npm install -g esy",
-    "build-main": "esy b dune build @install",
     "build-docs": "esy b dune build @doc",
-    "build-unit-test": "esy b dune build ./test/test.exe @install",
-    "build-int-test": "esy b dune build ./integration-test/fullServerTest.exe @install",
-    "build-test": "npm run build-unit-test && npm run build-int-test",
-    "build": "npm run build-main && npm run build-test",
-    "clean": "rm -f esy.json && find . -name 'bisect*.out' | xargs rm && esy b dune clean",
+    "build": "esy b dune build @install",
+    "clean": "rm -rf _coverage && find . -name 'bisect*.out' | xargs rm && esy b dune clean",
     "clean-install": "rm -rf node_modules && rm -rf esy.lock && rm -rf _esy",
     "clean-world": "npm run clean && npm run clean-install",
     "coco-report-html": "esy bisect-ppx-report -I _build/default/ -html _coverage/ `find . -name 'bisect*.out'`",
@@ -57,7 +52,8 @@
     "esy": "^0.5.6",
     "@opam/cohttp": "*",
     "@opam/cohttp-lwt-unix": "*",
-    "@opam/ounit": "*",
+    "@opam/alcotest": "*",
+    "@opam/alcotest-lwt": "*",
     "@opam/odoc": "*",
     "@opam/bisect_ppx": "*"
   },

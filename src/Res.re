@@ -114,3 +114,7 @@ let setSessionCookies = (newSessionId, res) => {
 let redirect = (path, req, res) => {
   status(302, res) |> addHeader(("Location", path)) |> text(req, "Found");
 };
+
+let reportError = (req: Req.t('a), exn) => {
+  Httpaf.Reqd.report_exn(req.requestDescriptor, exn);
+};

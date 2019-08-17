@@ -2,6 +2,7 @@ module Server = Server;
 module Req = Req;
 module Res = Res;
 module Method = Method;
+module Router = Router;
 module QueryMap = Query.QueryMap;
 module MimeTypes = MimeTypes;
 module Session = Session;

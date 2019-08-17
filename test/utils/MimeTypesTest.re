@@ -1,5 +1,3 @@
-open OUnit2;
-
 let expectedMimeTypes = [
   ("", "text/plain"),
   ("ez", "application/andrew-inset"),
@@ -1012,35 +1010,58 @@ let expectedMimeTypes = [
   ("thisaintreal", "text/plain"),
 ];
 
-let testSuite = () => [
-  "utils/MimeTypes.getExtension returns html for .html file"
-  >:: (
-    _ => {
-      let testFilename = "some/foo/bar.html";
-      let actualExt = Naboris.MimeTypes.getExtension(testFilename);
-      assert_equal(actualExt, "html");
-    }
-  ),
-  "utils/MimeTypes.getMimeType works for all expected mime types"
-  >:: (
-    _ => {
-      List.iter(
-        ((ext, expectedMimeType)) => {
-          let testFilename = "some/foo/bar." ++ ext;
-          let actualMimeType = Naboris.MimeTypes.getMimeType(testFilename);
-          assert_equal(actualMimeType, expectedMimeType);
-        },
-        expectedMimeTypes,
-      );
-    }
-  ),
-  "utils/MimeTypes.getMimeType works when no extension"
-  >:: (
-    _ => {
-      let testFilename = "some/foo/bar";
-      let expectedMimeType = "text/plain";
-      let actualMimeType = Naboris.MimeTypes.getMimeType(testFilename);
-      assert_equal(actualMimeType, expectedMimeType);
-    }
-  ),
-];
+let testSuite = () => (
+  "utils/MimeTypes",
+  [
+    Alcotest.test_case(
+      "getExtension returns html for .html file",
+      `Quick,
+      _ => {
+        let testFilename = "some/foo/bar.html";
+        let actualExt = Naboris.MimeTypes.getExtension(testFilename);
+        Alcotest.(check(string, "correct extension", actualExt, "html"));
+      },
+    ),
+    Alcotest.test_case(
+      "getMimeType works for all expected mime types",
+      `Quick,
+      _ => {
+        let actualMimeTypes =
+          List.map(
+            ((ext, _)) => {
+              let testFilename = "some/foo/bar." ++ ext;
+              Naboris.MimeTypes.getMimeType(testFilename);
+            },
+            expectedMimeTypes,
+          );
+
+        let expectedMimeTypesTypes =
+          List.map(
+            ((_, expectedMimeType)) => expectedMimeType,
+            expectedMimeTypes,
+          );
+
+        Alcotest.(
+          check(
+            list(string),
+            "match mime types",
+            expectedMimeTypesTypes,
+            actualMimeTypes,
+          )
+        );
+      },
+    ),
+    Alcotest.test_case(
+      "getMimeType works when no extension",
+      `Quick,
+      _ => {
+        let testFilename = "some/foo/bar";
+        let expectedMimeType = "text/plain";
+        let actualMimeType = Naboris.MimeTypes.getMimeType(testFilename);
+        Alcotest.(
+          check(string, "match mime type", actualMimeType, expectedMimeType)
+        );
+      },
+    ),
+  ],
+);

@@ -549,8 +549,7 @@ let testSuite = () => (
         }
       )
     }),
-    Alcotest_lwt.test_case(
-      "Unhandled errors don't crash server", `Slow, (_lwtSwitch, _) => {
+    Alcotest_lwt.test_case("Report error returns 500", `Slow, (_lwtSwitch, _) => {
       Cohttp_lwt_unix.Client.get(
         Uri.of_string("http://localhost:9991/error/boys"),
       )

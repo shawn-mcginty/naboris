@@ -45,7 +45,8 @@
     "@opam/httpaf": ">=0.6.0",
     "@opam/httpaf-lwt-unix": ">=0.6.0",
     "@opam/lwt": ">=4.2.1",
-    "@opam/uri": ">=2.2.0"
+    "@opam/uri": ">=2.2.0",
+    "@opam/bisect_ppx": ">=1.4.1"
   },
   "devDependencies": {
     "ocaml": "~4.6.1",
@@ -54,8 +55,7 @@
     "@opam/cohttp-lwt-unix": "*",
     "@opam/alcotest": "*",
     "@opam/alcotest-lwt": "*",
-    "@opam/odoc": "*",
-    "@opam/bisect_ppx": "*"
+    "@opam/odoc": "*"
   },
   "peerDependencies": {
     "ocaml": "~4.6.1"

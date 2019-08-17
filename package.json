@@ -8,7 +8,7 @@
     ],
     "buildInSource": "_build",
     "buildEnv": {
-      "BISECT_ENABLE": "YES",
+      "BISECT_ENABLE": "NO",
       "BISECT_SILENT": "ERR",
       "BISECT_FILE": "#{self.target_dir}/bisect"
     }

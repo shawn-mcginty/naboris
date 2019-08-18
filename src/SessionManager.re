@@ -12,7 +12,7 @@ let startSession = (req, res, data) => {
 
   let req2 = Req.setSessionData(Some({id: newSessionId, data}), req);
   let res2 = Res.setSessionCookies(newSessionId, res);
-  (req2, res2);
+  (req2, res2, newSessionId);
 };
 
 let resumeSession = (serverConfig: ServerConfig.t('sessionData), req) => {

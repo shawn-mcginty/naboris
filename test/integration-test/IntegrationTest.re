@@ -88,7 +88,7 @@ let startServers = lwtSwitch => {
           },
         )
       | (POST, ["login"]) =>
-        let (req2, res2) =
+        let (req2, res2, _sid) =
           Naboris.SessionManager.startSession(
             req,
             res,

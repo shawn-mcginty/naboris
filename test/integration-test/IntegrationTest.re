@@ -602,7 +602,7 @@ let testSuite = () => (
       )
     }),
     Alcotest_lwt.test_case(
-      "Get \"/json-test\" sends json header", `Slow, (_lwtSwitch, _) => {
+      "Get \"/raw-test\" sends xml header", `Slow, (_lwtSwitch, _) => {
       Cohttp_lwt_unix.Client.get(
         Uri.of_string("http://localhost:9991/test-raw"),
       )

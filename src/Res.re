@@ -33,6 +33,19 @@ let text = (req: Req.t('a), body: string, res: t) => {
   Httpaf.Body.close_writer(responseBody);
 };
 
+let json = (req: Req.t('a), body: string, res: t) => {
+  let resWithHeaders =
+    addHeader(("Content-Type", "application/json"), res)
+    |> addHeader(("Connection", "close"));
+  let response = createResponse(resWithHeaders);
+  let requestDescriptor = req.requestDescriptor;
+
+  let responseBody =
+    Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
+  Httpaf.Body.write_string(responseBody, body);
+  Httpaf.Body.close_writer(responseBody);
+};
+
 let html = (req: Req.t('a), htmlBody: string, res: t) => {
   let resWithHeaders =
     addHeader(("Content-Type", "text/html"), res)
@@ -43,6 +56,17 @@ let html = (req: Req.t('a), htmlBody: string, res: t) => {
   let responseBody =
     Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
   Httpaf.Body.write_string(responseBody, htmlBody);
+  Httpaf.Body.close_writer(responseBody);
+};
+
+let raw = (req: Req.t('a), body: string, res: t) => {
+  let resWithHeaders = addHeader(("Connection", "close"), res);
+  let response = createResponse(resWithHeaders);
+  let requestDescriptor = req.requestDescriptor;
+
+  let responseBody =
+    Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
+  Httpaf.Body.write_string(responseBody, body);
   Httpaf.Body.close_writer(responseBody);
 };
 

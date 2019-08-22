@@ -112,6 +112,15 @@ let startServers = lwtSwitch => {
         Naboris.Res.status(200, res)
         |> Naboris.Res.text(req, "You have landed.");
         Lwt.return_unit;
+      | (GET, ["test-json"]) =>
+        Naboris.Res.status(200, res)
+        |> Naboris.Res.json(req, "{\"test\": \"foo\"}");
+        Lwt.return_unit;
+      | (GET, ["test-raw"]) =>
+        Naboris.Res.status(200, res)
+        |> Naboris.Res.addHeader(("Content-Type", "application/xml"))
+        |> Naboris.Res.raw(req, "<xml></xml>");
+        Lwt.return_unit;
       | (GET, ["static", ...staticPath]) =>
         Naboris.Res.static(
           Sys.getenv("cur__root") ++ "/test/integration-test/test_assets",
@@ -560,6 +569,62 @@ let testSuite = () => (
             check(string, "status", codeStr, "500 Internal Server Error")
           );
           Lwt.return_unit;
+        }
+      )
+    }),
+    Alcotest_lwt.test_case(
+      "Get \"/json-test\" sends json header", `Slow, (_lwtSwitch, _) => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9991/test-json"),
+      )
+      >>= (
+        ((resp, bod)) => {
+          let codeStr = Cohttp.Code.string_of_status(resp.status);
+          Alcotest.(
+            check(
+              option(string),
+              "content type",
+              Cohttp.Header.get(resp.headers, "Content-type"),
+              Some("application/json"),
+            )
+          );
+          Alcotest.(check(string, "status", codeStr, "200 OK"));
+          Cohttp_lwt.Body.to_string(bod)
+          >>= (
+            bodyStr => {
+              Alcotest.(
+                check(string, "body", bodyStr, "{\"test\": \"foo\"}")
+              );
+              Lwt.return_unit;
+            }
+          );
+        }
+      )
+    }),
+    Alcotest_lwt.test_case(
+      "Get \"/json-test\" sends json header", `Slow, (_lwtSwitch, _) => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9991/test-raw"),
+      )
+      >>= (
+        ((resp, bod)) => {
+          let codeStr = Cohttp.Code.string_of_status(resp.status);
+          Alcotest.(
+            check(
+              option(string),
+              "content type",
+              Cohttp.Header.get(resp.headers, "Content-type"),
+              Some("application/xml"),
+            )
+          );
+          Alcotest.(check(string, "status", codeStr, "200 OK"));
+          Cohttp_lwt.Body.to_string(bod)
+          >>= (
+            bodyStr => {
+              Alcotest.(check(string, "body", bodyStr, "<xml></xml>"));
+              Lwt.return_unit;
+            }
+          );
         }
       )
     }),

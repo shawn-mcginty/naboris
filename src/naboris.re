@@ -11,8 +11,13 @@ module Cookie = Cookie;
 module ServerConfig = ServerConfig;
 
 open Lwt.Infix;
-let listen = (port, serverConfig: ServerConfig.t('sessionData)) => {
-  let listenAddress = Unix.(ADDR_INET(inet_addr_loopback, port));
+let listen =
+    (
+      ~inetAddr=Unix.inet_addr_any,
+      port,
+      serverConfig: ServerConfig.t('sessionData),
+    ) => {
+  let listenAddress = Unix.(ADDR_INET(inetAddr, port));
   let connectionHandler = Server.buildConnectionHandler(serverConfig);
 
   Lwt.async(() =>

@@ -1,3 +1,0 @@
-(executable
-	(name fullServerTest)
-	(libraries naboris httpaf httpaf-lwt-unix lwt lwt.unix cohttp cohttp-lwt-unix re))

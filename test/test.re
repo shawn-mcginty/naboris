@@ -1,8 +1,14 @@
-open OUnit;
+let runTests = () => {
+  Alcotest.run(
+    "Naboris Test",
+    [
+      CookieTest.testSuite(),
+      MimeTypesTest.testSuite(),
+      MethodTest.testSuite(),
+      RouterTest.testSuite(),
+      IntegrationTest.testSuite(),
+    ],
+  );
+};
 
-let suite =
-  "NaborisTest"
-  >::: List.concat([MimeTypesTest.testSuite(), CookieTest.testSuite()]);
-
-run_test_tt_main(suite);
-();
+runTests();

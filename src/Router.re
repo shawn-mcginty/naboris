@@ -24,14 +24,8 @@ let getQuery = uri =>
 
 let processPath = target => {
   let uri = Uri.of_string(target);
-  switch (String.split_on_char('/', Uri.path(uri))) {
-  | [_, ...path] => (
-      List.map(Uri.pct_decode, path),
-      getRawQuery(uri),
-      getQuery(uri),
-    )
-  | _ => raise(InvalidUrl(target))
-  };
+  let path = String.split_on_char('/', Uri.path(uri)) |> List.tl;
+  (List.map(Uri.pct_decode, path), getRawQuery(uri), getQuery(uri));
 };
 
 let generateRoute = (target, method) => {

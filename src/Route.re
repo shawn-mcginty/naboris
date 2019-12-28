@@ -1,6 +1,6 @@
 type t = {
   path: list(string),
-  method: Method.t,
+  meth: Method.t,
   rawQuery: string,
   query: Query.QueryMap.t(list(string)),
 };

@@ -9,8 +9,8 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
       (_client_address: Unix.sockaddr, request_descriptor: Httpaf.Reqd.t) => {
     let request: Httpaf.Request.t = Httpaf.Reqd.request(request_descriptor);
     let target = request.target;
-    let method = Method.ofHttpAfMethod(request.meth);
-    let route = Router.generateRoute(target, method);
+    let meth = Method.ofHttpAfMethod(request.meth);
+    let route = Router.generateRoute(target, meth);
 
     Lwt.async(() => {
       let rawReq =

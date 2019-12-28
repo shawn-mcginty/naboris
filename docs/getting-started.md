@@ -23,7 +23,7 @@ let testServerConfig: Naboris.Server.serverConfig(mySession) = {
   },
   sessionConfig: Some(sessionConfig),
   routeRequest: (route, req, res) =>
-    switch (route.method, route.path) {
+    switch (route.meth, route.path) {
     | (Naboris.Method.GET, ["echo", "pre-existing-route"]) =>
       Naboris.Res.status(200, res)
       |> Naboris.Res.html(
@@ -91,7 +91,7 @@ let testServerConfig: Naboris.Server.serverConfig(unit) = {
   },
   sessionConfig: None,
   routeRequest: (route, req, res) =>
-    switch (route.method, route.path) {
+    switch (route.meth, route.path) {
     | (Naboris.Method.GET, ["echo", "pre-existing-route"]) =>
       Naboris.Res.status(200, res)
       |> Naboris.Res.html(

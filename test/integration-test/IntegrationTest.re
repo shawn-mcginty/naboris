@@ -47,7 +47,7 @@ let startServers = lwtSwitch => {
     },
     sessionConfig: Some(sessionConfig),
     routeRequest: (route, req, res) =>
-      switch (route.method, route.path) {
+      switch (route.meth, route.path) {
       | (Naboris.Method.GET, ["echo", "pre-existing-route"]) =>
         Naboris.Res.status(200, res)
         |> Naboris.Res.html(
@@ -148,7 +148,7 @@ let startServers = lwtSwitch => {
     },
     sessionConfig: None,
     routeRequest: (route, req, res) =>
-      switch (route.method, route.path) {
+      switch (route.meth, route.path) {
       | _ =>
         Naboris.Res.status(404, res)
         |> Naboris.Res.html(

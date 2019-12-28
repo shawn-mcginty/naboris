@@ -23,8 +23,8 @@ let ofString = str => {
   };
 };
 
-let toString = method => {
-  switch (method) {
+let toString = meth => {
+  switch (meth) {
   | GET => "GET"
   | POST => "POST"
   | PUT => "PUT"
@@ -38,6 +38,6 @@ let toString = method => {
 };
 
 let ofHttpAfMethod = meth => {
-  let methodString = Httpaf.Method.to_string(meth);
-  ofString(methodString);
+  let methString = Httpaf.Method.to_string(meth);
+  ofString(methString);
 };

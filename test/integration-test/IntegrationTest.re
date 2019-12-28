@@ -158,12 +158,12 @@ let startServers = lwtSwitch => {
         Lwt.return_unit;
       },
   };
-  let _foo2 = Naboris.listen(9991, testServerConfig);
+  let _foo2 = Naboris.listenAndWaitForever(9991, testServerConfig);
   Lwt.bind(ssp1, () => {
     Lwt.bind(
       Lwt_unix.sleep(1.0),
       () => {
-        let _foo = Naboris.listen(9992, testServerConfig2);
+        let _foo = Naboris.listenAndWaitForever(9992, testServerConfig2);
         ssp2;
       },
     )

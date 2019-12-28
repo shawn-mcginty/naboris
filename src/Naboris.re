@@ -13,7 +13,7 @@ module Route = Route;
 
 open Lwt.Infix;
 
-let listenPromise =
+let listen =
     (
       ~inetAddr=Unix.inet_addr_any,
       port,
@@ -38,12 +38,12 @@ let listenPromise =
   Lwt.wait();
 };
 
-let listen =
+let listenAndWaitForever =
     (
       ~inetAddr=Unix.inet_addr_any,
       port,
       serverConfig: ServerConfig.t('sessionData),
     ) => {
-  let (forever, _) = listenPromise(~inetAddr, port, serverConfig)
+  let (forever, _) = listen(~inetAddr, port, serverConfig)
   forever;
 };

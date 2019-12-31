@@ -31,6 +31,7 @@ let sessionConfig: Naboris.ServerConfig.sessionConfig(TestSession.t) = {
 let startServers = lwtSwitch => {
   let (ssp1, ssr1) = Lwt.task();
   let (ssp2, ssr2) = Lwt.task();
+  let (ssp3, ssr3) = Lwt.task();
 
   Lwt_switch.add_hook(
     Some(lwtSwitch),
@@ -42,6 +43,9 @@ let startServers = lwtSwitch => {
   );
 
   let testServerConfig: Naboris.ServerConfig.t(TestSession.t) = {
+    middlewares: [],
+    httpAfConfig: None,
+    errorHandler: None,
     onListen: () => {
       Lwt.wakeup_later(ssr1, ());
     },
@@ -142,6 +146,9 @@ let startServers = lwtSwitch => {
   };
 
   let testServerConfig2: Naboris.ServerConfig.t(TestSession.t) = {
+    middlewares: [],
+    errorHandler: None,
+    httpAfConfig: None,
     onListen: () => {
       Lwt.wakeup_later(ssr2, ());
       ();
@@ -158,13 +165,63 @@ let startServers = lwtSwitch => {
         Lwt.return_unit;
       },
   };
+
+  // test the builder functions and middlewares
+  let testServerConfig3: Naboris.ServerConfig.t(TestSession.t) = Naboris.ServerConfig.create()
+    |> Naboris.ServerConfig.addMiddleware((next, route, req, res) => {
+      switch(route.path) {
+        | ["middleware", "one", _] =>
+          res
+            |> Naboris.Res.status(200)
+            |> Naboris.Res.text(req, "middleware 1");
+          Lwt.return_unit;
+        | _ =>
+          print_endline("Middleware 1, no matches");
+          next(route, req, res);
+      };
+    })
+    |> Naboris.ServerConfig.addMiddleware((next, route, req, res) => {
+      switch(route.path) {
+        | ["middleware", "one", "never"] =>
+          res
+            |> Naboris.Res.status(200)
+            |> Naboris.Res.text(req, "this should never happen");
+          Lwt.return_unit;
+        | ["middleware", "two"] =>
+          res
+            |> Naboris.Res.status(200)
+            |> Naboris.Res.text(req, "middleware 2");
+          Lwt.return_unit;
+        | _ => next(route, req, res)
+      }
+    })
+    |> Naboris.ServerConfig.setOnListen(() => Lwt.wakeup_later(ssr3, ()))
+    |> Naboris.ServerConfig.setRequestHandler((route, req, res) => switch(route.path) {
+      | ["no", "middleware"] =>
+        res
+          |> Naboris.Res.status(200)
+          |> Naboris.Res.text(req, "Regular router");
+        Lwt.return_unit;
+      | _ =>
+        res
+          |> Naboris.Res.status(404)
+          |> Naboris.Res.text(req, "Resource not found.");
+        Lwt.return_unit;
+    });
   let _foo2 = Naboris.listenAndWaitForever(9991, testServerConfig);
   Lwt.bind(ssp1, () => {
     Lwt.bind(
       Lwt_unix.sleep(1.0),
       () => {
         let _foo = Naboris.listenAndWaitForever(9992, testServerConfig2);
-        ssp2;
+        Lwt.bind(ssp2, () => {
+          Lwt.bind(
+            Lwt_unix.sleep(1.0),
+            () => {
+              let _baz = Naboris.listenAndWaitForever(9993, testServerConfig3);
+              ssp3;
+            });
+        });
       },
     )
   });
@@ -622,6 +679,87 @@ let testSuite = () => (
           >>= (
             bodyStr => {
               Alcotest.(check(string, "body", bodyStr, "<xml></xml>"));
+              Lwt.return_unit;
+            }
+          );
+        }
+      )
+    }),
+    Alcotest_lwt.test_case(
+      "Middleware - Get \"/middleware/one/never\" should be served by the first middleware", `Slow, (_lwtSwitch, _) => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9993/middleware/one/never"),
+      )
+      >>= (
+        ((resp, bod)) => {
+          let codeStr = Cohttp.Code.string_of_status(resp.status);
+          Alcotest.(
+            check(
+              option(string),
+              "content type",
+              Some("text/plain"),
+              Cohttp.Header.get(resp.headers, "Content-type"),
+            )
+          );
+          Alcotest.(check(string, "status", "200 OK", codeStr));
+          Cohttp_lwt.Body.to_string(bod)
+          >>= (
+            bodyStr => {
+              Alcotest.(check(string, "body", "middleware 1", bodyStr));
+              Lwt.return_unit;
+            }
+          );
+        }
+      )
+    }),
+    Alcotest_lwt.test_case(
+      "Middleware - Get \"/middleware/two\" should be served by the second middleware", `Slow, (_lwtSwitch, _) => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9993/middleware/two"),
+      )
+      >>= (
+        ((resp, bod)) => {
+          let codeStr = Cohttp.Code.string_of_status(resp.status);
+          Alcotest.(
+            check(
+              option(string),
+              "content type",
+              Some("text/plain"),
+              Cohttp.Header.get(resp.headers, "Content-type"),
+            )
+          );
+          Alcotest.(check(string, "status", "200 OK", codeStr));
+          Cohttp_lwt.Body.to_string(bod)
+          >>= (
+            bodyStr => {
+              Alcotest.(check(string, "body", "middleware 2", bodyStr));
+              Lwt.return_unit;
+            }
+          );
+        }
+      )
+    }),
+    Alcotest_lwt.test_case(
+      "Middleware - Get \"/no/middleware\" should be served by the route handler", `Slow, (_lwtSwitch, _) => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9993/no/middleware"),
+      )
+      >>= (
+        ((resp, bod)) => {
+          let codeStr = Cohttp.Code.string_of_status(resp.status);
+          Alcotest.(
+            check(
+              option(string),
+              "content type",
+              Some("text/plain"),
+              Cohttp.Header.get(resp.headers, "Content-type"),
+            )
+          );
+          Alcotest.(check(string, "status", "200 OK", codeStr));
+          Cohttp_lwt.Body.to_string(bod)
+          >>= (
+            bodyStr => {
+              Alcotest.(check(string, "body", "Regular router", bodyStr));
               Lwt.return_unit;
             }
           );

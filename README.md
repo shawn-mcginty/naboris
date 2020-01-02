@@ -26,6 +26,7 @@ Naboris.listenAndWaitForever(3000, serverConfig);
 ## Contents
 * [Getting Started](#getting-started)
     * [Installation](#installation)
+    * [Server Config](#server-config)
     * [Routing](#routing)
     * [Session Data](#session-data)
 * [Advanced](#advanced)
@@ -64,11 +65,19 @@ Naboris.listenAndWaitForever(3000, serverConfig);
                           @@(          @@                  
 ```
 
-## Installation
-
-
 ## Getting Started
 
+### Installation
+
+### Server Config
+
+### Routing
+
+### Session Data
+
+## Advanced
+
+### Middlewares
 
 ## Development
 Any help would be greatly appreciated! 👍

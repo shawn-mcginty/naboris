@@ -1,8 +1,35 @@
 # Naboris
-Simple http server built on httpaf and lwt.
+Simple, fast, minimalist web framework for [OCaml](https://ocaml.org)/[ReasonML](https://reasonml.github.io) built on [httpaf](https://github.com/inhabitedtype/httpaf) and [lwt](https://github.com/ocsigen/lwt).
 
 [![Build Status](https://travis-ci.com/shawn-mcginty/naboris.svg?branch=master)](https://travis-ci.com/shawn-mcginty/naboris)
 [![opam version 0.0.7](https://img.shields.io/static/v1?label=opam&message=0.0.7&color=E7C162)](https://opam.ocaml.org/packages/naboris/)
+
+```ocaml
+let serverConfig: Naboris.ServerConfig.t(unit) = Naboris.ServerConfig.create()
+  |> Naboris.ServerConfig.setRequestHandler((route, req, res) => switch(route.path) {
+    | ["hello"] =>
+      res
+        |> Naboris.Res.status(200)
+        |> Naboris.Res.text(req, "Hello world!");
+      Lwt.return_unit;
+    | _ =>
+      res
+        |> Naboris.Res.status(404)
+        |> Naboris.Res.text(req, "Resource not found.");
+      Lwt.return_unit;
+  });
+
+Naboris.listenAndWaitForever(3000, serverConfig);
+// In a browser navigate to http://localhost:3000/hello
+```
+
+## Contents
+* [Getting Started](#getting-started)
+    * [Installation](#installation)
+    * [Routing](#routing)
+    * [Session Data](#session-data)
+* [Advanced](#advanced)
+	* [Middlewares](#middlewares) 
 
 ```
                                                            
@@ -36,10 +63,16 @@ Simple http server built on httpaf and lwt.
                           @@(          @@                  
 ```
 
-## Work in progress
-This repo is a side project that I've just started.  It is not in working condition at the moment.
+## Installation
 
-## To run tests
+
+## Getting Started
+
+
+## Development
+Any help would be greatly appreciated! 👍
+
+### To run tests
 
 ```bash
 esy install

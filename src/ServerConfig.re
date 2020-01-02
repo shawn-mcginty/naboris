@@ -1,5 +1,5 @@
 type sessionConfig('sessionData) = {
-  onRequest: option(string) => Lwt.t(option(Session.t('sessionData))),
+  getSession: option(string) => Lwt.t(option(Session.t('sessionData))),
 };
 
 type httpAfConfig = {
@@ -60,6 +60,13 @@ let setErrorHandler = (errHandlerFn, conf) => { ...conf, errorHandler: errHandle
 let setHttpAfConfig = (httpAfConfig, conf) => { ...conf, httpAfConfig };
 
 let addMiddleware = (middleware, conf) => { ...conf, middlewares: List.append(conf.middlewares, [ middleware ]) }
+
+let setSessionGetter = (getSessionFn, conf) => {
+  let sessionConfig = {
+    getSession: getSessionFn,
+  };
+  { ...conf, sessionConfig: Some(sessionConfig) };
+};
 
 let toHttpAfConfig = (conf: t('sessionData)): option(Httpaf.Config.t) =>
   switch (conf.httpAfConfig) {

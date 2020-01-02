@@ -20,7 +20,7 @@ let serverConfig: Naboris.ServerConfig.t(unit) = Naboris.ServerConfig.create()
   });
 
 Naboris.listenAndWaitForever(3000, serverConfig);
-// In a browser navigate to http://localhost:3000/hello
+/* In a browser navigate to http://localhost:3000/hello */
 ```
 
 ## Contents
@@ -158,6 +158,30 @@ let requestHandler = (route, req, res) => switch (route.meth, route.path) {
 ```
 
 ### Session Data
+Many `Naboris` types take the parameter `'sessionData` this represents a custom data type that will define session data that will be attached to an incoming request.
+
+#### sessionGetter
+__Naboris.ServerConfig.setSessionGetter__ will set the configuration with a function with the signature `option(string) => Lwt.t(option(Naboris.Session.t('sessionData)))`.  That's a complicated type signature that expresses that the request may or may not have a `sessionId`; and given that fact it may or may not return a session.
+```ocaml
+type userData = {
+  userId: int,
+  username: string,
+  firstName: string,
+  lastName: string,
+};
+
+let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
+  |> setSessionGetter(sessionId => switch(sessionId) {
+    | Some(id) =>
+      Lwt.bind(getUserDataById(id),
+        userData => {
+          let session = Naboris.Session.create(id, userData);
+          Lwt.return(Some(session));
+        }
+      );
+    | None => Lwt.return(None);
+  });
+```
 
 ## Advanced
 

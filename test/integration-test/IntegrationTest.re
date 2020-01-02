@@ -18,11 +18,11 @@ let echoQueryQuery = (req, res, query) => {
 };
 
 let sessionConfig: Naboris.ServerConfig.sessionConfig(TestSession.t) = {
-  onRequest: sessionId => {
+  getSession: sessionId => {
     let userData = TestSession.{username: "realsessionuser"};
     switch (sessionId) {
     | Some(sid) =>
-      Lwt.return(Some(Naboris.Session.{id: sid, data: userData}))
+      Lwt.return(Some(Naboris.Session.create(sid, userData)));
     | _ => Lwt.return(None)
     };
   },

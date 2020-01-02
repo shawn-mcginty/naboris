@@ -1,7 +1,8 @@
 # Naboris
-An express-like native http server for OCaml/ReasonML
+Simple http server built on httpaf and lwt.
 
 [![Build Status](https://travis-ci.com/shawn-mcginty/naboris.svg?branch=master)](https://travis-ci.com/shawn-mcginty/naboris)
+[![opam version 0.0.7](https://img.shields.io/static/v1?label=opam&message=0.0.7&color=E7C162)](https://opam.ocaml.org/packages/naboris/)
 
 ```
                                                            

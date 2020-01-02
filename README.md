@@ -173,6 +173,8 @@ type userData = {
 let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
   |> setSessionGetter(sessionId => switch(sessionId) {
     | Some(id) =>
+      /* for the sake of this example we're not using ppx or infix */
+      /* lwt promises can be made much easier to read by using these */
       Lwt.bind(getUserDataById(id),
         userData => {
           let session = Naboris.Session.create(id, userData);
@@ -180,12 +182,40 @@ let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
         }
       );
     | None => Lwt.return(None);
+  })
+  |> setRequestHandler((route, req, res) => switch(route.meth, route.path) {
+    | (Naboris.Method.POST, ["login"]) =>
+      let (req2, res2, _sessionId) =
+        /* Begin a session */
+        Naboris.SessionManager.startSession(
+          req,
+          res,
+          {
+            userId: 1,
+            username: "foo",
+            firstName: "foo",
+            lastName: "bar",
+          },
+        );
+        Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
+        Lwt.return_unit;
+    | (Naboris.Method.GET, ["who-am-i"]) =>
+      /* Get session data from the request */
+      switch (Naboris.Req.getSessionData(req)) {
+      | None =>
+        Naboris.Res.status(404, res) |> Naboris.Res.text(req, "Not found")
+      | Some(userData) =>
+        Naboris.Res.status(200, res)
+        |> Naboris.Res.text(req, userData.username)
+      };
+      Lwt.return_unit;
   });
 ```
 
 ## Advanced
 
 ### Middlewares
+More info coming soon...
 
 ## Development
 Any help would be greatly appreciated! 👍

@@ -128,15 +128,15 @@ For these examples we'll be matching on `path` and `meth`.
 ```ocaml
 let requestHandler = (route, req, res) => switch (route.meth, route.path) {
   | (Naboris.Method.GET, ["user", userId, "contacts"]) =>
-  	/* Use pattern matching to pull parameters out of the url */
-  	let contacts = getContactsByUserId(userId);
+    /* Use pattern matching to pull parameters out of the url */
+    let contacts = getContactsByUserId(userId);
     let contactsJsonString = serializeToJson(contacts);
     res
       |> Naboris.Res.status(200)
       |> Naboris.Res.json(req, contactsJsonString);
     Lwt.return_unit;
   | (Naboris.Method.PUT, ["user", userId, "contacts"]) =>
-  	/* for the sake of this example we're not using ppx or infix */
+    /* for the sake of this example we're not using ppx or infix */
     /* lwt promises can be made much easier to read by using these */
     Lwt.bind(
       Naboris.Req.getBody(req),

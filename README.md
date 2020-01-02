@@ -69,9 +69,93 @@ Naboris.listenAndWaitForever(3000, serverConfig);
 
 ### Installation
 
+#### opam
+```bash
+opam install naboris
+```
+
+#### esy
+```json
+	"@opam/naboris": "^0.0.7"
+```
+
+#### dune
+```
+(libraries naboris)
+```
+
 ### Server Config
+The `Naboris.ServerConfig.t('sessionData)` type will define the way your server will handle requests.
+
+#### Creating a Server Config
+
+There are a number of helper functions for building server config records.
+
+##### ServerConfig.create
+__create__ is used to generate a default server config object, this will be the starting point.
+```ocaml
+let create: unit => ServerConfig.t('sessionData);
+```
+
+#### ServerConfig.setOnListen
+__setOnListen__ will set the function that will be called once the server has started and is listening for connections.  The `onListen` function has the type signature `unit => unit`.
+```ocaml
+let setOnListen: (unit => unit, ServerConfig.t('sessionData)) => ServerConfig.t('sessionData)
+```
+
+#### ServerConfig.setRequestHandler
+__setRequestHandler__ will set the main request handler function on the config.  This function is the main entry point for http requests and usually where routing the request happens.  The `requestHandler` function has the type signature `(Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit)`.
+```ocaml
+let setRequestHandler: ((Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit), ServerConfig.t('sessionData)) => ServerConfig.t('sessionData)
+```
 
 ### Routing
+Routin is intended to be done via pattern matching in the main `requestHandler` function.  This function takes as it's first argument a `Route.t` record, which looks like this:
+```ocaml
+/* module Naboris.Route */
+type t = {
+  path: list(string),
+  meth: Method.t,
+  rawQuery: string,
+  query: Query.QueryMap.t(list(string)),
+};
+```
+
+For these examples we'll be matching on `path` and `meth`.
+> Note: `path` is the url path broken into an array by the `/` separators.
+> e.g. `/user/1/contacts` would look like this: `["user", "1", "contacts"]`
+
+```ocaml
+let requestHandler = (route, req, res) => switch (route.meth, route.path) {
+  | (Naboris.Method.GET, ["user", userId, "contacts"]) =>
+  	/* Use pattern matching to pull parameters out of the url */
+  	let contacts = getContactsByUserId(userId);
+    let contactsJsonString = serializeToJson(contacts);
+    res
+      |> Naboris.Res.status(200)
+      |> Naboris.Res.json(req, contactsJsonString);
+    Lwt.return_unit;
+  | (Naboris.Method.PUT, ["user", userId, "contacts"]) =>
+  	/* for the sake of this example we're not using ppx or infix */
+    /* lwt promises can be made much easier to read by using these */
+    Lwt.bind(
+      Naboris.Req.getBody(req),
+      bodyStr => {
+      	let newContacts = parseJsonString(bodyStr);
+        addNewContactsToUser(userId, newContacts);
+        res
+          |> Naboris.Res.status(201)
+          |> Naboris.Res.text(req, "Created");
+        Lwt.return_unit;
+      },
+    )
+  | _ =>
+      res
+        |> Naboris.Res.status(404)
+        |> Naboris.Res.text(req, "Resource not found.");
+      Lwt.return_unit;
+};
+```
 
 ### Session Data
 

@@ -212,7 +212,7 @@ let requestHandler = (route, req, res) => switch (route.meth, route.path) {
 (* OCaml *)
 let request_handler route req res =
   match (route.meth, route.path) with
-    | (Naboris.Method.GET, ["user", user_id, "contacts"]) ->
+    | (Naboris.Method.GET, ["user"; user_id; "contacts"]) ->
       (* Use pattern matching to pull parameters out of the url *)
       let contatcs = get_contacts_by_user_id user_id in
       let contacts_json_string = serialize_to_json contacts in
@@ -220,7 +220,7 @@ let request_handler route req res =
         |> Naboris.Res.status 200
 	|> Naboris.Res.json req contacts_json_string;
       Lwt.return_unit
-    | (Naboris.Method.PUT, ["user", user_id, "contacts"]) ->
+    | (Naboris.Method.PUT, ["user"; user_id; "contacts"]) ->
       (* for the sake of this example we're not using ppx or infix *)
       (* lwt promises can be made much easier to read by using these *)
       Lwt.bind Naboris.Req.getBody req (fun body_str ->
@@ -300,8 +300,9 @@ let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
 type userData = {
   userId: int,
   username: string,
-  firstName: string,
-  lastName: string,
+  first_name: string,
+  last_name: string,
+  is_admin: boolean,
 }
 
 let serverConfig: userData Naboris.ServerConfiguserData = Naboris.ServerConfig.create ()
@@ -311,20 +312,21 @@ let serverConfig: userData Naboris.ServerConfiguserData = Naboris.ServerConfig.c
         (* for the sake of this example we're not using ppx or infix *)
         (* lwt promises can be made much easier to read by using these *)
         Lwt.bind (get_user_data_by_id id) (fun user_data ->
-          let session = Naboris.Session.create id userData in
-	        Lwt.return Some(session)
+          let session = Naboris.Session.create id user_data in
+	  Lwt.return Some(session)
         )
     | None => Lwt.return None)
   |> Naboris.ServerConfig.setRequestHandler (fun route, req, res ->
     match (route.meth, route.path) with
       | (Naboris.Method.POST, ["login"]) ->
-        let (req2, res2, _sessionId) =
+        let (req2, res2, _session_id) =
         (* Begin a session *)
           Naboris.SessionManager.startSession req res {
             userId: 1,
             username: "foo",
-            firstName: "foo",
-            lastName: "bar",
+            first_name: "foo",
+            last_name: "bar",
+	    is_admin: false,
           } in
         Naboris.Res.status 200 res2
           |> Naboris.Res.text req2, "OK";

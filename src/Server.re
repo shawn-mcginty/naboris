@@ -9,19 +9,24 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
       (_client_address: Unix.sockaddr, request_descriptor: Httpaf.Reqd.t) => {
     let request: Httpaf.Request.t = Httpaf.Reqd.request(request_descriptor);
     let target = request.target;
-    let method = Method.ofHttpAfMethod(request.meth);
-    let route = Router.generateRoute(target, method);
+    let meth = Method.ofHttpAfMethod(request.meth);
+    let route = Router.generateRoute(target, meth);
 
     Lwt.async(() => {
       let rawReq =
         Req.fromReqd(request_descriptor, serverConfig.sessionConfig);
 
       SessionManager.resumeSession(serverConfig, rawReq)
-      >>= (
-        req => {
-          serverConfig.routeRequest(route, req, Res.default());
-        }
-      );
+      >>= (req => switch(serverConfig.middlewares) {
+        | [] => serverConfig.routeRequest(route, req, Res.default())
+        | [oneMiddleware] => oneMiddleware(serverConfig.routeRequest, route, req, Res.default());
+        | _moreThanOneMiddleware =>
+          let fullHandler = serverConfig.middlewares
+            |> List.rev
+            |> List.fold_left((next: RequestHandler.t('a), current) => current(next), serverConfig.routeRequest)
+          
+          fullHandler(route, req, Res.default());
+      });
     });
   };
 
@@ -38,7 +43,7 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
   };
 
   Httpaf_lwt_unix.Server.create_connection_handler(
-    ~config=?None,
+    ~config=?ServerConfig.toHttpAfConfig(serverConfig),
     ~request_handler,
     ~error_handler,
   );

@@ -1,7 +1,7 @@
 {
   "name": "naboris",
-  "version": "0.0.6",
-  "description": "Simple HTTP server for ocaml/reasonml.  Based on httpaf and lwt.",
+  "version": "0.0.7",
+  "description": "Simple http server built on httpaf and lwt.",
   "esy": {
     "build": [
       "dune build -p #{self.name}"

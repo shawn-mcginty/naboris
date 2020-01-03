@@ -28,7 +28,7 @@ let processPath = target => {
   (List.map(Uri.pct_decode, path), getRawQuery(uri), getQuery(uri));
 };
 
-let generateRoute = (target, method) => {
+let generateRoute = (target, meth) => {
   let (path, rawQuery, query) = processPath(target);
-  Route.{path, rawQuery, query, method};
+  Route.{path, rawQuery, query, meth};
 };

@@ -20,7 +20,7 @@ let resumeSession = (serverConfig: ServerConfig.t('sessionData), req) => {
   | None => Lwt.return(req)
   | Some(sessionConfig) =>
     let sid = Cookie.sessionIdOfReq(req);
-    sessionConfig.onRequest(sid)
+    sessionConfig.getSession(sid)
     >>= (
       maybeSessionData => {
         let req2 = Req.setSessionData(maybeSessionData, req);

@@ -257,23 +257,26 @@ val static : string -> string list -> 'sessionData Req.t -> Res.t -> unit Lwt.t
 A pattern matcher for static file routes might look like this
 ```reason
 // ReasonML
-| (Naboris.Method.GET, ["static", ...staticPath]) =>
-  Naboris.Res.static(
-    Sys.getenv("cur__root") ++ "/static-assets",
-    staticPath,
-    req,
-    res,
-  )
+switch (route.meth, route.path) {
+  | (Naboris.Method.GET, ["static", ...staticPath]) =>
+    Naboris.Res.static(
+      Sys.getenv("cur__root") ++ "/static-assets",
+      staticPath,
+      req,
+      res,
+    )
+}
 ```
 ```ocaml
 (* OCaml *)
-| (Naboris.Method.GET, "static" :: static_path) =>
-  Naboris.Res.static(
-    (Sys.getenv "cur__root") ++ "/static-assets",
-    static_path,
-    req,
-    res,
-  )
+match (route.meth, route.path) with
+  | (Naboris.Method.GET, "static" :: static_path) ->
+    Naboris.Res.static(
+      (Sys.getenv "cur__root") ++ "/static-assets",
+      static_path,
+      req,
+      res,
+    )
 ```
 
 In the case above `/static/images/icon.png` would be served from `$cur__root/static-assets/images/icon.png`

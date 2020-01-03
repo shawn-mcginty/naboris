@@ -2,7 +2,7 @@
 Simple, fast, minimalist web framework for [OCaml](https://ocaml.org)/[ReasonML](https://reasonml.github.io) built on [httpaf](https://github.com/inhabitedtype/httpaf) and [lwt](https://github.com/ocsigen/lwt).
 
 [![Build Status](https://travis-ci.com/shawn-mcginty/naboris.svg?branch=master)](https://travis-ci.com/shawn-mcginty/naboris)
-[![opam version 0.0.7](https://img.shields.io/static/v1?label=opam&message=0.0.7&color=E7C162)](https://opam.ocaml.org/packages/naboris/)
+[![opam version 1.0.0](https://img.shields.io/static/v1?label=opam&message=1.0.0&color=E7C162)](https://opam.ocaml.org/packages/naboris/)
 
 ```reason
 // ReasonML
@@ -98,7 +98,7 @@ opam install naboris
 
 #### esy
 ```json
-"@opam/naboris": "^0.0.7"
+"@opam/naboris": "^1.0.0"
 ```
 
 #### dune

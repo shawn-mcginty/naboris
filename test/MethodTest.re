@@ -79,7 +79,7 @@ let testSuite = () => (
       },
     ),
     Alcotest.test_case(
-      "toString converts all standard methods to string values",
+      "toString converts all standard meths to string values",
       `Quick,
       _ => {
         Alcotest.(check(string, "GET", Naboris.Method.toString(GET), "GET"));

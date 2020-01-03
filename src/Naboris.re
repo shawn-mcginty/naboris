@@ -9,8 +9,10 @@ module Session = Session;
 module SessionManager = SessionManager;
 module Cookie = Cookie;
 module ServerConfig = ServerConfig;
+module Route = Route;
 
 open Lwt.Infix;
+
 let listen =
     (
       ~inetAddr=Unix.inet_addr_any,
@@ -33,6 +35,15 @@ let listen =
     )
   );
 
-  let (forever, _) = Lwt.wait();
+  Lwt.wait();
+};
+
+let listenAndWaitForever =
+    (
+      ~inetAddr=Unix.inet_addr_any,
+      port,
+      serverConfig: ServerConfig.t('sessionData),
+    ) => {
+  let (forever, _) = listen(~inetAddr, port, serverConfig)
   forever;
 };

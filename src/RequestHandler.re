@@ -1,0 +1,1 @@
+type t('sessionData) = (Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit)

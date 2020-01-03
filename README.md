@@ -49,6 +49,7 @@ Naboris.listenAndWaitForever 3000 server_config
     * [Installation](#installation)
     * [Server Config](#server-config)
     * [Routing](#routing)
+    * [Static Files](#static-files)
     * [Session Data](#session-data)
 * [Advanced](#advanced)
 	* [Middlewares](#middlewares)
@@ -236,6 +237,9 @@ let request_handler route req res =
       Lwt.return_unit
 ```
 
+### Static Files
+_Coming soon_
+
 ### Session Data
 Many `Naboris` types take the parameter `'sessionData` this represents a custom data type that will define session data that will be attached to an incoming request.
 
@@ -340,7 +344,7 @@ let serverConfig: userData Naboris.ServerConfiguserData = Naboris.ServerConfig.c
 ## Advanced
 
 ### Middlewares
-More info coming soon...
+_More info coming soon..._
 
 ## Development
 Any help would be greatly appreciated! 👍

@@ -238,7 +238,45 @@ let request_handler route req res =
 ```
 
 ### Static Files
-_Coming soon_
+While it is recommended to use a reverse proxy or other such service for serving static files `Naboris` does have helper functions to make this easy.  The `Res` module has the `static` function for this exact reason. The 
+
+```reason
+// ReasonML
+let static : (string, list(string), Req.t('sessionData), Res.t) => Lwt.t(unit)
+```
+```ocaml
+(* OCaml *)
+val static : string -> string list -> 'sessionData Req.t -> Res.t -> unit Lwt.t
+```
+
+* `string`: Being the root directory from which to read static files
+* `string list`: Being the split path from the root directory to read the specific static file
+* `'sessionData Req.t`: The current naboris request
+* `Res.t`: The current naobirs response
+
+A pattern matcher for static file routes might look like this
+```reason
+// ReasonML
+| (Naboris.Method.GET, ["static", ...staticPath]) =>
+  Naboris.Res.static(
+    Sys.getenv("cur__root") ++ "/static-assets",
+    staticPath,
+    req,
+    res,
+  )
+```
+```ocaml
+(* OCaml *)
+| (Naboris.Method.GET, "static" :: static_path) =>
+  Naboris.Res.static(
+    (Sys.getenv "cur__root") ++ "/static-assets",
+    static_path,
+    req,
+    res,
+  )
+```
+
+In the case above `/static/images/icon.png` would be served from `$cur__root/static-assets/images/icon.png`
 
 ### Session Data
 Many `Naboris` types take the parameter `'sessionData` this represents a custom data type that will define session data that will be attached to an incoming request.

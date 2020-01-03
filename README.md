@@ -293,6 +293,7 @@ type userData = {
   username: string,
   firstName: string,
   lastName: string,
+  isAdmin: bool,
 };
 
 let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
@@ -320,6 +321,7 @@ let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
             username: "foo",
             firstName: "foo",
             lastName: "bar",
+	    isAdmin: false,
           },
         );
         Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
@@ -338,15 +340,15 @@ let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
 ```
 ```ocaml
 (* OCaml *)
-type userData = {
+type user_data = {
   userId: int,
   username: string,
   first_name: string,
   last_name: string,
-  is_admin: boolean,
+  is_admin: bool,
 }
 
-let serverConfig: userData Naboris.ServerConfiguserData = Naboris.ServerConfig.create ()
+let serverConfig: user_data Naboris.ServerConfiguserData = Naboris.ServerConfig.create ()
   |> Naboris.ServerConfig.setSessionGetter (fun session_id ->
     match (session_id) with
       | Some(id) =>
@@ -387,7 +389,45 @@ let serverConfig: userData Naboris.ServerConfiguserData = Naboris.ServerConfig.c
 ## Advanced
 
 ### Middlewares
-_More info coming soon..._
+Middlewares have a wide variety of uses.  They are executed __in the order in which they are registered__ so be sure to keep that in mind. Middlewares are functions with the following signature:
+
+`Naboris.RouteHandler.t -> Naboris.Route.t -> Naboris.Req.t -> Naboris.Res.t -> unit Lwt.t`
+
+Middlewares can either handle the http request/repsonse lifecycle themselves or call the passed in route handler passing the req/res on to the next middleware in the list.  Once the list of middlewares has been exaused it will then be passed on to the default route handler.
+
+One simple example of a middleware would be one that protects certain routes from users without specific permissions.
+
+Given the __Sesson Data__ example above, one such middleware might look like this:
+```reason
+// ReasonML
+let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.create()
+  |> Naboris.ServerConfig.addMiddleware((next, route, req, res) => switch (route.path) {
+    | ["admin", ..._] => switch (Naboris.Req.getSessionData(req)) {
+      | Some({ is_admin: true, ..._}) => next(route, req, res)
+      | _ =>
+        res
+	  |> Naboris.Res.status(401)
+	  |> Naboris.Res.text(req, "Unauthorized);
+	Lwt.return_unit
+      }
+    | _ => next(route, req, res)
+  });
+```
+```ocaml
+(* OCaml *)
+let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.create ()
+  |> Naboris.ServerConfig.addMiddleware (fun next route req res ->
+    match (route.path) with
+      | "admin" :: _ ->
+        (match (Naboris.Req.getSessionData req) with
+          | Some({ is_admin = true; _}) -> next route req res
+          | _ ->
+            res
+              |> Naboris.Res.status 401
+              |> Naboris.Res.text req "Unauthorized";
+            Lwt.return_unit)
+      | _ -> next route req res)
+```
 
 ## Development
 Any help would be greatly appreciated! 👍

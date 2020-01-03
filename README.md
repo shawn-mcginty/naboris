@@ -310,8 +310,7 @@ let serverConfig: userData Naboris.ServerConfiguserData = Naboris.ServerConfig.c
           let session = Naboris.Session.create id userData in
 	        Lwt.return Some(session)
         )
-    | None => Lwt.return None;
-  })
+    | None => Lwt.return None)
   |> Naboris.ServerConfig.setRequestHandler (fun route, req, res ->
     match (route.meth, route.path) with
       | (Naboris.Method.POST, ["login"]) ->

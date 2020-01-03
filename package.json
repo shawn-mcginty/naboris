@@ -58,6 +58,6 @@
     "@opam/odoc": "*"
   },
   "peerDependencies": {
-    "ocaml": "~4.6.1"
+    "ocaml": ">=4.5.0"
   }
 }

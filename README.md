@@ -5,6 +5,7 @@ Simple, fast, minimalist web framework for [OCaml](https://ocaml.org)/[ReasonML]
 [![opam version 0.0.7](https://img.shields.io/static/v1?label=opam&message=0.0.7&color=E7C162)](https://opam.ocaml.org/packages/naboris/)
 
 ```reason
+// ReasonML
 let serverConfig: Naboris.ServerConfig.t(unit) = Naboris.ServerConfig.create()
   |> Naboris.ServerConfig.setRequestHandler((route, req, res) => switch(route.path) {
     | ["hello"] =>
@@ -21,6 +22,26 @@ let serverConfig: Naboris.ServerConfig.t(unit) = Naboris.ServerConfig.create()
 
 Naboris.listenAndWaitForever(3000, serverConfig);
 /* In a browser navigate to http://localhost:3000/hello */
+```
+
+```ocaml
+(* OCaml *)
+let server_config: unit Naboris.ServerConfig.t = Naboris.ServerConfig.create ()
+  |> Naboris.ServerConfig.setRequestHandler(fun route req res ->
+    match (route.path) with
+      | ["hello"] ->
+        res
+          |> Naboris.Res.text req "Hello world!";
+        Lwt.return_unit
+      | _ ->
+        res
+          |> Naboris.Res.status 404
+          |> Naboris.Res.text req "Resource not found.";
+        Lwt.return_unit
+  ) in
+
+Naboris.listenAndWaitForever 3000 server_config
+(* In a browser navigate to http://localhost:3000/hello *)
 ```
 
 ## Contents
@@ -94,27 +115,44 @@ There are a number of helper functions for building server config records.
 ##### ServerConfig.create
 __create__ is used to generate a default server config object, this will be the starting point.
 ```reason
+// ReasonML
 let create: unit => ServerConfig.t('sessionData);
+```
+```ocaml
+(* OCaml *)
+val create: unit -> 'sessionData ServerConfig.t
 ```
 
 #### ServerConfig.setOnListen
 __setOnListen__ will set the function that will be called once the server has started and is listening for connections.  The `onListen` function has the type signature `unit => unit`.
 ```reason
+// ReasonML
 let setOnListen: (unit => unit, ServerConfig.t('sessionData)) => ServerConfig.t('sessionData)
+```
+```ocaml
+(* OCaml *)
+val setOnListen: (unit -> unit) -> 'sessionData ServerConfig.t -> 'sessionData ServerConfig.t
 ```
 
 #### ServerConfig.setRequestHandler
 __setRequestHandler__ will set the main request handler function on the config.  This function is the main entry point for http requests and usually where routing the request happens.  The `requestHandler` function has the type signature `(Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit)`.
 ```reason
+// ReasonML
 let setRequestHandler: (
   (Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit),
   ServerConfig.t('sessionData)
 ) => ServerConfig.t('sessionData)
 ```
+```ocaml
+(* OCaml *)
+val setRequestHandler: (Route.t -> 'sessionData Req.t -> Res.t -> unit Lwt.t)
+  -> 'sessionData ServerConfig.t -> 'sessionData ServerConfig.t
+```
 
 ### Routing
 Routin is intended to be done via pattern matching in the main `requestHandler` function.  This function takes as it's first argument a `Route.t` record, which looks like this:
 ```reason
+// ReasonML
 /* module Naboris.Route */
 type t = {
   path: list(string),
@@ -123,12 +161,22 @@ type t = {
   query: Query.QueryMap.t(list(string)),
 };
 ```
+```ocaml
+(* OCaml *)
+type t = {
+  path: string list,
+  meth: Method.t,
+  rawQuery: string,
+  query: string list Qyery.QueryMap.t
+}
+```
 
 For these examples we'll be matching on `path` and `meth`.
 > Note: `path` is the url path broken into an array by the `/` separators.
 > e.g. `/user/1/contacts` would look like this: `["user", "1", "contacts"]`
 
 ```reason
+// ReasonML
 let requestHandler = (route, req, res) => switch (route.meth, route.path) {
   | (Naboris.Method.GET, ["user", userId, "contacts"]) =>
     /* Use pattern matching to pull parameters out of the url */
@@ -145,7 +193,7 @@ let requestHandler = (route, req, res) => switch (route.meth, route.path) {
       Naboris.Req.getBody(req),
       bodyStr => {
       	let newContacts = parseJsonString(bodyStr);
-        addNewContactsToUser(userId, newContacts);
+        let _ = addNewContactsToUser(userId, newContacts);
         res
           |> Naboris.Res.status(201)
           |> Naboris.Res.text(req, "Created");
@@ -159,6 +207,34 @@ let requestHandler = (route, req, res) => switch (route.meth, route.path) {
       Lwt.return_unit;
 };
 ```
+```ocaml
+(* OCaml *)
+let request_handler route req res =
+  match (route.meth, route.path) with
+    | (Naboris.Method.GET, ["user", user_id, "contacts"]) ->
+      (* Use pattern matching to pull parameters out of the url *)
+      let contatcs = get_contacts_by_user_id user_id in
+      let contacts_json_string = serialize_to_json contacts in
+      res
+        |> Naboris.Res.status 200
+	|> Naboris.Res.json req contacts_json_string;
+      Lwt.return_unit
+    | (Naboris.Method.PUT, ["user", user_id, "contacts"]) ->
+      (* for the sake of this example we're not using ppx or infix *)
+      (* lwt promises can be made much easier to read by using these *)
+      Lwt.bind Naboris.Req.getBody req (fun body_str ->
+        let new_contacts = parse_json_string body_str in
+	let _ = add_new_contacts_to_user user_id new_contacts in
+	res
+	  |> Naboris.Res.status 201
+	  |> Naboris.Res.text req "Created";
+	Lwt.return_unit)
+    | _ ->
+      res
+        |> Naboris.Res.status 404
+	|> Naboris.Res.text req "Resource not found.";
+      Lwt.return_unit
+```
 
 ### Session Data
 Many `Naboris` types take the parameter `'sessionData` this represents a custom data type that will define session data that will be attached to an incoming request.
@@ -166,6 +242,7 @@ Many `Naboris` types take the parameter `'sessionData` this represents a custom 
 #### sessionGetter
 __Naboris.ServerConfig.setSessionGetter__ will set the configuration with a function with the signature `option(string) => Lwt.t(option(Naboris.Session.t('sessionData)))`.  That's a complicated type signature that expresses that the request may or may not have a `sessionId`; and given that fact it may or may not return a session.
 ```reason
+// ReasonML
 type userData = {
   userId: int,
   username: string,
@@ -174,7 +251,7 @@ type userData = {
 };
 
 let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
-  |> setSessionGetter(sessionId => switch(sessionId) {
+  |> Naboris.ServerConfig.setSessionGetter(sessionId => switch(sessionId) {
     | Some(id) =>
       /* for the sake of this example we're not using ppx or infix */
       /* lwt promises can be made much easier to read by using these */
@@ -186,7 +263,7 @@ let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
       );
     | None => Lwt.return(None);
   })
-  |> setRequestHandler((route, req, res) => switch(route.meth, route.path) {
+  |> Naboris.ServerConfig.setRequestHandler((route, req, res) => switch(route.meth, route.path) {
     | (Naboris.Method.POST, ["login"]) =>
       let (req2, res2, _sessionId) =
         /* Begin a session */
@@ -213,6 +290,52 @@ let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
       };
       Lwt.return_unit;
   });
+```
+```ocaml
+(* OCaml *)
+type userData = {
+  userId: int,
+  username: string,
+  firstName: string,
+  lastName: string,
+}
+
+let serverConfig: userData Naboris.ServerConfiguserData = Naboris.ServerConfig.create ()
+  |> Naboris.ServerConfig.setSessionGetter (fun session_id ->
+    match (session_id) with
+      | Some(id) =>
+        (* for the sake of this example we're not using ppx or infix *)
+        (* lwt promises can be made much easier to read by using these *)
+        Lwt.bind (get_user_data_by_id id) (fun user_data ->
+          let session = Naboris.Session.create id userData in
+	        Lwt.return Some(session)
+        )
+    | None => Lwt.return None;
+  })
+  |> Naboris.ServerConfig.setRequestHandler (fun route, req, res ->
+    match (route.meth, route.path) with
+      | (Naboris.Method.POST, ["login"]) ->
+        let (req2, res2, _sessionId) =
+        (* Begin a session *)
+          Naboris.SessionManager.startSession req res {
+            userId: 1,
+            username: "foo",
+            firstName: "foo",
+            lastName: "bar",
+          } in
+        Naboris.Res.status 200 res2
+          |> Naboris.Res.text req2, "OK";
+        Lwt.return_unit;
+    | (Naboris.Method.GET, ["who-am-i"]) ->
+      (* Get session data from the request *)
+      match (Naboris.Req.getSessionData req) with
+        | None ->
+          Naboris.Res.status 404 res
+            |> Naboris.Res.text req "Not found"
+        | Some(user_data) ->
+          Naboris.Res.status 200 res
+            |> Naboris.Res.text req user_data.username;
+      Lwt.return_unit)
 ```
 
 ## Advanced

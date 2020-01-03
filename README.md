@@ -106,7 +106,10 @@ let setOnListen: (unit => unit, ServerConfig.t('sessionData)) => ServerConfig.t(
 #### ServerConfig.setRequestHandler
 __setRequestHandler__ will set the main request handler function on the config.  This function is the main entry point for http requests and usually where routing the request happens.  The `requestHandler` function has the type signature `(Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit)`.
 ```reason
-let setRequestHandler: ((Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit), ServerConfig.t('sessionData)) => ServerConfig.t('sessionData)
+let setRequestHandler: (
+  (Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit),
+  ServerConfig.t('sessionData)
+) => ServerConfig.t('sessionData)
 ```
 
 ### Routing

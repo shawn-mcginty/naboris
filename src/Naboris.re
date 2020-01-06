@@ -2,14 +2,14 @@ module Server = Server;
 module Req = Req;
 module Res = Res;
 module Method = Method;
+module Route = Route;
 module Router = Router;
-module QueryMap = Query.QueryMap;
+module Query = Query;
 module MimeTypes = MimeTypes;
 module Session = Session;
 module SessionManager = SessionManager;
 module Cookie = Cookie;
 module ServerConfig = ServerConfig;
-module Route = Route;
 
 open Lwt.Infix;
 

@@ -7,17 +7,15 @@ Simple, fast, minimalist web framework for [OCaml](https://ocaml.org)/[ReasonML]
 ```reason
 // ReasonML
 let serverConfig: Naboris.ServerConfig.t(unit) = Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.setRequestHandler((route, req, res) => switch(route.path) {
+  |> Naboris.ServerConfig.setRequestHandler((route, req, res) => switch(Naboris.Route.path(route)) {
     | ["hello"] =>
       res
         |> Naboris.Res.status(200)
         |> Naboris.Res.text(req, "Hello world!");
-      Lwt.return_unit;
     | _ =>
       res
         |> Naboris.Res.status(404)
         |> Naboris.Res.text(req, "Resource not found.");
-      Lwt.return_unit;
   });
 
 Naboris.listenAndWaitForever(3000, serverConfig);
@@ -28,16 +26,14 @@ Naboris.listenAndWaitForever(3000, serverConfig);
 (* OCaml *)
 let server_config: unit Naboris.ServerConfig.t = Naboris.ServerConfig.create ()
   |> Naboris.ServerConfig.setRequestHandler(fun route req res ->
-    match (route.path) with
+    match (Naboris.Route.path route) with
       | ["hello"] ->
         res
           |> Naboris.Res.text req "Hello world!";
-        Lwt.return_unit
       | _ ->
         res
           |> Naboris.Res.status 404
           |> Naboris.Res.text req "Resource not found.";
-        Lwt.return_unit
   ) in
 
 Naboris.listenAndWaitForever 3000 server_config
@@ -155,21 +151,23 @@ Routin is intended to be done via pattern matching in the main `requestHandler` 
 ```reason
 // ReasonML
 /* module Naboris.Route */
-type t = {
-  path: list(string),
-  meth: Method.t,
-  rawQuery: string,
-  query: Query.QueryMap.t(list(string)),
+module type Route = {
+  type t;
+  let path: t => list(string),
+  let meth: t => Method.t,
+  let rawQuery: t => string,
+  let query: t =>Query.QueryMap.t(list(string)),
 };
 ```
 ```ocaml
 (* OCaml *)
-type t = {
-  path: string list,
-  meth: Method.t,
-  rawQuery: string,
-  query: string list Qyery.QueryMap.t
-}
+module Route : sig
+  type t;
+  val path = t -> string list
+  val meth = t -> Method.t
+  val rawQuery = t -> string
+  val query = t -> string list Qyery.QueryMap.t
+end
 ```
 
 For these examples we'll be matching on `path` and `meth`.
@@ -178,7 +176,7 @@ For these examples we'll be matching on `path` and `meth`.
 
 ```reason
 // ReasonML
-let requestHandler = (route, req, res) => switch (route.meth, route.path) {
+let requestHandler = (route, req, res) => switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
   | (Naboris.Method.GET, ["user", userId, "contacts"]) =>
     /* Use pattern matching to pull parameters out of the url */
     let contacts = getContactsByUserId(userId);
@@ -186,7 +184,6 @@ let requestHandler = (route, req, res) => switch (route.meth, route.path) {
     res
       |> Naboris.Res.status(200)
       |> Naboris.Res.json(req, contactsJsonString);
-    Lwt.return_unit;
   | (Naboris.Method.PUT, ["user", userId, "contacts"]) =>
     /* for the sake of this example we're not using ppx or infix */
     /* lwt promises can be made much easier to read by using these */
@@ -198,43 +195,38 @@ let requestHandler = (route, req, res) => switch (route.meth, route.path) {
         res
           |> Naboris.Res.status(201)
           |> Naboris.Res.text(req, "Created");
-        Lwt.return_unit;
       },
     )
   | _ =>
       res
         |> Naboris.Res.status(404)
         |> Naboris.Res.text(req, "Resource not found.");
-      Lwt.return_unit;
 };
 ```
 ```ocaml
 (* OCaml *)
 let request_handler route req res =
-  match (route.meth, route.path) with
+  match ((Naboris.Route.meth route), (Naboris.Route.path route)) with
     | (Naboris.Method.GET, ["user"; user_id; "contacts"]) ->
       (* Use pattern matching to pull parameters out of the url *)
       let contatcs = get_contacts_by_user_id user_id in
       let contacts_json_string = serialize_to_json contacts in
       res
         |> Naboris.Res.status 200
-	|> Naboris.Res.json req contacts_json_string;
-      Lwt.return_unit
+        |> Naboris.Res.json req contacts_json_string;
     | (Naboris.Method.PUT, ["user"; user_id; "contacts"]) ->
       (* for the sake of this example we're not using ppx or infix *)
       (* lwt promises can be made much easier to read by using these *)
       Lwt.bind Naboris.Req.getBody req (fun body_str ->
         let new_contacts = parse_json_string body_str in
-	let _ = add_new_contacts_to_user user_id new_contacts in
-	res
-	  |> Naboris.Res.status 201
-	  |> Naboris.Res.text req "Created";
-	Lwt.return_unit)
+        let _ = add_new_contacts_to_user user_id new_contacts in
+        res
+          |> Naboris.Res.status 201
+          |> Naboris.Res.text req "Created")
     | _ ->
       res
         |> Naboris.Res.status 404
-	|> Naboris.Res.text req "Resource not found.";
-      Lwt.return_unit
+        |> Naboris.Res.text req "Resource not found."
 ```
 
 ### Static Files
@@ -257,7 +249,7 @@ val static : string -> string list -> 'sessionData Req.t -> Res.t -> unit Lwt.t
 A pattern matcher for static file routes might look like this
 ```reason
 // ReasonML
-switch (route.meth, route.path) {
+switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
   | (Naboris.Method.GET, ["static", ...staticPath]) =>
     Naboris.Res.static(
       Sys.getenv("cur__root") ++ "/static-assets",
@@ -269,7 +261,7 @@ switch (route.meth, route.path) {
 ```
 ```ocaml
 (* OCaml *)
-match (route.meth, route.path) with
+match ((Naboris.Route.meth route), (Naboris.Route.path route)) with
   | (Naboris.Method.GET, "static" :: static_path) ->
     Naboris.Res.static(
       (Sys.getenv "cur__root") ++ "/static-assets",
@@ -288,6 +280,7 @@ Many `Naboris` types take the parameter `'sessionData` this represents a custom 
 __Naboris.ServerConfig.setSessionGetter__ will set the configuration with a function with the signature `option(string) => Lwt.t(option(Naboris.Session.t('sessionData)))`.  That's a complicated type signature that expresses that the request may or may not have a `sessionId`; and given that fact it may or may not return a session.
 ```reason
 // ReasonML
+// Your custom data type
 type userData = {
   userId: int,
   username: string,
@@ -309,7 +302,7 @@ let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
       );
     | None => Lwt.return(None);
   })
-  |> Naboris.ServerConfig.setRequestHandler((route, req, res) => switch(route.meth, route.path) {
+  |> Naboris.ServerConfig.setRequestHandler((route, req, res) => switch(Naboris.Route.meth(meth), Naboris.Route.path(route)) {
     | (Naboris.Method.POST, ["login"]) =>
       let (req2, res2, _sessionId) =
         /* Begin a session */
@@ -321,11 +314,10 @@ let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
             username: "foo",
             firstName: "foo",
             lastName: "bar",
-	    isAdmin: false,
+            isAdmin: false,
           },
         );
         Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
-        Lwt.return_unit;
     | (Naboris.Method.GET, ["who-am-i"]) =>
       /* Get session data from the request */
       switch (Naboris.Req.getSessionData(req)) {
@@ -335,11 +327,11 @@ let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
         Naboris.Res.status(200, res)
         |> Naboris.Res.text(req, userData.username)
       };
-      Lwt.return_unit;
   });
 ```
 ```ocaml
 (* OCaml *)
+(* Your custom session data *)
 type user_data = {
   userId: int,
   username: string,
@@ -360,7 +352,7 @@ let serverConfig: user_data Naboris.ServerConfiguserData = Naboris.ServerConfig.
         )
     | None => Lwt.return None)
   |> Naboris.ServerConfig.setRequestHandler (fun route, req, res ->
-    match (route.meth, route.path) with
+    match ((Naboris.Route.meth route), (Naboris.Route.path route)) with
       | (Naboris.Method.POST, ["login"]) ->
         let (req2, res2, _session_id) =
         (* Begin a session *)
@@ -369,11 +361,10 @@ let serverConfig: user_data Naboris.ServerConfiguserData = Naboris.ServerConfig.
             username: "foo",
             first_name: "foo",
             last_name: "bar",
-	    is_admin: false,
+            is_admin: false,
           } in
         Naboris.Res.status 200 res2
-          |> Naboris.Res.text req2, "OK";
-        Lwt.return_unit;
+          |> Naboris.Res.text req2, "OK"
     | (Naboris.Method.GET, ["who-am-i"]) ->
       (* Get session data from the request *)
       match (Naboris.Req.getSessionData req) with
@@ -382,8 +373,7 @@ let serverConfig: user_data Naboris.ServerConfiguserData = Naboris.ServerConfig.
             |> Naboris.Res.text req "Not found"
         | Some(user_data) ->
           Naboris.Res.status 200 res
-            |> Naboris.Res.text req user_data.username;
-      Lwt.return_unit)
+            |> Naboris.Res.text req user_data.username)
 ```
 
 ## Advanced
@@ -401,14 +391,13 @@ Given the __Sesson Data__ example above, one such middleware might look like thi
 ```reason
 // ReasonML
 let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.addMiddleware((next, route, req, res) => switch (route.path) {
+  |> Naboris.ServerConfig.addMiddleware((next, route, req, res) => switch (Naboris.Route.path(route)) {
     | ["admin", ..._] => switch (Naboris.Req.getSessionData(req)) {
       | Some({ is_admin: true, ..._}) => next(route, req, res)
       | _ =>
         res
-	  |> Naboris.Res.status(401)
-	  |> Naboris.Res.text(req, "Unauthorized);
-	Lwt.return_unit
+          |> Naboris.Res.status(401)
+          |> Naboris.Res.text(req, "Unauthorized");
       }
     | _ => next(route, req, res)
   });
@@ -417,15 +406,14 @@ let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.create()
 (* OCaml *)
 let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.create ()
   |> Naboris.ServerConfig.addMiddleware (fun next route req res ->
-    match (route.path) with
+    match (Naboris.Route.path route) with
       | "admin" :: _ ->
         (match (Naboris.Req.getSessionData req) with
           | Some({ is_admin = true; _}) -> next route req res
           | _ ->
             res
               |> Naboris.Res.status 401
-              |> Naboris.Res.text req "Unauthorized";
-            Lwt.return_unit)
+              |> Naboris.Res.text req "Unauthorized")
       | _ -> next route req res)
 ```
 

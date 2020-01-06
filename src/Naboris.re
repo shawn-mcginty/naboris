@@ -29,7 +29,7 @@ let listen =
     )
     >>= (
       _server => {
-        serverConfig.onListen();
+        ServerConfig.onListen(serverConfig, ());
         Lwt.return_unit;
       }
     )

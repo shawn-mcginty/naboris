@@ -4,6 +4,8 @@ Simple, fast, minimalist web framework for [OCaml](https://ocaml.org)/[ReasonML]
 [![Build Status](https://travis-ci.com/shawn-mcginty/naboris.svg?branch=master)](https://travis-ci.com/shawn-mcginty/naboris)
 [![opam version 0.0.8](https://img.shields.io/static/v1?label=opam&message=0.0.8&color=E7C162)](https://opam.ocaml.org/packages/naboris/)
 
+[odocs avialable here][docs html index]
+
 ```reason
 // ReasonML
 let serverConfig: Naboris.ServerConfig.t(unit) = Naboris.ServerConfig.create()
@@ -426,3 +428,4 @@ Any help would be greatly appreciated! 👍
 esy install
 npm run test
 ```
+[docs html index]: docs/_html/index.html

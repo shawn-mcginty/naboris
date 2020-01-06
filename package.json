@@ -20,7 +20,7 @@
     "unit-test": "esy b dune runtest",
     "install": "esy install",
     "install-globals": "npm install -g esy",
-    "build-docs": "esy b dune build @doc",
+    "build-docs": "esy b dune build @doc && rm -rf doc/_html && cp -r _esy/default/build/default/_doc/_html ./docs/_html",
     "build": "esy b dune build @install",
     "clean": "rm -rf _coverage && find . -name 'bisect*.out' | xargs rm && esy b dune clean",
     "clean-install": "rm -rf node_modules && rm -rf esy.lock && rm -rf _esy",

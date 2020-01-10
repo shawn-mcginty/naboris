@@ -30,5 +30,5 @@ let processPath = target => {
 
 let generateRoute = (target, meth) => {
   let (path, rawQuery, query) = processPath(target);
-  Route.{path, rawQuery, query, meth};
+  Route.create(path, meth, rawQuery, query);
 };

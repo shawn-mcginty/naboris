@@ -10,13 +10,13 @@ let startSession = (req, res, data) => {
   let hash4 = Random.bits() |> string_of_int |> Digest.string |> Digest.to_hex;
   let newSessionId = hash1 ++ hash2 ++ hash3 ++ hash4;
 
-  let req2 = Req.setSessionData(Some({id: newSessionId, data}), req);
+  let req2 = Req.setSessionData(Some(Session.create(newSessionId, data)), req);
   let res2 = Res.setSessionCookies(newSessionId, res);
   (req2, res2, newSessionId);
 };
 
 let resumeSession = (serverConfig: ServerConfig.t('sessionData), req) => {
-  switch (serverConfig.sessionConfig) {
+  switch (ServerConfig.sessionConfig(serverConfig)) {
   | None => Lwt.return(req)
   | Some(sessionConfig) =>
     let sid = Cookie.sessionIdOfReq(req);

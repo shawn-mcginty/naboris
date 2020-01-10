@@ -20,55 +20,26 @@ let status = (status: int, res: t) => {
   {...res, status};
 };
 
-let text = (req: Req.t('a), body: string, res: t) => {
-  let resWithHeaders =
-    addHeader(("Content-Type", "text/plain"), res)
-    |> addHeader(("Connection", "close"));
-  let response = createResponse(resWithHeaders);
-  let requestDescriptor = req.requestDescriptor;
-
-  let responseBody =
-    Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
-  Httpaf.Body.write_string(responseBody, body);
-  Httpaf.Body.close_writer(responseBody);
-};
-
-let json = (req: Req.t('a), body: string, res: t) => {
-  let resWithHeaders =
-    addHeader(("Content-Type", "application/json"), res)
-    |> addHeader(("Connection", "close"));
-  let response = createResponse(resWithHeaders);
-  let requestDescriptor = req.requestDescriptor;
-
-  let responseBody =
-    Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
-  Httpaf.Body.write_string(responseBody, body);
-  Httpaf.Body.close_writer(responseBody);
-};
-
-let html = (req: Req.t('a), htmlBody: string, res: t) => {
-  let resWithHeaders =
-    addHeader(("Content-Type", "text/html"), res)
-    |> addHeader(("Connection", "close"));
-  let response = createResponse(resWithHeaders);
-  let requestDescriptor = req.requestDescriptor;
-
-  let responseBody =
-    Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
-  Httpaf.Body.write_string(responseBody, htmlBody);
-  Httpaf.Body.close_writer(responseBody);
-};
-
 let raw = (req: Req.t('a), body: string, res: t) => {
   let resWithHeaders = addHeader(("Connection", "close"), res);
   let response = createResponse(resWithHeaders);
-  let requestDescriptor = req.requestDescriptor;
+  let requestDescriptor = Req.reqd(req);
 
   let responseBody =
     Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
   Httpaf.Body.write_string(responseBody, body);
   Httpaf.Body.close_writer(responseBody);
+  Lwt.return_unit;
 };
+
+let text = (req: Req.t('a), body: string, res: t) => addHeader(("Content-Type", "text/plain"), res)
+  |> raw(req, body);
+
+let json = (req: Req.t('a), body: string, res: t) => addHeader(("Content-Type", "application/json"), res)
+  |> raw(req, body);
+
+let html = (req: Req.t('a), htmlBody: string, res: t) => addHeader(("Content-Type", "text/html"), res)
+  |> raw(req, htmlBody);
 
 let streamFileContentsToBody = (fullFilePath, responseBody) => {
   let readOnlyFlags = [Unix.O_RDONLY];
@@ -105,7 +76,7 @@ let static = (basePath, pathList, req: Req.t('a), res) => {
       addHeader(("Content-Type", MimeTypes.getMimeType(fullFilePath)), res)
       |> addHeader(("Connection", "close"));
     let response = createResponse(resWithHeaders);
-    let requestDescriptor = req.requestDescriptor;
+    let requestDescriptor = Req.reqd(req);
     let responseBody =
       Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
     streamFileContentsToBody(fullFilePath, responseBody);
@@ -114,7 +85,7 @@ let static = (basePath, pathList, req: Req.t('a), res) => {
       status(404, res) |> addHeader(("Connection", "close"));
     let response = createResponse(resWithHeaders);
     let responseBody =
-      Httpaf.Reqd.respond_with_streaming(req.requestDescriptor, response);
+      Httpaf.Reqd.respond_with_streaming(Req.reqd(req), response);
     Httpaf.Body.write_string(responseBody, "Not found");
     Httpaf.Body.close_writer(responseBody);
     Lwt.return_unit;
@@ -140,5 +111,5 @@ let redirect = (path, req, res) => {
 };
 
 let reportError = (req: Req.t('a), exn) => {
-  Httpaf.Reqd.report_exn(req.requestDescriptor, exn);
+  Httpaf.Reqd.report_exn(Req.reqd(req), exn);
 };

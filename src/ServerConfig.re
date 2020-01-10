@@ -42,12 +42,19 @@ let default = {
   routeRequest: (_route, req, res) => {
     res |> Res.status(404)
       |> Res.raw(req, "Resource not found");
-    Lwt.return_unit;
   },
   sessionConfig: None,
   httpAfConfig: None,
   middlewares: [],
 };
+
+let sessionConfig = conf => conf.sessionConfig;
+
+let errorHandler = conf => conf.errorHandler;
+
+let routeRequest = conf => conf.routeRequest;
+
+let onListen = conf => conf.onListen;
 
 let create = () => default;
 
@@ -55,11 +62,13 @@ let setOnListen = (onListenFn, conf) => { ...conf, onListen: onListenFn };
 
 let setRequestHandler = (reqHandlerFn, conf) => { ...conf, routeRequest: reqHandlerFn };
 
-let setErrorHandler = (errHandlerFn, conf) => { ...conf, errorHandler: errHandlerFn };
+let setErrorHandler = (errHandlerFn, conf) => { ...conf, errorHandler: Some(errHandlerFn) };
 
-let setHttpAfConfig = (httpAfConfig, conf) => { ...conf, httpAfConfig };
+let setHttpAfConfig = (httpAfConfig, conf) => { ...conf, httpAfConfig: Some(httpAfConfig) };
 
 let addMiddleware = (middleware, conf) => { ...conf, middlewares: List.append(conf.middlewares, [ middleware ]) }
+
+let middlewares = conf => conf.middlewares;
 
 let setSessionGetter = (getSessionFn, conf) => {
   let sessionConfig = {
@@ -68,7 +77,7 @@ let setSessionGetter = (getSessionFn, conf) => {
   { ...conf, sessionConfig: Some(sessionConfig) };
 };
 
-let toHttpAfConfig = (conf: t('sessionData)): option(Httpaf.Config.t) =>
+let httpAfConfig = (conf: t('sessionData)): option(Httpaf.Config.t) =>
   switch (conf.httpAfConfig) {
   | None => None
   | Some(httpConf) =>

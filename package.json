@@ -1,6 +1,6 @@
 {
   "name": "naboris",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "Simple http server built on httpaf and lwt.",
   "esy": {
     "build": [

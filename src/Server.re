@@ -13,20 +13,33 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
     let route = Router.generateRoute(target, meth);
 
     Lwt.async(() => {
-      let rawReq =
-        Req.fromReqd(request_descriptor, serverConfig.sessionConfig);
+      let rawReq = Req.fromReqd(request_descriptor);
 
       SessionManager.resumeSession(serverConfig, rawReq)
-      >>= (req => switch(serverConfig.middlewares) {
-        | [] => serverConfig.routeRequest(route, req, Res.default())
-        | [oneMiddleware] => oneMiddleware(serverConfig.routeRequest, route, req, Res.default());
-        | _moreThanOneMiddleware =>
-          let fullHandler = serverConfig.middlewares
-            |> List.rev
-            |> List.fold_left((next: RequestHandler.t('a), current) => current(next), serverConfig.routeRequest)
-          
-          fullHandler(route, req, Res.default());
-      });
+      >>= (
+        req =>
+          switch (ServerConfig.middlewares(serverConfig)) {
+          | [] =>
+            ServerConfig.routeRequest(serverConfig, route, req, Res.default())
+          | [oneMiddleware] =>
+            oneMiddleware(
+              ServerConfig.routeRequest(serverConfig),
+              route,
+              req,
+              Res.default(),
+            )
+          | _moreThanOneMiddleware =>
+            let fullHandler =
+              ServerConfig.middlewares(serverConfig)
+              |> List.rev
+              |> List.fold_left(
+                   (next: RequestHandler.t('a), current) => current(next),
+                   ServerConfig.routeRequest(serverConfig),
+                 );
+
+            fullHandler(route, req, Res.default());
+          }
+      );
     });
   };
 
@@ -43,7 +56,7 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
   };
 
   Httpaf_lwt_unix.Server.create_connection_handler(
-    ~config=?ServerConfig.toHttpAfConfig(serverConfig),
+    ~config=?ServerConfig.httpAfConfig(serverConfig),
     ~request_handler,
     ~error_handler,
   );

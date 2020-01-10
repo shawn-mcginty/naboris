@@ -428,4 +428,4 @@ Any help would be greatly appreciated! 👍
 esy install
 npm run test
 ```
-[docs html index]: https://shawn-mcginty.github.io/naboris/docs/_html/index.html
+[docs html index]: https://shawn-mcginty.github.io/naboris/docs/html/index.html

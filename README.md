@@ -2,7 +2,7 @@
 Simple, fast, minimalist web framework for [OCaml](https://ocaml.org)/[ReasonML](https://reasonml.github.io) built on [httpaf](https://github.com/inhabitedtype/httpaf) and [lwt](https://github.com/ocsigen/lwt).
 
 [![Build Status](https://travis-ci.com/shawn-mcginty/naboris.svg?branch=master)](https://travis-ci.com/shawn-mcginty/naboris)
-[![opam version 0.0.8](https://img.shields.io/static/v1?label=opam&message=0.0.8&color=E7C162)](https://opam.ocaml.org/packages/naboris/)
+[![opam version 0.1.0](https://img.shields.io/static/v1?label=opam&message=0.1.0&color=E7C162)](https://opam.ocaml.org/packages/naboris/)
 
 [odocs avialable here][docs html index]
 
@@ -96,7 +96,7 @@ opam install naboris
 
 #### esy
 ```json
-"@opam/naboris": "^0.0.8"
+"@opam/naboris": "^0.1.0"
 ```
 
 #### dune
@@ -428,4 +428,4 @@ Any help would be greatly appreciated! 👍
 esy install
 npm run test
 ```
-[docs html index]: https://shawn-mcginty.github.io/naboris/docs/_html/index.html
+[docs html index]: https://shawn-mcginty.github.io/naboris/docs/html/index.html

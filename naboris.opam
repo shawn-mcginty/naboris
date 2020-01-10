@@ -1,6 +1,6 @@
 opam-version: "2.0"
 name: "naboris"
-version: "0.0.8"
+version: "0.1.0"
 synopsis: "Simple http server"
 description: "Simple http server built on httpaf and lwt"
 maintainer: "Shawn McGinty <loltempast@gmail.com>"
@@ -21,5 +21,4 @@ depends: [
   "httpaf-lwt-unix" {>= "0.6.0"}
   "lwt" {>= "4.2.1"}
   "uri" {>= "2.2.0"}
-  "bisect_ppx" {dev}
 ]

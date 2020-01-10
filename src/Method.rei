@@ -1,5 +1,5 @@
 /**
- * Represents an HTTP Method
+ Represents an HTTP Method
  */
 type t =
   | GET

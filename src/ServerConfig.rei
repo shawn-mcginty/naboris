@@ -12,77 +12,77 @@ type httpAfConfig = {
 };
 
 /**
- * Returns default config.  Used as the starting place to build the config.
+ Returns default config.  Used as the starting place to build the config.
  */
 let create: unit => t('sessionData);
 
 /**
- * Create new config from `t('sessionData)` with the onListen function `unit => unit`.
- * 
- * `onListen` function is called once the server is created successfully.
+ Create new config from [t('sessionData)] with the onListen function [unit => unit].
+
+ [onListen] function is called once the server is created successfully.
  */
 let setOnListen: (unit => unit, t('sessionData)) => t('sessionData);
 
 /**
- * Creates new config from `t('sessionData)` with sessionGetter function `option(string) => Lwt.t(option(Session.t('sessionData)))`.
- * 
- * `sessionGetter` function is called at the very beginning of each request/response lifecycle.
- * Used to set session data into the `Req.t('sessionData)` for use later in the request/response lifecycle.
+ Creates new config from [t('sessionData)] with sessionGetter function [option(string) => Lwt.t(option(Session.t('sessionData)))].
+
+ [sessionGetter] function is called at the very beginning of each request/response lifecycle.
+ Used to set session data into the [Req.t('sessionData)] for use later in the request/response lifecycle.
  */
 let setSessionGetter: (option(string) => Lwt.t(option(Session.t('sessionData))), t('sessionData)) => t('sessionData);
 
 /**
- * Creates new config from `t('sessionData)` with requestHandler `(Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit)`.
- * 
- * `requestHandler` is the main handler function for responding to incoming http requests.
+ Creates new config from [t('sessionData)] with requestHandler [(Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit)].
+
+ [requestHandler] is the main handler function for responding to incoming http requests.
  */
 let setRequestHandler: ((Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit), t('sessionData)) => t('sessionData);
 
 
 /**
- * Creates new config from `t('sessionData)` with errorHandler `ErrorHandler.t`.
+ Creates new config from [t('sessionData)] with errorHandler [ErrorHandler.t].
  */
 let setErrorHandler: (ErrorHandler.t, t('sessionData)) => t('sessionData);
 
 /**
- * Creates new config from `t('sessionData)` with httpAfConfig `httpAfConfig`.
+ Creates new config from [t('sessionData)] with httpAfConfig [httpAfConfig].
  */
 let setHttpAfConfig: (httpAfConfig, t('sessionData)) => t('sessionData);
 
 /**
- * Creates nwe config from `t('sessionData)` with the added middleware `Middleware.t('sessionData)`.
- * 
- * Middlewares are executed in the order they are added.  The final "middleware" is the `requestHandler`.
+ Creates nwe config from [t('sessionData)] with the added middleware [Middleware.t('sessionData)].
+
+ Middlewares are executed in the order they are added.  The final "middleware" is the [requestHandler].
  */
 let addMiddleware: (Middleware.t('sessionData), t('sessionData)) => t('sessionData);
 
 /**
- * Returns `sessionConfig('sessionData)` from config.
- * `None` if none is configured.
+ Returns [sessionConfig('sessionData)] from config.
+ [None] if none is configured.
  */
 let sessionConfig: t('sessionData) => option(sessionConfig('sessionData));
 
 /**
- * Returns list of middlewares from the config.
+ Returns list of middlewares from the config.
  */
 let middlewares: t('sessionData) => list(Middleware.t('sessionData));
 
 /**
- * Returns `onListen` function of `t`.
+ Returns [onListen] function of [t].
  */
 let onListen: t('sessionData) => (unit => unit);
 
 /**
- * Returns `routeRequest` function of `t`.
+ Returns [routeRequest] function of [t].
  */
 let routeRequest: t('sessionData) => ((Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit));
 
 /**
- * Returns `option(ErrorHandler.t)` of `t`.
+ Returns [option(ErrorHandler.t)] of [t].
  */
 let errorHandler: t('sessionData) => option(ErrorHandler.t);
 
 /**
- * Returns `option(HttpAf.Config.t)` of `t`.
+ Returns [option(HttpAf.Config.t)] of [t].
  */
 let httpAfConfig: t('sessionData) => option(Httpaf.Config.t);

@@ -9,14 +9,18 @@
    */
   let listenAndWaitForever: (~inetAddr: Unix.inet_addr=?, int, ServerConfig.t('sessionData)) => Lwt.t('a);
 
-  module Cookie = Cookie;
-  module Method = Method;
-  module Router = Router;
-  module Query = Query;
-  module MimeTypes = MimeTypes;
   module Req = Req;
   module Res = Res;
   module Route = Route;
   module ServerConfig = ServerConfig;
   module Session = Session;
+  module Method = Method;
+  module Router = Router;
+  module Query = Query;
+
+  /**
+   {b Less commonly used}
+   */
+  module Cookie = Cookie;
+  module MimeTypes = MimeTypes;
   module SessionManager = SessionManager;

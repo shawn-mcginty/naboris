@@ -14,7 +14,7 @@
     }
   },
   "scripts": {
-    "source": "esy build-env > tmp-build-env && source tmp-build-env && rm tmp-build-env",
+    "source": "rm -f tmp-build-env && esy build-env | grep DUNE_BUILD_DIR > tmp-build-env && source tmp-build-env && rm tmp-build-env",
     "gen-prod-json": "sed -i '' 's/\"BISECT_ENABLE\": \"YES\"/\"BISECT_ENABLE\": \"NO\"/g' package.json",
     "gen-test-json": "sed -i '' 's/\"BISECT_ENABLE\": \"NO\"/\"BISECT_ENABLE\": \"YES\"/g' package.json",
     "test": "npm run unit-test",

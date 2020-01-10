@@ -26,7 +26,6 @@ _esy
 _coverage
 .esy
 node_modules
-esy.lock
 naboris.install
 .vscode
 

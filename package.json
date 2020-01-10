@@ -1,6 +1,6 @@
 {
   "name": "naboris",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Simple http server built on httpaf and lwt.",
   "esy": {
     "build": [
@@ -14,13 +14,14 @@
     }
   },
   "scripts": {
+    "source": "esy build-env > tmp-build-env && source tmp-build-env && rm tmp-build-env",
     "gen-prod-json": "sed -i '' 's/\"BISECT_ENABLE\": \"YES\"/\"BISECT_ENABLE\": \"NO\"/g' package.json",
     "gen-test-json": "sed -i '' 's/\"BISECT_ENABLE\": \"NO\"/\"BISECT_ENABLE\": \"YES\"/g' package.json",
     "test": "npm run unit-test",
     "unit-test": "esy b dune runtest",
     "install": "esy install",
     "install-globals": "npm install -g esy",
-    "build-docs": "rm -rf _esy/default/build/default/_doc && esy b dune build @doc && rm -rf docs/_html && cp -r _esy/default/build/default/_doc/_html ./docs/_html",
+    "build-docs": "esy b dune build @doc && npm run source && rm -rf docs/_html && cp -r $DUNE_BUILD_DIR/default/_doc/_html ./docs/_html",
     "build": "esy b dune build @install",
     "clean": "rm -rf _coverage && find . -name 'bisect*.out' | xargs rm && esy b dune clean",
     "clean-install": "rm -rf node_modules && rm -rf esy.lock && rm -rf _esy",

@@ -1,5 +1,5 @@
   /**
-    Will start an http server listening at [inetAddr] on port [int] with [ServerConfig.t('sessionData)].
+   Will start an http server listening at [inetAddr] on port [int] with [ServerConfig.t('sessionData)].
    */
   let listen: (~inetAddr: Unix.inet_addr=?, int, ServerConfig.t('sessionData)) => (Lwt.t('a), Lwt.u('a));
 
@@ -9,18 +9,49 @@
    */
   let listenAndWaitForever: (~inetAddr: Unix.inet_addr=?, int, ServerConfig.t('sessionData)) => Lwt.t('a);
 
+  /**
+   Module for working with incoming requests.
+   */
   module Req = Req;
-  module Res = Res;
-  module Route = Route;
-  module ServerConfig = ServerConfig;
-  module Session = Session;
-  module Method = Method;
-  module Router = Router;
-  module Query = Query;
 
   /**
-   {b Less commonly used}
+   Module for creating and sending responses.
    */
+  module Res = Res;
+
+  /**
+   Module to extract routing data.
+   */
+  module Route = Route;
+
+  /**
+   Module for configuring the naboris http server.
+   */
+  module ServerConfig = ServerConfig;
+
+  /**
+   Module for working with sessions and session data.
+   */
+  module Session = Session;
+
+  /**
+   Module with types used for matching requests.
+   */
+  module Method = Method;
+
+  /**
+   [Map] type for working with queries from routed requests.
+   */
+  module Query = Query;
+
+  /** {b Less commonly used.}*/
   module Cookie = Cookie;
+
+  /** {b Less commonly used.}*/
   module MimeTypes = MimeTypes;
+
+  /** {b Less commonly used.}*/
   module SessionManager = SessionManager;
+
+  /** {b Less commonly used.} */
+  module Router = Router;

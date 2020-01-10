@@ -37,7 +37,7 @@
     "@opam/httpaf": ">=0.6.0",
     "@opam/httpaf-lwt-unix": ">=0.6.0",
     "@opam/lwt": ">=4.2.1",
-    "@opam/uri": ">=2.2.0",
+    "@opam/uri": ">=2.2.0"
   },
   "devDependencies": {
     "ocaml": "~4.6.1",

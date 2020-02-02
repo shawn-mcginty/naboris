@@ -20,7 +20,7 @@ let serverConfig: Naboris.ServerConfig.t(unit) = Naboris.ServerConfig.create()
         |> Naboris.Res.text(req, "Resource not found.");
   });
 
-Naboris.listenAndWaitForever(3000, serverConfig);
+Lwt_main.run(Naboris.listenAndWaitForever(3000, serverConfig));
 /* In a browser navigate to http://localhost:3000/hello */
 ```
 
@@ -38,7 +38,8 @@ let server_config: unit Naboris.ServerConfig.t = Naboris.ServerConfig.create ()
           |> Naboris.Res.text req "Resource not found.";
   ) in
 
-Naboris.listenAndWaitForever 3000 server_config
+
+let _ = Lwt_main.run(Naboris.listenAndWaitForever 3000 server_config)
 (* In a browser navigate to http://localhost:3000/hello *)
 ```
 

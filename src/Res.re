@@ -63,6 +63,7 @@ let streamFileContentsToBody = (fullFilePath, responseBody) => {
     pipeBody(~count=bufferSize, channel, responseBody),
     () => {
       Httpaf.Body.close_writer(responseBody);
+      Unix.close(fd);
       Lwt.return_unit;
     },
   );

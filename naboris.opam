@@ -19,6 +19,9 @@ depends: [
   "reason" {>= "3.4.0"}
   "httpaf" {>= "0.6.0"}
   "httpaf-lwt-unix" {>= "0.6.0"}
-  "lwt" {>= "4.2.1"}
+  "lwt" {>= "5.1.1"}
   "uri" {>= "2.2.0"}
+]
+depopts: [
+  "conf-libev"
 ]

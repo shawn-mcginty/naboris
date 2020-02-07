@@ -59,8 +59,8 @@ let streamFileContentsToBody = (fullFilePath, responseBody) => {
           : pipeBody(~count, ch, body);
       },
     );
-  Lwt.bind(
-    pipeBody(~count=bufferSize, channel, responseBody),
+  Lwt.finalize(
+    () => pipeBody(~count=bufferSize, channel, responseBody),
     () => {
       Httpaf.Body.close_writer(responseBody);
       Unix.close(fd);

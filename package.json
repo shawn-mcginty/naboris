@@ -20,7 +20,8 @@
     "clean-install": "rm -rf node_modules && rm -rf esy.lock && rm -rf _esy",
     "clean-world": "npm run clean && npm run clean-install",
     "test-coco": "npm run clean && npm run gen-test-json && npm run test && npm run coco-report && npm run gen-prod-json",
-    "full-libev-test": "esy @libev-test install && LIBEV_TEST=true esy @libev-test b dune runtest"
+    "build-load-test-server": "esy @libev b dune build load-test/load_test.exe && npm run output-env",
+    "output-env": "rm -f command-env && esy @libev build-env | grep DUNE_BUILD_DIR > command-env"
   },
   "repository": {
     "type": "git",
@@ -37,7 +38,6 @@
     "@opam/reason": ">=3.4.0",
     "@opam/httpaf": ">=0.6.0",
     "@opam/httpaf-lwt-unix": ">=0.6.0",
-    "@opam/conf-libev": ">=4",
     "@opam/lwt": ">=5.1.1",
     "@opam/uri": ">=2.2.0"
   },

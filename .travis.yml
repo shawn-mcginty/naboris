@@ -17,6 +17,7 @@ before_install:
   - npm install -g esy
 install:
   - esy install -q
+  - esy @libev install -q
 before_script:
   - npm run build
 jobs:
@@ -24,6 +25,7 @@ jobs:
     - stage: "Test - Standard"
       script: /bin/bash ci/test-standard.sh
     - stage: "Test - Libev"
+      if: branch = master
       script: /bin/bash ci/test-libev.sh
     - stage: "Load Test - Libev"
       script: /bin/bash ci/test-under-load.sh

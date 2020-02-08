@@ -12,7 +12,7 @@ let status: (int, t) => t;
 
 /**
  Sends response [t] with body [string].
- Adding headers [Content-type: application/json] and [Connection: close]
+ Adding headers [Content-type: application/json] and [Content-length]
 
  {e This function will end the http request/response lifecycle.}
  */
@@ -20,7 +20,7 @@ let json: (Req.t('sessionData), string, t) => Lwt.t(unit);
 
 /**
  Sends response [t] with body [string].
- Adding headers [Content-type: text/html] and [Connection: close]
+ Adding headers [Content-type: text/html] and [Content-length]
 
  {e This function will end the http request/response lifecycle.}
  */
@@ -28,7 +28,7 @@ let html: (Req.t('sessionData), string, t) => Lwt.t(unit);
 
 /**
  Sends response [t] with body [string].
- Adding headers [Content-type: text/plain] and [Connection: close]
+ Adding headers [Content-type: text/plain] and [Content-length]
 
  {e This function will end the http request/response lifecycle.}
  */
@@ -37,7 +37,7 @@ let text: (Req.t('sessionData), string, t) => Lwt.t(unit);
 /**
  Sends response [t] with body [string].
 
- {e This function will not add any headers other than [Connection: close].}
+ {e This function will not add any headers other than [Content-length] with the length of [string].}
  {e This function will end the http request/response lifecycle.}
  */
 let raw: (Req.t('sessionData), string, t) => Lwt.t(unit);

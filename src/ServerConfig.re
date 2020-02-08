@@ -70,6 +70,22 @@ let addMiddleware = (middleware, conf) => { ...conf, middlewares: List.append(co
 
 let middlewares = conf => conf.middlewares;
 
+let rec matchPaths = (matcher, path) => switch (matcher, path) {
+  | ([x], [y, ...rest]) when x == y => Some(rest)
+  | ([x, ...restMatcher], [y, ...restPath]) when x == y => matchPaths(restMatcher, restPath)
+  | _ => None
+};
+
+let addStaticMiddleware = (pathPrefix, publicPath, conf) => conf
+  |> addMiddleware((next, route, req, res) => switch (Route.meth(route), Route.path(route)) {
+    | (Method.GET, path) => switch (matchPaths(pathPrefix, path)) {
+      | Some(remainingPath) => Res.static(publicPath, remainingPath, req, res)
+      | _ => next(route, req, res)
+    }
+
+    | _ => next(route, req, res)
+  });
+
 let setSessionGetter = (getSessionFn, conf) => {
   let sessionConfig = {
     getSession: getSessionFn,

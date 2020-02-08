@@ -50,6 +50,7 @@ let addHeader: ((string, string), t) => t;
 /**
  Opens file starting at path [string] and following [list(string)].
  Sets [Content-type] header based on file extension.  If type cannot be inferred [text/plain] is used.
+ Sets [Content-length] header with the size of the file in bytes.
  Responds with [404] if file does not exist.
 
  {e This function will end the http request/response lifecycle.}

@@ -29,4 +29,5 @@ node_modules
 naboris.install
 .vscode
 esy.lock
-
+command-env
+libev.esy.lock

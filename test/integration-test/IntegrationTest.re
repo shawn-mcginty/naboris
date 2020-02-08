@@ -45,6 +45,7 @@ let startServers = lwtSwitch => {
   let testServerConfig: Naboris.ServerConfig.t(TestSession.t) = Naboris.ServerConfig.create()
     |> Naboris.ServerConfig.setOnListen(() => Lwt.wakeup_later(ssr1, ()))
     |> Naboris.ServerConfig.setSessionGetter(sessionConfig.getSession)
+    |> Naboris.ServerConfig.addStaticMiddleware(["static"], Sys.getenv("cur__root") ++ "/test/integration-test/test_assets")
     |> Naboris.ServerConfig.setRequestHandler((route, req, res) =>
       switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
       | (Naboris.Method.GET, ["echo", "pre-existing-route"]) =>
@@ -107,13 +108,6 @@ let startServers = lwtSwitch => {
         Naboris.Res.status(200, res)
         |> Naboris.Res.addHeader(("Content-Type", "application/xml"))
         |> Naboris.Res.raw(req, "<xml></xml>");
-      | (GET, ["static", ...staticPath]) =>
-        Naboris.Res.static(
-          Sys.getenv("cur__root") ++ "/test/integration-test/test_assets",
-          staticPath,
-          req,
-          res,
-        )
       | (GET, ["error", "boys"]) =>
         Naboris.Res.reportError(req, SomebodyGoofed("Problems"));
         Lwt.return_unit;

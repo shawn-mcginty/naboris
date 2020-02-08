@@ -1,0 +1,5 @@
+(executable
+	(name load_test)
+	(libraries lwt lwt.unix re naboris)
+)
+(include_subdirs unqualified)

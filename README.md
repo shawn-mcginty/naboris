@@ -254,6 +254,20 @@ during server configuration.
 
 ```reason
 // ReasonML
+let addStaticMiddleware : (list(string), string, ServerConfig.t('sessionData)) => ServerConfig.t('sessionData)
+```
+```ocaml
+(* OCaml *)
+val addStaticMiddleware : string list -> string -> 'sessionData ServerConfig.t -> 'sessionData ServerConfig.t
+```
+
+* `string list`: Split path that will match against incoming requests
+* `string`: Root directory from which to read static files
+* `'sessionData ServerConfig.t`: Naboris server configuration
+* Returns `'sessionData ServerConfig.t`: New configuration with the static middleware
+
+```reason
+// ReasonML
 let serverConfig = Naboris.ServerConfig.create()
   |> Naboris.ServerConfig.addStaticMiddleware(["static"], Sys.getenv("cur__root") ++ "/public/");
 ```

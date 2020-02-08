@@ -23,7 +23,7 @@ let status = (status: int, res: t) => {
 };
 
 let raw = (req: Req.t('a), body: string, res: t) => {
-  let resWithHeaders = addHeader(("Connection", "close"), res);
+  let resWithHeaders = addHeader(("Content-length", String.length(body) |> string_of_int), res);
   let response = createResponse(resWithHeaders);
   let requestDescriptor = Req.reqd(req);
 

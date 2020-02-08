@@ -57,6 +57,13 @@ let setHttpAfConfig: (httpAfConfig, t('sessionData)) => t('sessionData);
 let addMiddleware: (Middleware.t('sessionData), t('sessionData)) => t('sessionData);
 
 /**
+ Creates a virtual path prefix [list(string)] and maps it to a local directory [string].
+
+ Middlewares are executed in the order they are added.  The final "middleware" is the [requestHandler].
+ */
+let addStaticMiddleware: (list(string), string, t('sessionData)) => t('sessionData);
+
+/**
  Returns [sessionConfig('sessionData)] from config.
  [None] if none is configured.
  */

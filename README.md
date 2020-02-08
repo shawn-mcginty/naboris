@@ -90,7 +90,7 @@ let _ = Lwt_main.run(Naboris.listenAndWaitForever 3000 server_config)
 
 ### Installation
 
-#### note
+#### Note
 Naboris makes heavy use of [Lwt](https://github.com/ocsigen/lwt#installing).  For better performance it is highly recommended _(however optional)_ to also install `conf-libev` which will configure [Lwt](https://github.com/ocsigen/lwt#installing) to run with the libev scheduler.  If you are using **esy** you will have to install `conf-libev` using a [special package](https://github.com/esy-packages/libev).
 
 `conf-libev` also requires that the libev be installed.  This can usually be done via your package manager. 
@@ -245,6 +245,27 @@ let request_handler route req res =
 ```
 
 ### Static Files
+
+> **Note** For best performance, use a reverse proxy to serve static assets.
+
+#### Static middleware
+`ServerConfig.addStaticMiddleware` makes it easy to add a virtual path prefix for static assets
+during server configuration.
+
+```reason
+// ReasonML
+let serverConfig = Naboris.ServerConfig.create()
+  |> Naboris.ServerConfig.addStaticMiddleware(["static"], Sys.getenv("cur__root") ++ "/public/");
+```
+```ocaml
+(* OCaml *)
+let server_conf = Naboris.ServerConfig.create()
+  |> Naboris.ServerConfig.addStaticMiddleware ["static"] ((Sys.getenv "cur__root") ^ "/static-assets/")
+```
+
+In the case above `/static/images/icon.png` would be served from `$cur__root/public/images/icon.png`
+
+#### Static response
 `Res.static` is available to help make it easy to serve static files.
 
 ```reason

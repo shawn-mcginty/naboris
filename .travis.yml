@@ -28,4 +28,5 @@ jobs:
       if: branch = master
       script: /bin/bash ci/test-libev.sh
     - stage: "Load Test - Libev"
+      if: branch = master
       script: /bin/bash ci/test-under-load.sh

@@ -89,6 +89,18 @@ Naboris.listenAndWaitForever 3000 server_config
 
 ### Installation
 
+#### note
+Naboris makes heavy use of [Lwt](https://github.com/ocsigen/lwt#installing).  For better performance it is highly recommended _(however optional)_ to also install `conf-libev` which will configure [Lwt](https://github.com/ocsigen/lwt#installing) to run with the libev scheduler.  If you are using **esy** you will have to install `conf-libev` using a [special package](https://github.com/esy-packages/libev).
+
+`conf-libev` also requires that the libev be installed.  This can usually be done via your package manager. 
+```bash
+brew install libev
+```
+or
+```bash
+apt install libev-dev
+```
+
 #### opam
 ```bash
 opam install naboris

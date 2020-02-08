@@ -90,6 +90,18 @@ let _ = Lwt_main.run(Naboris.listenAndWaitForever 3000 server_config)
 
 ### Installation
 
+#### note
+Naboris makes heavy use of [Lwt](https://github.com/ocsigen/lwt#installing).  For better performance it is highly recommended _(however optional)_ to also install `conf-libev` which will configure [Lwt](https://github.com/ocsigen/lwt#installing) to run with the libev scheduler.  If you are using **esy** you will have to install `conf-libev` using a [special package](https://github.com/esy-packages/libev).
+
+`conf-libev` also requires that the libev be installed.  This can usually be done via your package manager. 
+```bash
+brew install libev
+```
+or
+```bash
+apt install libev-dev
+```
+
 #### opam
 ```bash
 opam install naboris
@@ -233,7 +245,7 @@ let request_handler route req res =
 ```
 
 ### Static Files
-While it is recommended to use a reverse proxy or other such service for serving static files `Naboris` does have helper functions to make this easy.  The `Res` module has the `static` function for this exact reason. The 
+`Res.static` is available to help make it easy to serve static files.
 
 ```reason
 // ReasonML
@@ -254,27 +266,19 @@ A pattern matcher for static file routes might look like this
 // ReasonML
 switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
   | (Naboris.Method.GET, ["static", ...staticPath]) =>
-    Naboris.Res.static(
-      Sys.getenv("cur__root") ++ "/static-assets",
-      staticPath,
-      req,
-      res,
-    )
+    let publicDir = Sys.getenv("cur__root") ++ "/public/";
+    Naboris.Res.static(publicDir, staticPath, req, res);
 }
 ```
 ```ocaml
 (* OCaml *)
 match ((Naboris.Route.meth route), (Naboris.Route.path route)) with
   | (Naboris.Method.GET, "static" :: static_path) ->
-    Naboris.Res.static(
-      (Sys.getenv "cur__root") ++ "/static-assets",
-      static_path,
-      req,
-      res,
-    )
+    let public_dir = (Sys.getenv "cur__root") ^ "/static-assets/") in
+    Naboris.Res.static public_dir static_path req res
 ```
 
-In the case above `/static/images/icon.png` would be served from `$cur__root/static-assets/images/icon.png`
+In the case above `/static/images/icon.png` would be served from `$cur__root/public/images/icon.png`
 
 ### Session Data
 Many `Naboris` types take the parameter `'sessionData` this represents a custom data type that will define session data that will be attached to an incoming request.

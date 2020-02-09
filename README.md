@@ -43,6 +43,8 @@ let _ = Lwt_main.run(Naboris.listenAndWaitForever 3000 server_config)
 (* In a browser navigate to http://localhost:3000/hello *)
 ```
 
+> Pre `1.0.0` the API may be changing a bit. A list of these changes will be kept below.
+
 ## Contents
 * [Getting Started](#getting-started)
     * [Installation](#installation)
@@ -53,6 +55,7 @@ let _ = Lwt_main.run(Naboris.listenAndWaitForever 3000 server_config)
 * [Advanced](#advanced)
 	* [Middlewares](#middlewares)
 * [Development](#development)
+* [Breaking Changes](#breaking-changes)
 
 ```
                                                            
@@ -320,7 +323,7 @@ Many `Naboris` types take the parameter `'sessionData` this represents a custom 
 
 #### sessionConfig
 __Naboris.ServerConfig.setSessionConfig__ will return a new server configuration with the desired
-session configuration. This call consists of one required argument `sessionGetter` and two
+session configuration. This call consists of one required argument `mapSession` and two
 optional arguments `~maxAge` and `~sidKey`.
 
 ```reason
@@ -330,7 +333,7 @@ let setSessionConfig: (~maxAge: int=?, ~sidKey: string=?, option(string) => Lwt.
 val setSessionConfig: ?maxAge: int -> ?sidKey: string -> string option -> 'sessionData Session.t option Lwt.t -> 'sessionData ServerConfig.t -> 'sessionData ServerConfig.t
 ```
 
-#### sessionGetter
+#### mapSession
 A special function that is used to set session data on an incoming reuquest based on the requests cookies. The signature looks like: `option(string) => Lwt.t(option(Naboris.Session.t('sessionData)))`.  That's a complicated type signature that expresses that the request may or may not have a `sessionId`; and given that fact it may or may not return a session.
 ```reason
 // ReasonML
@@ -485,3 +488,9 @@ esy install
 npm run test
 ```
 [docs html index]: https://shawn-mcginty.github.io/naboris/docs/html/index.html
+
+## Breaking Changes
+
+| From | To | Breaking Change |
+| --- | --- | --- |
+| `0.1.0` | `0.1.1` | `ServerConfig.setSessionGetter` changed to `ServerConfig.setSessionConfig` which also allows `~maxAge` and `~sidKey` to be passed in optionally. |

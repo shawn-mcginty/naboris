@@ -13,7 +13,7 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
     let route = Router.generateRoute(target, meth);
 
     Lwt.async(() => {
-      let rawReq = Req.fromReqd(request_descriptor);
+      let rawReq = Req.fromReqd(request_descriptor, ServerConfig.sessionConfig(serverConfig));
 
       SessionManager.resumeSession(serverConfig, rawReq)
       >>= (

@@ -1,9 +1,5 @@
 type t('sessionData);
 
-type sessionConfig('sessionData) = {
-  getSession: option(string) => Lwt.t(option(Session.t('sessionData))),
-};
-
 type httpAfConfig = {
   read_buffer_size: int,
   request_body_buffer_size: int,
@@ -24,12 +20,15 @@ let create: unit => t('sessionData);
 let setOnListen: (unit => unit, t('sessionData)) => t('sessionData);
 
 /**
- Creates new config from [t('sessionData)] with sessionGetter function [option(string) => Lwt.t(option(Session.t('sessionData)))].
+ Creates new config from [t('sessionData)] with mapSession function [option(string) => Lwt.t(option(Session.t('sessionData)))].
 
- [sessionGetter] function is called at the very beginning of each request/response lifecycle.
+ [mapSession] function is called at the very beginning of each request/response lifecycle.
  Used to set session data into the [Req.t('sessionData)] for use later in the request/response lifecycle.
+
+ [~maxAge] Optional param to set max age for session cookies in seconds (defaults to 30 days)
+ [~sidKey] Optional param to set key for session cookies (defaults to ["nab.sid"])
  */
-let setSessionGetter: (option(string) => Lwt.t(option(Session.t('sessionData))), t('sessionData)) => t('sessionData);
+let setSessionConfig: (~maxAge: int=?, ~sidKey: string=?, option(string) => Lwt.t(option(Session.t('sessionData))), t('sessionData)) => t('sessionData);
 
 /**
  Creates new config from [t('sessionData)] with requestHandler [(Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit)].
@@ -64,10 +63,10 @@ let addMiddleware: (Middleware.t('sessionData), t('sessionData)) => t('sessionDa
 let addStaticMiddleware: (list(string), string, t('sessionData)) => t('sessionData);
 
 /**
- Returns [sessionConfig('sessionData)] from config.
+ Returns [SessionConfig.t('sessionData)] from config.
  [None] if none is configured.
  */
-let sessionConfig: t('sessionData) => option(sessionConfig('sessionData));
+let sessionConfig: t('sessionData) => option(SessionConfig.t('sessionData));
 
 /**
  Returns list of middlewares from the config.

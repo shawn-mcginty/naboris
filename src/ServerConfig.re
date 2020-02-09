@@ -1,7 +1,3 @@
-type sessionConfig('sessionData) = {
-  getSession: option(string) => Lwt.t(option(Session.t('sessionData))),
-};
-
 type httpAfConfig = {
   read_buffer_size: int,
   request_body_buffer_size: int,
@@ -12,7 +8,7 @@ type httpAfConfig = {
 type t('sessionData) = {
   onListen: unit => unit,
   routeRequest: (Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit),
-  sessionConfig: option(sessionConfig('sessionData)),
+  sessionConfig: option(SessionConfig.t('sessionData)),
   errorHandler: option(ErrorHandler.t),
   httpAfConfig: option(httpAfConfig),
   middlewares: list(Middleware.t('sessionData))
@@ -86,9 +82,11 @@ let addStaticMiddleware = (pathPrefix, publicPath, conf) => conf
     | _ => next(route, req, res)
   });
 
-let setSessionGetter = (getSessionFn, conf) => {
-  let sessionConfig = {
+let setSessionConfig = (~maxAge=2592000, ~sidKey="nab.sid", getSessionFn, conf) => {
+  let sessionConfig: SessionConfig.t('sessionData) = {
     getSession: getSessionFn,
+    maxAge,
+    sidKey,
   };
   { ...conf, sessionConfig: Some(sessionConfig) };
 };

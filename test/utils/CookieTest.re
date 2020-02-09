@@ -12,7 +12,7 @@ let testSuite = () => (
           check(
             option(string),
             "same sid",
-            Naboris.Cookie.getSessionId(cookieStr),
+            Naboris.Cookie.getSessionId("nab.sid", cookieStr),
             Some(expectedSid),
           )
         );
@@ -23,7 +23,7 @@ let testSuite = () => (
       `Quick,
       _ => {
         let cookieStr = "nnect.sid=s%3AadVKe5fVEcZVq4X5ZUrMen2U88jmjy4f.LOwere3akcgCno7WDqinHgL%2BXWXVp2SgbHZzv7%2Btbt4";
-        let maybeCookie = Naboris.Cookie.getSessionId(cookieStr);
+        let maybeCookie = Naboris.Cookie.getSessionId("nab.sid", cookieStr);
         Alcotest.(
           check(option(string), "no matching cookie", None, maybeCookie)
         );
@@ -39,7 +39,7 @@ let testSuite = () => (
           check(
             option(string),
             "same sid",
-            Naboris.Cookie.getSessionId(cookieStr),
+            Naboris.Cookie.getSessionId("nab.sid", cookieStr),
             Some(expectedSid),
           )
         );
@@ -54,7 +54,7 @@ let testSuite = () => (
           check(
             option(string),
             "empty",
-            Naboris.Cookie.getSessionId(cookieStr),
+            Naboris.Cookie.getSessionId("nab.sid", cookieStr),
             None,
           )
         );

@@ -1,6 +1,8 @@
 type t('sessionData) = {
   requestDescriptor: Httpaf.Reqd.t,
   session: option(Session.t('sessionData)),
+  sidKey: string,
+  maxAge: int,
 };
 
 let reqd = req => req.requestDescriptor;
@@ -26,8 +28,10 @@ let getBody = ({requestDescriptor, _}) => {
   Lwt_stream.fold((a, b) => a ++ b, bodyStream, "");
 };
 
-let fromReqd = reqd => {
-  let defaultReq = {requestDescriptor: reqd, session: None};
+let fromReqd = (reqd, sessionConfig) => {
+  let sidKey = SessionConfig.sidKey(sessionConfig);
+  let maxAge = SessionConfig.maxAge(sessionConfig);
+  let defaultReq = {requestDescriptor: reqd, session: None, sidKey, maxAge};
   defaultReq;
 };
 
@@ -41,3 +45,7 @@ let getSessionData = req => {
 let setSessionData = (maybeSession, req) => {
   {...req, session: maybeSession};
 };
+
+let sidKey = req => req.sidKey;
+
+let maxAge = req => req.maxAge;

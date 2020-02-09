@@ -90,6 +90,10 @@ let startServers = lwtSwitch => {
             TestSession.{username: "realsessionuser"},
           );
         Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
+      | (GET, ["logout"]) =>
+        Naboris.SessionManager.removeSession(req, res)
+          |> Naboris.Res.status(200)
+          |> Naboris.Res.text(req, "OK");
       | (GET, ["who-am-i"]) =>
         switch (Naboris.Req.getSessionData(req)) {
         | None =>
@@ -556,6 +560,47 @@ let testSuite = () => (
                     Lwt.return_unit;
                   }
                 );
+              }
+            );
+          | None =>
+            Alcotest.(check(bool, "failed", false, true));
+            Lwt.return_unit;
+          };
+        }
+      )
+    }),
+    Alcotest_lwt.test_case(
+      "Can remove session cookies", `Slow, (_lwtSwitch, _) => {
+      Cohttp_lwt_unix.Client.post(
+        Uri.of_string("http://localhost:9991/login"),
+      )
+      >>= (
+        ((resp, _bod)) => {
+          let codeStr = Cohttp.Code.string_of_status(resp.status);
+          Alcotest.(check(string, "status", codeStr, "200 OK"));
+
+          let headers = Cohttp.Response.headers(resp);
+          switch (Cohttp.Header.get(headers, "Set-Cookie")) {
+          | Some(_cookie) =>
+            let cookie = "_ga=GA1.1.1652070095.1563853850; express.sid=s%3AhSEgvCCmOADa-0Flv4ulT1FltA8TzHeq.G1UoU2xXC8X8wkEO5I0J%2BhE3NCjUoggAlGnz0jA1%2B2w; _gid=GA1.1.1409339010.1564626384; connect.sid=s%3AClROuVLX_Dalzkmf0D4d0Xath-HHG16M.8zaxTWykLFnypEw%2BCAIZRTPJR7IKBDUcAamWUch4Czk; nab.sid=67f67df4c5d9711ef89bbf8b509d49e2cc1ce51e3d95c90d45485a7b3cf40ca4ec9cbbceb0ca6ad844ec4a4779fd9981b130c40f81646f2ef286749c7184e66f";
+            let headers2 = Cohttp.Header.init_with("Cookie", cookie);
+            Cohttp_lwt_unix.Client.get(
+              ~headers=headers2,
+              Uri.of_string("http://localhost:9991/logout"),
+            )
+            >>= (
+              ((resp2, _bod)) => {
+                let codeStr = Cohttp.Code.string_of_status(resp2.status);
+                Alcotest.(check(string, "status", codeStr, "200 OK"));
+                let logoutHeaders = Cohttp.Response.headers(resp2);
+                switch (Cohttp.Header.get(logoutHeaders, "Set-Cookie")) {
+                  | Some(setCookie) =>
+                    Alcotest.(check(string, "set header", "nab.sid=; Max-Age=0;", setCookie));
+                    Lwt.return_unit;
+                  | None =>
+                    Alcotest.(check(bool, "failed", false, true));
+                    Lwt.return_unit;
+                }
               }
             );
           | None =>

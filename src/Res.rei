@@ -70,10 +70,11 @@ let redirect: (string, Req.t('sessionData), t) => Lwt.t(unit);
 let reportError: (Req.t('sessionData), exn) => unit;
 
 /**
- Adds [Set-Cookie] header to response [t] with sessionId [string] as a value.
- Uses ["nab.sid"] as the key for parsing the cookie later.
- Uses 30 days [Max-Age] for expiration.
+ Adds [Set-Cookie] header to response [t] with
+ [string] sessionId
+ [string] cookie key
+ [int] max age of cookie in seconds
 
  {e These will be configurable in future versions.}
  */
-let setSessionCookies: (string, t) => t;
+let setSessionCookies: (string, string, int, t) => t;

@@ -17,7 +17,9 @@ let echoQueryQuery = (req, res, query) => {
   };
 };
 
-let sessionConfig: Naboris.ServerConfig.sessionConfig(TestSession.t) = {
+let sessionConfig: Naboris.SessionConfig.t(TestSession.t) = {
+  sidKey: "nab.sid",
+  maxAge: 3600,
   getSession: sessionId => {
     let userData = TestSession.{username: "realsessionuser"};
     switch (sessionId) {
@@ -44,7 +46,7 @@ let startServers = lwtSwitch => {
 
   let testServerConfig: Naboris.ServerConfig.t(TestSession.t) = Naboris.ServerConfig.create()
     |> Naboris.ServerConfig.setOnListen(() => Lwt.wakeup_later(ssr1, ()))
-    |> Naboris.ServerConfig.setSessionGetter(sessionConfig.getSession)
+    |> Naboris.ServerConfig.setSessionConfig(sessionConfig.getSession)
     |> Naboris.ServerConfig.addStaticMiddleware(["static"], Sys.getenv("cur__root") ++ "/test/integration-test/test_assets")
     |> Naboris.ServerConfig.setRequestHandler((route, req, res) =>
       switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
@@ -133,6 +135,7 @@ let startServers = lwtSwitch => {
 
   // test the builder functions and middlewares
   let testServerConfig3: Naboris.ServerConfig.t(TestSession.t) = Naboris.ServerConfig.create()
+    |> Naboris.ServerConfig.setSessionConfig(~sidKey="custom.sid", sessionConfig.getSession)
     |> Naboris.ServerConfig.addMiddleware((next, route, req, res) => {
       switch(Naboris.Route.path(route)) {
         | ["middleware", "one", _] =>
@@ -140,7 +143,6 @@ let startServers = lwtSwitch => {
             |> Naboris.Res.status(200)
             |> Naboris.Res.text(req, "middleware 1");
         | _ =>
-          print_endline("Middleware 1, no matches");
           next(route, req, res);
       };
     })
@@ -163,6 +165,14 @@ let startServers = lwtSwitch => {
         res
           |> Naboris.Res.status(200)
           |> Naboris.Res.text(req, "Regular router");
+      | (["no", "middleware", "login"]) =>
+        let (req2, res2, _sid) =
+          Naboris.SessionManager.startSession(
+            req,
+            res,
+            TestSession.{username: "realsessionuser"},
+          );
+        Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
       | _ =>
         res
           |> Naboris.Res.status(404)
@@ -723,6 +733,27 @@ let testSuite = () => (
               Lwt.return_unit;
             }
           );
+        }
+      )
+    }),
+    Alcotest_lwt.test_case("Can start a session with custom cookie key", `Slow, (_lwtSwitch, _) => {
+      Cohttp_lwt_unix.Client.post(
+        Uri.of_string("http://localhost:9993/no/middleware/login"),
+      )
+      >>= (
+        ((resp, _bod)) => {
+          let codeStr = Cohttp.Code.string_of_status(resp.status);
+          Alcotest.(check(string, "status", codeStr, "200 OK"));
+
+          let headers = resp |> Cohttp.Response.headers;
+          switch (Cohttp.Header.get(headers, "Set-Cookie")) {
+          | Some(cookie) =>
+            Alcotest.(
+              check(string, "id", String.sub(cookie, 0, 10), "custom.sid")
+            )
+          | None => Alcotest.(check(bool, "fail", false, true))
+          };
+          Lwt.return_unit;
         }
       )
     }),

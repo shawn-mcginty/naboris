@@ -98,15 +98,14 @@ let static = (basePath, pathList, req: Req.t('a), res) => {
     });
 };
 
-let setSessionCookies = (newSessionId, res) => {
+let setSessionCookies = (newSessionId, sessionIdKey, maxAge, res) => {
   let setCookieKey = "Set-Cookie";
-  let thirtyDays = string_of_int(30 * 24 * 60 * 60);
-  let sessionIdKey = "nab.sid";
+  let maxAgeStr = string_of_int(maxAge);
 
   addHeader(
     (
       setCookieKey,
-      sessionIdKey ++ "=" ++ newSessionId ++ "; Max-Age=" ++ thirtyDays ++ ";",
+      sessionIdKey ++ "=" ++ newSessionId ++ "; Max-Age=" ++ maxAgeStr ++ ";",
     ),
     res,
   );

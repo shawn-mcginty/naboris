@@ -33,4 +33,14 @@ let setSessionData: (option(Session.t('sessionData)), t('sessionData)) => t('ses
  {b Intended for internal use.}
  Creates default req record.
  */
-let fromReqd: Httpaf.Reqd.t => t('sessionData);
+let fromReqd: (Httpaf.Reqd.t, option(SessionConfig.t('sessionData))) => t('sessionData);
+
+/**
+ Get key for session id cookie
+ */
+let sidKey: t('sessionData) => string;
+
+/**
+ Get max age for session id cookies (in seconds)
+ */
+let maxAge: t('sessionData) => int;

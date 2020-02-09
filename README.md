@@ -318,8 +318,20 @@ In the case above `/static/images/icon.png` would be served from `$cur__root/pub
 ### Session Data
 Many `Naboris` types take the parameter `'sessionData` this represents a custom data type that will define session data that will be attached to an incoming request.
 
+#### sessionConfig
+__Naboris.ServerConfig.setSessionConfig__ will return a new server configuration with the desired
+session configuration. This call consists of one required argument `sessionGetter` and two
+optional arguments `~maxAge` and `~sidKey`.
+
+```reason
+let setSessionConfig: (~maxAge: int=?, ~sidKey: string=?, option(string) => Lwt.t(option(Session.t('sessionData))), ServerConfig.t('sessionData)) => ServerConfig.t('sessionData);
+```
+```ocaml
+val setSessionConfig: ?maxAge: int -> ?sidKey: string -> string option -> 'sessionData Session.t option Lwt.t -> 'sessionData ServerConfig.t -> 'sessionData ServerConfig.t
+```
+
 #### sessionGetter
-__Naboris.ServerConfig.setSessionGetter__ will set the configuration with a function with the signature `option(string) => Lwt.t(option(Naboris.Session.t('sessionData)))`.  That's a complicated type signature that expresses that the request may or may not have a `sessionId`; and given that fact it may or may not return a session.
+A special function that is used to set session data on an incoming reuquest based on the requests cookies. The signature looks like: `option(string) => Lwt.t(option(Naboris.Session.t('sessionData)))`.  That's a complicated type signature that expresses that the request may or may not have a `sessionId`; and given that fact it may or may not return a session.
 ```reason
 // ReasonML
 // Your custom data type
@@ -332,7 +344,7 @@ type userData = {
 };
 
 let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.setSessionGetter(sessionId => switch(sessionId) {
+  |> Naboris.ServerConfig.setSessionConfig(sessionId => switch(sessionId) {
     | Some(id) =>
       /* for the sake of this example we're not using ppx or infix */
       /* lwt promises can be made much easier to read by using these */
@@ -383,7 +395,7 @@ type user_data = {
 }
 
 let serverConfig: user_data Naboris.ServerConfiguserData = Naboris.ServerConfig.create ()
-  |> Naboris.ServerConfig.setSessionGetter (fun session_id ->
+  |> Naboris.ServerConfig.setSessionConfig (fun session_id ->
     match (session_id) with
       | Some(id) =>
         (* for the sake of this example we're not using ppx or infix *)
@@ -417,6 +429,10 @@ let serverConfig: user_data Naboris.ServerConfiguserData = Naboris.ServerConfig.
           Naboris.Res.status 200 res
             |> Naboris.Res.text req user_data.username)
 ```
+
+#### sidKey and maxAge
+`sidKey` - `string` (optional) - The key used to store the session id in browser cookies. Defaults to `"nab.sid"`.
+`maxAge` - `int` (optional) - The max age of session cookies in seconds.  Defaults to `2592000` (30 days.)
 
 ## Advanced
 

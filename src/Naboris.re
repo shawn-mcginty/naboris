@@ -10,6 +10,7 @@ module Session = Session;
 module SessionManager = SessionManager;
 module Cookie = Cookie;
 module ServerConfig = ServerConfig;
+module SessionConfig = SessionConfig;
 
 open Lwt.Infix;
 

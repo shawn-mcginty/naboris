@@ -20,9 +20,9 @@ let create: unit => t('sessionData);
 let setOnListen: (unit => unit, t('sessionData)) => t('sessionData);
 
 /**
- Creates new config from [t('sessionData)] with sessionGetter function [option(string) => Lwt.t(option(Session.t('sessionData)))].
+ Creates new config from [t('sessionData)] with mapSession function [option(string) => Lwt.t(option(Session.t('sessionData)))].
 
- [sessionGetter] function is called at the very beginning of each request/response lifecycle.
+ [mapSession] function is called at the very beginning of each request/response lifecycle.
  Used to set session data into the [Req.t('sessionData)] for use later in the request/response lifecycle.
 
  [~maxAge] Optional param to set max age for session cookies in seconds (defaults to 30 days)

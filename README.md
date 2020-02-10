@@ -437,6 +437,62 @@ let serverConfig: user_data Naboris.ServerConfiguserData = Naboris.ServerConfig.
 `sidKey` - `string` (optional) - The key used to store the session id in browser cookies. Defaults to `"nab.sid"`.
 `maxAge` - `int` (optional) - The max age of session cookies in seconds.  Defaults to `2592000` (30 days.)
 
+#### SessionManager.startSession
+Generates a new session id `string` value and adds `Set-Cookie` header to a new `Res.t`. Useful for handling a login request.
+
+```reason
+let startSession: (Req.t('sessionData), Res.t, 'sessionData) => (Req.t('sessionData), Res.t, string);
+```
+```ocaml
+val startSession: 'sessionData Req.t -> Res.t -> 'sessionData -> 'sessionData Req.t * Res.t * string
+```
+
+An example login request might look like this:
+
+```reason
+| (Naboris.Method.POST, ["login"]) =>
+  let (req2, res2, _sid) =
+    Naboris.SessionManager.startSession(
+      req,
+      res,
+      TestSession.{username: "realsessionuser"},
+    );
+  Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
+```
+```ocaml
+| (Naboris.Method.POST, ["login"]) ->
+  let (req2, res2, _sid) = Naboris.SessionManager.startSession
+    req
+    res
+    TestSession.{username= "realsessionuser"} in
+  (Naboris.Res.status 200 res2) |> Naboris.Res.text req2 "OK"
+```
+
+#### SessionManager.removeSession
+Adds `Set-Cookie` header to a new `Res.t` to expire the session id cookie. Useful for handling a logout request.
+
+```reason
+let removeSession: (Req.t('sessionData), Res.t) => Res.t;
+```
+```ocaml
+val removeSession: 'sessionData Req.t -> Res.t -> Res.t
+```
+
+An example logout request might look like this:
+
+```reason
+| (Naboris.Method.GET, ["logout"]) =>
+  Naboris.SessionManager.removeSession(req, res)
+    |> Naboris.Res.status(200)
+    |> Naboris.Res.text(req, "OK");
+```
+```ocaml
+| (Naboris.Method.GET, ["logout"]) ->
+  Naboris.SessionManager.removeSession req res
+    |> Naboris.Res.status 200
+    |> Naboris.Res.text req "OK";
+```
+
 ## Advanced
 
 ### Middlewares

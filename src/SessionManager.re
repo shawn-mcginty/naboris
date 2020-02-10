@@ -29,3 +29,5 @@ let resumeSession = (serverConfig: ServerConfig.t('sessionData), req) => {
     );
   };
 };
+
+let removeSession = (req, res) => Res.setSessionCookies("", Req.sidKey(req), 0, res);

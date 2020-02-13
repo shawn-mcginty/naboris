@@ -42,7 +42,7 @@
     "@opam/uri": ">=2.2.0"
   },
   "devDependencies": {
-    "ocaml": "~4.6.1",
+    "ocaml": "~4.7",
     "esy": "^0.5.6",
     "@opam/cohttp": "*",
     "@opam/cohttp-lwt-unix": "*",

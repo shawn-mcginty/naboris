@@ -1,10 +1,10 @@
 let testSuite = () => (
   "Method",
   [
-    Alcotest.test_case(
+    Alcotest_lwt.test_case(
       "ofString returns good values for all good strings",
       `Quick,
-      _ => {
+      (_lwtSwitch, _) => {
         Alcotest.(
           check(bool, "GET", true, Naboris.Method.ofString("GET") == GET)
         );
@@ -54,12 +54,13 @@ let testSuite = () => (
             Naboris.Method.ofString("TRACE") == TRACE,
           )
         );
+        Lwt.return_unit;
       },
     ),
-    Alcotest.test_case(
+    Alcotest_lwt.test_case(
       "ofString returns Other(s) when given s non standard value",
       `Quick,
-      _ => {
+      (_lwtSwitch, _) => {
         Alcotest.(
           check(
             bool,
@@ -76,12 +77,13 @@ let testSuite = () => (
             Naboris.Method.ofString("bar") == Other("bar"),
           )
         );
+        Lwt.return_unit;
       },
     ),
-    Alcotest.test_case(
+    Alcotest_lwt.test_case(
       "toString converts all standard meths to string values",
       `Quick,
-      _ => {
+      (_lwtSwitch, _) => {
         Alcotest.(check(string, "GET", Naboris.Method.toString(GET), "GET"));
         Alcotest.(
           check(string, "POST", Naboris.Method.toString(POST), "POST")
@@ -112,18 +114,20 @@ let testSuite = () => (
         Alcotest.(
           check(string, "TRACE", Naboris.Method.toString(TRACE), "TRACE")
         );
+        Lwt.return_unit;
       },
     ),
-    Alcotest.test_case(
+    Alcotest_lwt.test_case(
       "toString converts non standard to string",
       `Quick,
-      _ => {
+      (_lwtSwitch, _) => {
         Alcotest.(
           check(string, "foo", Naboris.Method.toString(Other("foo")), "foo")
         );
         Alcotest.(
           check(string, "bar", Naboris.Method.toString(Other("bar")), "bar")
         );
+        Lwt.return_unit;
       },
     ),
   ],

@@ -6,4 +6,4 @@
 (alias
 	(name runtest)
 	(deps test.exe)
-	(action (run %{deps} --verbose --color=always)))
+	(action (run %{deps} --verbose)))

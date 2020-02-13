@@ -37,10 +37,17 @@ let text: (Req.t('sessionData), string, t) => Lwt.t(unit);
 /**
  Sends response [t] with body [string].
 
- {e This function will not add any headers other than [Content-length] with the length of [string].}
+ {e This function will add [Content-length] header with the length of [string].}
+ {e This function will add [Connection: keep-alive] header.}
  {e This function will end the http request/response lifecycle.}
  */
 let raw: (Req.t('sessionData), string, t) => Lwt.t(unit);
+
+/**
+ Creates a [Lwt_io.channel(Output)] which can be written to to stream data to the client.
+ This will set [Transfer-Encoding: chunked] header and follow the protocol for chunked responses.
+ */
+let writeChannel: (Req.t('a), t) => Lwt_io.channel(Lwt_io.output);
 
 /**
  Creates new response from [t] with header [(string, string)] added.

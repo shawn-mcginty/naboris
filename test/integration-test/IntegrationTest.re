@@ -114,6 +114,14 @@ let startServers = lwtSwitch => {
         Naboris.Res.status(200, res)
         |> Naboris.Res.addHeader(("Content-Type", "application/xml"))
         |> Naboris.Res.raw(req, "<xml></xml>");
+      | (GET, ["test-streaming"]) =>
+        let ch = Naboris.Res.addHeader(("Content-Type", "text/html"), res)
+          |> Naboris.Res.writeChannel(req);
+        Lwt_io.write(ch, "<html><head><title>Foo</title></head>")
+          >>= (() => Lwt_io.flush(ch))
+          >>= (() => Lwt_io.write(ch, "<body>Some data"))
+          >>= (() => Lwt_io.write(ch, ". And more data.</body></html>"))
+          >>= (() => Lwt_io.close(ch));
       | (GET, ["error", "boys"]) =>
         Naboris.Res.reportError(req, SomebodyGoofed("Problems"));
         Lwt.return_unit;
@@ -694,6 +702,49 @@ let testSuite = () => (
           >>= (
             bodyStr => {
               Alcotest.(check(string, "body", bodyStr, "<xml></xml>"));
+              Lwt.return_unit;
+            }
+          );
+        }
+      )
+    }),
+    Alcotest_lwt.test_case(
+      "Get \"/test-streaming\" sends chunked header and data", `Slow, (_lwtSwitch, _) => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9991/test-streaming"),
+      )
+      >>= (
+        ((resp, bod)) => {
+          let codeStr = Cohttp.Code.string_of_status(resp.status);
+          Alcotest.(
+            check(
+              option(string),
+              "transfer encoding",
+              Cohttp.Header.get(resp.headers, "transfer-encoding"),
+              Some("chunked"),
+            )
+          );
+          Alcotest.(
+            check(
+              option(string),
+              "no content length",
+              Cohttp.Header.get(resp.headers, "content-length"),
+              None,
+            )
+          );
+          Alcotest.(
+            check(
+              option(string),
+              "keep alive",
+              Cohttp.Header.get(resp.headers, "connection"),
+              Some("keep-alive"),
+            )
+          );
+          Alcotest.(check(string, "status", codeStr, "200 OK"));
+          Cohttp_lwt.Body.to_string(bod)
+          >>= (
+            bodyStr => {
+              Alcotest.(check(string, "body", bodyStr, "<html><head><title>Foo</title></head><body>Some data. And more data.</body></html>"));
               Lwt.return_unit;
             }
           );

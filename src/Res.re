@@ -15,7 +15,23 @@ let createResponse = (res: t) => {
 };
 
 let addHeader = (header: (string, string), res: t) => {
-  {...res, headers: [header, ...res.headers]};
+  let (key, value) = header;
+  {...res, headers: [(String.lowercase_ascii(key), value), ...res.headers]};
+};
+
+let addHeaderIfNone = (header, res) => {
+  let (key, _) = header;
+  let existing = List.fold_left((exists, h) => switch(exists) {
+    | true => true
+    | false =>
+      let (k, _) = h;
+      k == key;
+  }, false, res.headers);
+
+  switch(existing) {
+    | true => res
+    | false => addHeader(header, res);
+  };
 };
 
 let status = (status: int, res: t) => {
@@ -23,7 +39,8 @@ let status = (status: int, res: t) => {
 };
 
 let raw = (req: Req.t('a), body: string, res: t) => {
-  let resWithHeaders = addHeader(("Content-length", String.length(body) |> string_of_int), res);
+  let resWithHeaders = addHeaderIfNone(("Content-length", String.length(body) |> string_of_int), res)
+    |> addHeaderIfNone(("Connection", "keep-alive"));
   let response = createResponse(resWithHeaders);
   let requestDescriptor = Req.reqd(req);
 
@@ -48,7 +65,7 @@ let streamFileContentsToBody = (fullFilePath, responseBody) => {
   let readOnlyPerm = 444;
   Lwt_unix.openfile(fullFilePath, readOnlyFlags, readOnlyPerm) >>= ((fd) => {
     let channel = Lwt_io.of_fd(fd, ~mode=Lwt_io.Input);
-    let bufferSize = 512;
+    let bufferSize = Lwt_io.default_buffer_size();
     let rec pipeBody = (~count, ch, body) =>
       Lwt.bind(
         Lwt_io.read(~count, ch),
@@ -88,7 +105,7 @@ let static = (basePath, pathList, req: Req.t('a), res) => {
       });
     | _ =>
       let resWithHeaders =
-        status(404, res) |> addHeader(("Connection", "close"));
+        status(404, res) |> addHeader(("Content-Length", "9")) |> addHeader(("Connection", "keep-alive"));
       let response = createResponse(resWithHeaders);
       let responseBody =
         Httpaf.Reqd.respond_with_streaming(Req.reqd(req), response);
@@ -117,4 +134,28 @@ let redirect = (path, req, res) => {
 
 let reportError = (req: Req.t('a), exn) => {
   Httpaf.Reqd.report_exn(Req.reqd(req), exn);
+};
+
+let writeChannel = (req: Req.t('a), res) => {
+  let reqd = Req.reqd(req);
+  let responseBody = addHeader(("Transfer-encoding", "chunked"), res)
+    |> addHeader(("Connection", "keep-alive"))
+    |> createResponse
+    |> Httpaf.Reqd.respond_with_streaming(~flush_headers_immediately=true, reqd);
+
+  let onWrite = (bytes, off, len) => {
+    Httpaf.Body.write_bigstring(~off, ~len, responseBody, bytes);
+    Lwt.return(len);
+  };
+
+  let close = () => {
+    Httpaf.Body.close_writer(responseBody);
+    Lwt.return_unit;
+  };
+
+  Lwt_io.make(
+    ~close,
+    ~mode=Output,
+    onWrite
+  )
 };

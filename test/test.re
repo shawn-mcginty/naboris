@@ -5,15 +5,16 @@ let runTests = () => {
   } else {
     print_endline("DIT NOT set lwt engine to libev explicitly.");
   }
-  Alcotest.run(
-    "Naboris Test",
+
+  Lwt_main.run @@ Alcotest_lwt.run(
+    "Naboris_Tests",
     [
       CookieTest.testSuite(),
       MimeTypesTest.testSuite(),
       MethodTest.testSuite(),
       RouterTest.testSuite(),
       IntegrationTest.testSuite(),
-    ],
+    ]
   );
 };
 

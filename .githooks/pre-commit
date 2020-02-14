@@ -7,6 +7,23 @@
 #
 # To enable this hook, rename this file to "pre-commit".
 echo "Running pre commit script..."
+
+# Run test suite
+npm run install
+npm_install_exit=$?
+if [ "$npm_install_exit" -ne 0 ]
+then
+	exit $npm_install_exit
+fi
+
+npm run test
+
+npm_test_exit=$?
+if [ "$npm_test_exit" -ne 0 ]
+then
+	exit $npm_test_exit
+fi
+
 if git rev-parse --verify HEAD >/dev/null 2>&1
 then
 	against=HEAD
@@ -47,7 +64,3 @@ fi
 
 # If there are whitespace errors, print the offending file names and fail.
 exec git diff-index --check --cached $against --
-
-# Run test suite
-npm run install
-npm run test

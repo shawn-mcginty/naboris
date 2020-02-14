@@ -6,7 +6,7 @@
 # it wants to stop the commit.
 #
 # To enable this hook, rename this file to "pre-commit".
-
+echo "Running pre commit script..."
 if git rev-parse --verify HEAD >/dev/null 2>&1
 then
 	against=HEAD

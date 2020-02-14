@@ -31,11 +31,11 @@ let setOnListen: (unit => unit, t('sessionData)) => t('sessionData);
 let setSessionConfig: (~maxAge: int=?, ~sidKey: string=?, option(string) => Lwt.t(option(Session.t('sessionData))), t('sessionData)) => t('sessionData);
 
 /**
- Creates new config from [t('sessionData)] with requestHandler [(Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit)].
+ Creates new config from [t('sessionData)] with requestHandler [(Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t)].
 
  [requestHandler] is the main handler function for responding to incoming http requests.
  */
-let setRequestHandler: ((Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit), t('sessionData)) => t('sessionData);
+let setRequestHandler: ((Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t), t('sessionData)) => t('sessionData);
 
 
 /**
@@ -81,7 +81,7 @@ let onListen: t('sessionData) => (unit => unit);
 /**
  Returns [routeRequest] function of [t].
  */
-let routeRequest: t('sessionData) => ((Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit));
+let routeRequest: t('sessionData) => ((Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t));
 
 /**
  Returns [option(ErrorHandler.t)] of [t].

@@ -39,7 +39,7 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
 
             fullHandler(route, req, Res.default());
           }
-      );
+      ) >>= ((_res) => Lwt.return_unit);
     });
   };
 

@@ -1,1 +1,1 @@
-type t('sessionData) = (RequestHandler.t('sessionData), Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit)
+type t('sessionData) = (RequestHandler.t('sessionData), Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t)

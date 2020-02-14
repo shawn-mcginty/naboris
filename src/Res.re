@@ -3,9 +3,11 @@ open Lwt.Infix;
 type t = {
   status: int,
   headers: list((string, string)),
+  closed: bool,
+  exn: option(exn),
 };
 
-let default = () => {status: 200, headers: []};
+let default = () => {status: 200, headers: [], closed: false, exn: None};
 
 let createResponse = (res: t) => {
   Httpaf.Response.create(
@@ -38,6 +40,8 @@ let status = (status: int, res: t) => {
   {...res, status};
 };
 
+let closeResponse = (res) => { ...res, closed: true };
+
 let raw = (req: Req.t('a), body: string, res: t) => {
   let resWithHeaders = addHeaderIfNone(("Content-length", String.length(body) |> string_of_int), res)
     |> addHeaderIfNone(("Connection", "keep-alive"));
@@ -48,7 +52,7 @@ let raw = (req: Req.t('a), body: string, res: t) => {
     Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
   Httpaf.Body.write_string(responseBody, body);
   Httpaf.Body.close_writer(responseBody);
-  Lwt.return_unit;
+  Lwt.return(closeResponse(resWithHeaders));
 };
 
 let text = (req: Req.t('a), body: string, res: t) => addHeader(("Content-Type", "text/plain"), res)
@@ -101,7 +105,8 @@ let static = (basePath, pathList, req: Req.t('a), res) => {
         let requestDescriptor = Req.reqd(req);
         let responseBody =
           Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
-        streamFileContentsToBody(fullFilePath, responseBody);
+        streamFileContentsToBody(fullFilePath, responseBody)
+          >>= (() => Lwt.return @@ closeResponse @@ resWithHeaders);
       });
     | _ =>
       let resWithHeaders =
@@ -111,7 +116,7 @@ let static = (basePath, pathList, req: Req.t('a), res) => {
         Httpaf.Reqd.respond_with_streaming(Req.reqd(req), response);
       Httpaf.Body.write_string(responseBody, "Not found");
       Httpaf.Body.close_writer(responseBody);
-      Lwt.return_unit;
+      Lwt.return @@ closeResponse @@ resWithHeaders;
     });
 };
 
@@ -132,14 +137,17 @@ let redirect = (path, req, res) => {
   status(302, res) |> addHeader(("Location", path)) |> text(req, "Found");
 };
 
-let reportError = (req: Req.t('a), exn) => {
+let reportError = (req: Req.t('a), res, exn) => {
   Httpaf.Reqd.report_exn(Req.reqd(req), exn);
+  Lwt.return @@ closeResponse({...res, exn: Some(exn)});
 };
 
 let writeChannel = (req: Req.t('a), res) => {
   let reqd = Req.reqd(req);
-  let responseBody = addHeader(("Transfer-encoding", "chunked"), res)
-    |> addHeader(("Connection", "keep-alive"))
+  let resWithHeaders = addHeader(("Transfer-encoding", "chunked"), res)
+    |> addHeader(("Connection", "keep-alive"));
+
+  let responseBody = resWithHeaders
     |> createResponse
     |> Httpaf.Reqd.respond_with_streaming(~flush_headers_immediately=true, reqd);
 
@@ -148,14 +156,17 @@ let writeChannel = (req: Req.t('a), res) => {
     Lwt.return(len);
   };
 
+  let (respPromise, respResolver) = Lwt.task();
+
   let close = () => {
     Httpaf.Body.close_writer(responseBody);
+    Lwt.wakeup(respResolver, closeResponse(resWithHeaders));
     Lwt.return_unit;
   };
 
-  Lwt_io.make(
+  (Lwt_io.make(
     ~close,
     ~mode=Output,
     onWrite
-  )
+  ), respPromise);
 };

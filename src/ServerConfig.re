@@ -7,7 +7,7 @@ type httpAfConfig = {
 
 type t('sessionData) = {
   onListen: unit => unit,
-  routeRequest: (Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit),
+  routeRequest: (Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t),
   sessionConfig: option(SessionConfig.t('sessionData)),
   errorHandler: option(ErrorHandler.t),
   httpAfConfig: option(httpAfConfig),

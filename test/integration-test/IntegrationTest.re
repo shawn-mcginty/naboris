@@ -115,16 +115,16 @@ let startServers = lwtSwitch => {
         |> Naboris.Res.addHeader(("Content-Type", "application/xml"))
         |> Naboris.Res.raw(req, "<xml></xml>");
       | (GET, ["test-streaming"]) =>
-        let ch = Naboris.Res.addHeader(("Content-Type", "text/html"), res)
+        let (ch, return) = Naboris.Res.addHeader(("Content-Type", "text/html"), res)
           |> Naboris.Res.writeChannel(req);
-        Lwt_io.write(ch, "<html><head><title>Foo</title></head>")
+        Lwt.async(() => Lwt_io.write(ch, "<html><head><title>Foo</title></head>")
           >>= (() => Lwt_io.flush(ch))
           >>= (() => Lwt_io.write(ch, "<body>Some data"))
           >>= (() => Lwt_io.write(ch, ". And more data.</body></html>"))
-          >>= (() => Lwt_io.close(ch));
+          >>= (() => Lwt_io.close(ch)));
+        return;
       | (GET, ["error", "boys"]) =>
-        Naboris.Res.reportError(req, SomebodyGoofed("Problems"));
-        Lwt.return_unit;
+        Naboris.Res.reportError(req, res, SomebodyGoofed("Problems"));
       | _ =>
         Naboris.Res.status(404, res)
         |> Naboris.Res.html(

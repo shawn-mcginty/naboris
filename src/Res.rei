@@ -16,7 +16,7 @@ let status: (int, t) => t;
 
  {e This function will end the http request/response lifecycle.}
  */
-let json: (Req.t('sessionData), string, t) => Lwt.t(unit);
+let json: (Req.t('sessionData), string, t) => Lwt.t(t);
 
 /**
  Sends response [t] with body [string].
@@ -24,7 +24,7 @@ let json: (Req.t('sessionData), string, t) => Lwt.t(unit);
 
  {e This function will end the http request/response lifecycle.}
  */
-let html: (Req.t('sessionData), string, t) => Lwt.t(unit);
+let html: (Req.t('sessionData), string, t) => Lwt.t(t);
 
 /**
  Sends response [t] with body [string].
@@ -32,7 +32,7 @@ let html: (Req.t('sessionData), string, t) => Lwt.t(unit);
 
  {e This function will end the http request/response lifecycle.}
  */
-let text: (Req.t('sessionData), string, t) => Lwt.t(unit);
+let text: (Req.t('sessionData), string, t) => Lwt.t(t);
 
 /**
  Sends response [t] with body [string].
@@ -41,13 +41,14 @@ let text: (Req.t('sessionData), string, t) => Lwt.t(unit);
  {e This function will add [Connection: keep-alive] header.}
  {e This function will end the http request/response lifecycle.}
  */
-let raw: (Req.t('sessionData), string, t) => Lwt.t(unit);
+let raw: (Req.t('sessionData), string, t) => Lwt.t(t);
 
 /**
  Creates a [Lwt_io.channel(Output)] which can be written to to stream data to the client.
+ And a [Lwt.t(t)] promise, which will resolve when the output channel is closed.
  This will set [Transfer-Encoding: chunked] header and follow the protocol for chunked responses.
  */
-let writeChannel: (Req.t('a), t) => Lwt_io.channel(Lwt_io.output);
+let writeChannel: (Req.t('a), t) => (Lwt_io.channel(Lwt_io.output), Lwt.t(t));
 
 /**
  Creates new response from [t] with header [(string, string)] added.
@@ -62,19 +63,19 @@ let addHeader: ((string, string), t) => t;
 
  {e This function will end the http request/response lifecycle.}
  */
-let static: (string, list(string), Req.t('sessionData), t) => Lwt.t(unit);
+let static: (string, list(string), Req.t('sessionData), t) => Lwt.t(t);
 
 /**
  Sets [Location] header to [string] and responds with [302].
  Redirecting client to [string].
  */
-let redirect: (string, Req.t('sessionData), t) => Lwt.t(unit);
+let redirect: (string, Req.t('sessionData), t) => Lwt.t(t);
 
 
 /**
  Report an error [exn] to Httpaf.
  */
-let reportError: (Req.t('sessionData), exn) => unit;
+let reportError: (Req.t('sessionData), t, exn) => Lwt.t(t);
 
 /**
  Adds [Set-Cookie] header to response [t] with

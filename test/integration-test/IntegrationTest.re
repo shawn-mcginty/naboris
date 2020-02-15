@@ -124,7 +124,7 @@ let startServers = lwtSwitch => {
           >>= (() => Lwt_io.close(ch)));
         return;
       | (GET, ["error", "boys"]) =>
-        Naboris.Res.reportError(req, res, SomebodyGoofed("Problems"));
+        Naboris.Res.reportError(SomebodyGoofed("Problems"), req, res);
       | _ =>
         Naboris.Res.status(404, res)
         |> Naboris.Res.html(

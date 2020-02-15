@@ -137,7 +137,7 @@ let redirect = (path, req, res) => {
   status(302, res) |> addHeader(("Location", path)) |> text(req, "Found");
 };
 
-let reportError = (req: Req.t('a), res, exn) => {
+let reportError = (exn, req: Req.t('a), res) => {
   Httpaf.Reqd.report_exn(Req.reqd(req), exn);
   Lwt.return @@ closeResponse({...res, exn: Some(exn)});
 };

@@ -574,3 +574,4 @@ npm run test
 | --- | --- | --- |
 | `0.1.0` | `0.1.1` | `ServerConfig.setSessionGetter` changed to `ServerConfig.setSessionConfig` which also allows `~maxAge` and `~sidKey` to be passed in optionally. |
 | `0.1.0` | `0.1.1` | All `RequestHandler.t` and `Middleware.t` now return `Lwt.t(Res.t)` instead of `Lwt.t(unit)` |
+| `0.1.0` | `0.1.1` | `Res.reportError` now taxes `exn` as the first argument to match more closely the rest of the `Res` API. |

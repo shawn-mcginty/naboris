@@ -500,7 +500,7 @@ Middlewares have a wide variety of uses.  They are executed __in the order in wh
 
 `Naboris.RouteHandler.t -> Naboris.Route.t -> Naboris.Req.t -> Naboris.Res.t -> unit Lwt.t`
 
-Middlewares can either handle the http request/repsonse lifecycle themselves or call the passed in route handler passing the req/res on to the next middleware in the list.  Once the list of middlewares has been exaused it will then be passed on to the default route handler.
+Middlewares can either handle the http request/repsonse lifecycle themselves or call the passed in route handler passing the req/res on to the next middleware in the list.  Once the list of middlewares has been exaused it will then be passed on to the main request handler.
 
 One simple example of a middleware would be one that protects certain routes from users without specific permissions.
 
@@ -534,6 +534,29 @@ let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.create 
       | _ -> next route req res)
 ```
 
+Requests handlers also return `Lwt.t(Res.t)` and this can be used to inspect the response record _after_
+the request has been served.  This could be useful for logging as an example:
+
+```reason
+  // ResonML
+  let serverConfig = Naboris.ServerConfig.addMiddleware((next, route, req, res) => {
+    Lwt.bind(() => next(route, req, res), (servedResponse) => {
+      print_endline("Server responded with status " ++ int_of_string(Res.status(servedResponse)));
+    });
+  }, oldServerConfig);
+```
+```
+  (* OCaml *)
+  let serverConfig = Naboris.ServerConfig.addMiddleware (fun (next, route, req, res) ->
+    Lwt.bind
+      (fun () -> next route req res)
+      (fun (served_res) ->
+        print_endline "Server responded with status " ^ (int_of_string (Res.status served_res))
+      )
+    )
+    oldServerConfig in
+```
+
 ## Development
 Any help would be greatly appreciated! 👍
 
@@ -550,3 +573,4 @@ npm run test
 | From | To | Breaking Change |
 | --- | --- | --- |
 | `0.1.0` | `0.1.1` | `ServerConfig.setSessionGetter` changed to `ServerConfig.setSessionConfig` which also allows `~maxAge` and `~sidKey` to be passed in optionally. |
+| `0.1.0` | `0.1.1` | All `RequestHandler.t` and `Middleware.t` now return `Lwt.t(Res.t)` instead of `Lwt.t(unit)` |

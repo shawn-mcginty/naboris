@@ -1,6 +1,6 @@
 {
   "name": "naboris",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Simple http server built on httpaf and lwt.",
   "esy": {
     "build": [
@@ -15,7 +15,7 @@
     "unit-test": "esy b dune runtest",
     "install": "esy install",
     "install-globals": "npm install -g esy",
-    "build-docs": "esy b dune build @doc && npm run source && rm -rf docs/html && cp -r $DUNE_BUILD_DIR/default/_doc/_html ./docs/html",
+    "build-docs": "/bin/bash ci/build-docs.sh",
     "build": "esy b dune build @install",
     "clean": "esy b dune clean",
     "clean-install": "rm -rf node_modules && rm -rf esy.lock && rm -rf _esy",

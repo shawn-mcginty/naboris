@@ -75,7 +75,7 @@ let redirect: (string, Req.t('sessionData), t) => Lwt.t(t);
 /**
  Report an error [exn] to Httpaf.
  */
-let reportError: (Req.t('sessionData), t, exn) => Lwt.t(t);
+let reportError: (exn, Req.t('sessionData), t) => Lwt.t(t);
 
 /**
  Adds [Set-Cookie] header to response [t] with

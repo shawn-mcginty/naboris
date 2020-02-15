@@ -150,22 +150,22 @@ val setOnListen: (unit -> unit) -> 'sessionData ServerConfig.t -> 'sessionData S
 ```
 
 #### ServerConfig.setRequestHandler
-__setRequestHandler__ will set the main request handler function on the config.  This function is the main entry point for http requests and usually where routing the request happens.  The `requestHandler` function has the type signature `(Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit)`.
+__setRequestHandler__ will set the main request handler function on the config.  This function is the main entry point for http requests and usually where routing the request happens.  The `requestHandler` function has the type signature `(Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t)`.
 ```reason
 // ReasonML
 let setRequestHandler: (
-  (Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit),
+  (Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t),
   ServerConfig.t('sessionData)
 ) => ServerConfig.t('sessionData)
 ```
 ```ocaml
 (* OCaml *)
-val setRequestHandler: (Route.t -> 'sessionData Req.t -> Res.t -> unit Lwt.t)
+val setRequestHandler: (Route.t -> 'sessionData Req.t -> Res.t -> Res.t Lwt.t)
   -> 'sessionData ServerConfig.t -> 'sessionData ServerConfig.t
 ```
 
 ### Routing
-Routin is intended to be done via pattern matching in the main `requestHandler` function.  This function takes as it's first argument a `Route.t` record, which looks like this:
+Routin is intended to be done via pattern matching in the main `requestHandler` function.  This function takes as it's first argument a `Route.t` record. The `Route` module looks like this:
 ```reason
 // ReasonML
 /* module Naboris.Route */
@@ -235,12 +235,15 @@ let request_handler route req res =
     | (Naboris.Method.PUT, ["user"; user_id; "contacts"]) ->
       (* for the sake of this example we're not using ppx or infix *)
       (* lwt promises can be made much easier to read by using these *)
-      Lwt.bind Naboris.Req.getBody req (fun body_str ->
-        let new_contacts = parse_json_string body_str in
-        let _ = add_new_contacts_to_user user_id new_contacts in
-        res
-          |> Naboris.Res.status 201
-          |> Naboris.Res.text req "Created")
+      Lwt.bind
+        (Naboris.Req.getBody req)
+        (fun body_str ->
+          let new_contacts = parse_json_string body_str in
+          let _ = add_new_contacts_to_user user_id new_contacts in
+          res
+            |> Naboris.Res.status 201
+            |> Naboris.Res.text req "Created"
+        )
     | _ ->
       res
         |> Naboris.Res.status 404
@@ -287,11 +290,11 @@ In the case above `/static/images/icon.png` would be served from `$cur__root/pub
 
 ```reason
 // ReasonML
-let static : (string, list(string), Req.t('sessionData), Res.t) => Lwt.t(unit)
+let static : (string, list(string), Req.t('sessionData), Res.t) => Lwt.t(Res.t)
 ```
 ```ocaml
 (* OCaml *)
-val static : string -> string list -> 'sessionData Req.t -> Res.t -> unit Lwt.t
+val static : string -> string list -> 'sessionData Req.t -> Res.t -> Res.t Lwt.t
 ```
 
 * `string`: Being the root directory from which to read static files
@@ -390,11 +393,11 @@ let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
 (* OCaml *)
 (* Your custom session data *)
 type user_data = {
-  userId: int,
-  username: string,
-  first_name: string,
-  last_name: string,
-  is_admin: bool,
+  userId: int;
+  username: string;
+  first_name: string;
+  last_name: string;
+  is_admin: bool
 }
 
 let serverConfig: user_data Naboris.ServerConfiguserData = Naboris.ServerConfig.create ()
@@ -414,11 +417,11 @@ let serverConfig: user_data Naboris.ServerConfiguserData = Naboris.ServerConfig.
         let (req2, res2, _session_id) =
         (* Begin a session *)
           Naboris.SessionManager.startSession req res {
-            userId: 1,
-            username: "foo",
-            first_name: "foo",
-            last_name: "bar",
-            is_admin: false,
+            userId= 1;
+            username= "foo";
+            first_name= "foo";
+            last_name= "bar";
+            is_admin= false
           } in
         Naboris.Res.status 200 res2
           |> Naboris.Res.text req2, "OK"
@@ -434,8 +437,8 @@ let serverConfig: user_data Naboris.ServerConfiguserData = Naboris.ServerConfig.
 ```
 
 #### sidKey and maxAge
-`sidKey` - `string` (optional) - The key used to store the session id in browser cookies. Defaults to `"nab.sid"`.
-`maxAge` - `int` (optional) - The max age of session cookies in seconds.  Defaults to `2592000` (30 days.)
+* `sidKey` - `string` (optional) - The key used to store the session id in browser cookies. Defaults to `"nab.sid"`.
+* `maxAge` - `int` (optional) - The max age of session cookies in seconds.  Defaults to `2592000` (30 days.)
 
 #### SessionManager.startSession
 Generates a new session id `string` value and adds `Set-Cookie` header to a new `Res.t`. Useful for handling a login request.
@@ -498,9 +501,9 @@ An example logout request might look like this:
 ### Middlewares
 Middlewares have a wide variety of uses.  They are executed __in the order in which they are registered__ so be sure to keep that in mind. Middlewares are functions with the following signature:
 
-`Naboris.RouteHandler.t -> Naboris.Route.t -> Naboris.Req.t -> Naboris.Res.t -> unit Lwt.t`
+`Naboris.RequestHandler.t -> Naboris.Route.t -> Naboris.Req.t -> Naboris.Res.t -> Res.t Lwt.t`
 
-Middlewares can either handle the http request/repsonse lifecycle themselves or call the passed in route handler passing the req/res on to the next middleware in the list.  Once the list of middlewares has been exaused it will then be passed on to the main request handler.
+Middlewares can either handle the http request/repsonse lifecycle themselves or call the passed in request handler, which is the next middleware in the list, passing the route, req, and res.  Once the list of middlewares has been exaused it will then be passed on to the main request handler.
 
 One simple example of a middleware would be one that protects certain routes from users without specific permissions.
 
@@ -534,7 +537,7 @@ let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.create 
       | _ -> next route req res)
 ```
 
-Requests handlers also return `Lwt.t(Res.t)` and this can be used to inspect the response record _after_
+`RequestHandler.t` also return `Lwt.t(Res.t)` and this can be used to inspect the response record _after_
 the request has been served.  This could be useful for logging as an example:
 
 ```reason

@@ -1,7 +1,7 @@
 /**
- Given a Cookie header string value extracts sessonId
+ Given the session id key and cookie header string values extracts sessonId
  */
-let getSessionId: string => option(string);
+let getSessionId: (string, string) => option(string);
 
 /**
  Extract sessionId from http cookie headers in [Req.t]

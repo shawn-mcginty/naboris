@@ -1,6 +1,6 @@
 {
   "name": "naboris",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Simple http server built on httpaf and lwt.",
   "esy": {
     "build": [
@@ -9,17 +9,20 @@
     "buildInSource": "_build"
   },
   "scripts": {
+    "set-git-config": "cp -f .githooks/* .git/hooks",
     "source": "rm -f tmp-build-env && esy build-env | grep DUNE_BUILD_DIR > tmp-build-env && source tmp-build-env && rm tmp-build-env",
     "test": "npm run unit-test",
     "unit-test": "esy b dune runtest",
     "install": "esy install",
     "install-globals": "npm install -g esy",
-    "build-docs": "esy b dune build @doc && npm run source && rm -rf docs/html && cp -r $DUNE_BUILD_DIR/default/_doc/_html ./docs/html",
+    "build-docs": "/bin/bash ci/build-docs.sh",
     "build": "esy b dune build @install",
     "clean": "esy b dune clean",
     "clean-install": "rm -rf node_modules && rm -rf esy.lock && rm -rf _esy",
     "clean-world": "npm run clean && npm run clean-install",
-    "test-coco": "npm run clean && npm run gen-test-json && npm run test && npm run coco-report && npm run gen-prod-json"
+    "test-coco": "npm run clean && npm run gen-test-json && npm run test && npm run coco-report && npm run gen-prod-json",
+    "build-load-test-server": "esy @libev b dune build load-test/load_test.exe && npm run output-env",
+    "output-env": "rm -f command-env && esy @libev build-env | grep DUNE_BUILD_DIR > command-env"
   },
   "repository": {
     "type": "git",
@@ -36,16 +39,16 @@
     "@opam/reason": ">=3.4.0",
     "@opam/httpaf": ">=0.6.0",
     "@opam/httpaf-lwt-unix": ">=0.6.0",
-    "@opam/lwt": ">=4.2.1",
+    "@opam/lwt": ">=5.1.1",
     "@opam/uri": ">=2.2.0"
   },
   "devDependencies": {
-    "ocaml": "~4.6.1",
+    "ocaml": "~4.7",
     "esy": "^0.5.6",
     "@opam/cohttp": "*",
     "@opam/cohttp-lwt-unix": "*",
-    "@opam/alcotest": "*",
-    "@opam/alcotest-lwt": "*",
+    "@opam/alcotest": "~1.0.0",
+    "@opam/alcotest-lwt": "~1.0.0",
     "@opam/odoc": "*"
   },
   "peerDependencies": {

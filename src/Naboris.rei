@@ -55,3 +55,6 @@
 
   /** {b Less commonly used.} */
   module Router = Router;
+
+  /** {b Less commonly used.} */
+  module SessionConfig = SessionConfig;

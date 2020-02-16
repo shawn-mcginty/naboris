@@ -1011,21 +1011,22 @@ let expectedMimeTypes = [
 ];
 
 let testSuite = () => (
-  "utils/MimeTypes",
+  "utils_MimeTypes",
   [
-    Alcotest.test_case(
+    Alcotest_lwt.test_case(
       "getExtension returns html for .html file",
       `Quick,
-      _ => {
+      (_lwtSwitch, _) => {
         let testFilename = "some/foo/bar.html";
         let actualExt = Naboris.MimeTypes.getExtension(testFilename);
         Alcotest.(check(string, "correct extension", actualExt, "html"));
+        Lwt.return_unit;
       },
     ),
-    Alcotest.test_case(
+    Alcotest_lwt.test_case(
       "getMimeType works for all expected mime types",
       `Quick,
-      _ => {
+      (_lwtSwitch, _) => {
         let actualMimeTypes =
           List.map(
             ((ext, _)) => {
@@ -1049,18 +1050,20 @@ let testSuite = () => (
             actualMimeTypes,
           )
         );
+        Lwt.return_unit;
       },
     ),
-    Alcotest.test_case(
+    Alcotest_lwt.test_case(
       "getMimeType works when no extension",
       `Quick,
-      _ => {
+      (_lwtSwitch, _) => {
         let testFilename = "some/foo/bar";
         let expectedMimeType = "text/plain";
         let actualMimeType = Naboris.MimeTypes.getMimeType(testFilename);
         Alcotest.(
           check(string, "match mime type", actualMimeType, expectedMimeType)
         );
+        Lwt.return_unit;
       },
     ),
   ],

@@ -1,7 +1,3 @@
-type sessionConfig('sessionData) = {
-  getSession: option(string) => Lwt.t(option(Session.t('sessionData))),
-};
-
 type httpAfConfig = {
   read_buffer_size: int,
   request_body_buffer_size: int,
@@ -11,8 +7,8 @@ type httpAfConfig = {
 
 type t('sessionData) = {
   onListen: unit => unit,
-  routeRequest: (Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit),
-  sessionConfig: option(sessionConfig('sessionData)),
+  routeRequest: (Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t),
+  sessionConfig: option(SessionConfig.t('sessionData)),
   errorHandler: option(ErrorHandler.t),
   httpAfConfig: option(httpAfConfig),
   middlewares: list(Middleware.t('sessionData))
@@ -70,9 +66,27 @@ let addMiddleware = (middleware, conf) => { ...conf, middlewares: List.append(co
 
 let middlewares = conf => conf.middlewares;
 
-let setSessionGetter = (getSessionFn, conf) => {
-  let sessionConfig = {
+let rec matchPaths = (matcher, path) => switch (matcher, path) {
+  | ([x], [y, ...rest]) when x == y => Some(rest)
+  | ([x, ...restMatcher], [y, ...restPath]) when x == y => matchPaths(restMatcher, restPath)
+  | _ => None
+};
+
+let addStaticMiddleware = (pathPrefix, publicPath, conf) => conf
+  |> addMiddleware((next, route, req, res) => switch (Route.meth(route), Route.path(route)) {
+    | (Method.GET, path) => switch (matchPaths(pathPrefix, path)) {
+      | Some(remainingPath) => Res.static(publicPath, remainingPath, req, res)
+      | _ => next(route, req, res)
+    }
+
+    | _ => next(route, req, res)
+  });
+
+let setSessionConfig = (~maxAge=2592000, ~sidKey="nab.sid", getSessionFn, conf) => {
+  let sessionConfig: SessionConfig.t('sessionData) = {
     getSession: getSessionFn,
+    maxAge,
+    sidKey,
   };
   { ...conf, sessionConfig: Some(sessionConfig) };
 };

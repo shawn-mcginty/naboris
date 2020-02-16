@@ -11,7 +11,7 @@ let startSession = (req, res, data) => {
   let newSessionId = hash1 ++ hash2 ++ hash3 ++ hash4;
 
   let req2 = Req.setSessionData(Some(Session.create(newSessionId, data)), req);
-  let res2 = Res.setSessionCookies(newSessionId, res);
+  let res2 = Res.setSessionCookies(newSessionId, Req.sidKey(req2), Req.maxAge(req2), res);
   (req2, res2, newSessionId);
 };
 
@@ -29,3 +29,5 @@ let resumeSession = (serverConfig: ServerConfig.t('sessionData), req) => {
     );
   };
 };
+
+let removeSession = (req, res) => Res.setSessionCookies("", Req.sidKey(req), 0, res);

@@ -1,0 +1,55 @@
+{
+  "name": "naboris",
+  "version": "0.1.1",
+  "description": "Simple http server built on httpaf and lwt.",
+  "esy": {
+    "build": [
+      "dune build -p #{self.name}"
+    ],
+    "buildInSource": "_build",
+    "exportedEnv": {
+      "NABORIS_LIBEV_TEST": {
+        "val": "true",
+        "scope": "global"
+      }
+    },
+    "buildEnv": {
+      "NABORIS_LIBEV_TEST": "true",
+      "NABORIS_ROOT_PWD": "#{self.root}"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shawn-mcginty/naboris.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shawn-mcginty/naboris/issues"
+  },
+  "homepage": "https://github.com/shawn-mcginty/naboris#readme",
+  "dependencies": {
+    "@opam/dune": "*",
+    "@opam/reason": ">=3.4.0",
+    "@opam/httpaf": ">=0.6.0",
+    "@opam/httpaf-lwt-unix": ">=0.6.0",
+    "@opam/lwt": ">=5.1.1",
+    "@opam/uri": ">=2.2.0"
+  },
+  "devDependencies": {
+    "ocaml": "~4.7",
+    "esy": "^0.5.6",
+    "@opam/cohttp": "*",
+    "@opam/cohttp-lwt-unix": "*",
+    "@opam/alcotest": "~1.0.0",
+    "@opam/alcotest-lwt": "~1.0.0",
+    "@opam/conf-libev": "*",
+    "@opam/odoc": "*"
+  },
+  "peerDependencies": {
+    "ocaml": ">=4.5.0"
+  },
+  "resolutions": {
+    "@opam/conf-libev": "esy-packages/libev:package.json#0b5eb66"
+  }
+}

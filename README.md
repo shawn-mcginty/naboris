@@ -2,7 +2,7 @@
 Simple, fast, minimalist web framework for [OCaml](https://ocaml.org)/[ReasonML](https://reasonml.github.io) built on [httpaf](https://github.com/inhabitedtype/httpaf) and [lwt](https://github.com/ocsigen/lwt).
 
 [![Build Status](https://travis-ci.com/shawn-mcginty/naboris.svg?branch=master)](https://travis-ci.com/shawn-mcginty/naboris)
-[![opam version 0.1.0](https://img.shields.io/static/v1?label=opam&message=0.1.0&color=E7C162)](https://opam.ocaml.org/packages/naboris/)
+[![opam version 0.1.1](https://img.shields.io/static/v1?label=opam&message=0.1.1&color=E7C162)](https://opam.ocaml.org/packages/naboris/)
 
 [odocs avialable here][docs html index]
 
@@ -20,7 +20,7 @@ let serverConfig: Naboris.ServerConfig.t(unit) = Naboris.ServerConfig.create()
         |> Naboris.Res.text(req, "Resource not found.");
   });
 
-Naboris.listenAndWaitForever(3000, serverConfig);
+Lwt_main.run(Naboris.listenAndWaitForever(3000, serverConfig));
 /* In a browser navigate to http://localhost:3000/hello */
 ```
 
@@ -38,9 +38,12 @@ let server_config: unit Naboris.ServerConfig.t = Naboris.ServerConfig.create ()
           |> Naboris.Res.text req "Resource not found.";
   ) in
 
-Naboris.listenAndWaitForever 3000 server_config
+
+let _ = Lwt_main.run(Naboris.listenAndWaitForever 3000 server_config)
 (* In a browser navigate to http://localhost:3000/hello *)
 ```
+
+> Pre `1.0.0` the API may be changing a bit. A list of these changes will be kept below.
 
 ## Contents
 * [Getting Started](#getting-started)
@@ -52,6 +55,7 @@ Naboris.listenAndWaitForever 3000 server_config
 * [Advanced](#advanced)
 	* [Middlewares](#middlewares)
 * [Development](#development)
+* [Breaking Changes](#breaking-changes)
 
 ```
                                                            
@@ -89,6 +93,18 @@ Naboris.listenAndWaitForever 3000 server_config
 
 ### Installation
 
+#### Note
+Naboris makes heavy use of [Lwt](https://github.com/ocsigen/lwt#installing).  For better performance it is highly recommended _(however optional)_ to also install `conf-libev` which will configure [Lwt](https://github.com/ocsigen/lwt#installing) to run with the libev scheduler.  If you are using **esy** you will have to install `conf-libev` using a [special package](https://github.com/esy-packages/libev).
+
+`conf-libev` also requires that the libev be installed.  This can usually be done via your package manager. 
+```bash
+brew install libev
+```
+or
+```bash
+apt install libev-dev
+```
+
 #### opam
 ```bash
 opam install naboris
@@ -96,7 +112,7 @@ opam install naboris
 
 #### esy
 ```json
-"@opam/naboris": "^0.1.0"
+"@opam/naboris": "^0.1.1"
 ```
 
 #### dune
@@ -134,22 +150,22 @@ val setOnListen: (unit -> unit) -> 'sessionData ServerConfig.t -> 'sessionData S
 ```
 
 #### ServerConfig.setRequestHandler
-__setRequestHandler__ will set the main request handler function on the config.  This function is the main entry point for http requests and usually where routing the request happens.  The `requestHandler` function has the type signature `(Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit)`.
+__setRequestHandler__ will set the main request handler function on the config.  This function is the main entry point for http requests and usually where routing the request happens.  The `requestHandler` function has the type signature `(Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t)`.
 ```reason
 // ReasonML
 let setRequestHandler: (
-  (Route.t, Req.t('sessionData), Res.t) => Lwt.t(unit),
+  (Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t),
   ServerConfig.t('sessionData)
 ) => ServerConfig.t('sessionData)
 ```
 ```ocaml
 (* OCaml *)
-val setRequestHandler: (Route.t -> 'sessionData Req.t -> Res.t -> unit Lwt.t)
+val setRequestHandler: (Route.t -> 'sessionData Req.t -> Res.t -> Res.t Lwt.t)
   -> 'sessionData ServerConfig.t -> 'sessionData ServerConfig.t
 ```
 
 ### Routing
-Routin is intended to be done via pattern matching in the main `requestHandler` function.  This function takes as it's first argument a `Route.t` record, which looks like this:
+Routin is intended to be done via pattern matching in the main `requestHandler` function.  This function takes as it's first argument a `Route.t` record. The `Route` module looks like this:
 ```reason
 // ReasonML
 /* module Naboris.Route */
@@ -219,12 +235,15 @@ let request_handler route req res =
     | (Naboris.Method.PUT, ["user"; user_id; "contacts"]) ->
       (* for the sake of this example we're not using ppx or infix *)
       (* lwt promises can be made much easier to read by using these *)
-      Lwt.bind Naboris.Req.getBody req (fun body_str ->
-        let new_contacts = parse_json_string body_str in
-        let _ = add_new_contacts_to_user user_id new_contacts in
-        res
-          |> Naboris.Res.status 201
-          |> Naboris.Res.text req "Created")
+      Lwt.bind
+        (Naboris.Req.getBody req)
+        (fun body_str ->
+          let new_contacts = parse_json_string body_str in
+          let _ = add_new_contacts_to_user user_id new_contacts in
+          res
+            |> Naboris.Res.status 201
+            |> Naboris.Res.text req "Created"
+        )
     | _ ->
       res
         |> Naboris.Res.status 404
@@ -232,15 +251,50 @@ let request_handler route req res =
 ```
 
 ### Static Files
-While it is recommended to use a reverse proxy or other such service for serving static files `Naboris` does have helper functions to make this easy.  The `Res` module has the `static` function for this exact reason. The 
+
+> **Note** For best performance, use a reverse proxy to serve static assets.
+
+#### Static middleware
+`ServerConfig.addStaticMiddleware` makes it easy to add a virtual path prefix for static assets
+during server configuration.
 
 ```reason
 // ReasonML
-let static : (string, list(string), Req.t('sessionData), Res.t) => Lwt.t(unit)
+let addStaticMiddleware : (list(string), string, ServerConfig.t('sessionData)) => ServerConfig.t('sessionData)
 ```
 ```ocaml
 (* OCaml *)
-val static : string -> string list -> 'sessionData Req.t -> Res.t -> unit Lwt.t
+val addStaticMiddleware : string list -> string -> 'sessionData ServerConfig.t -> 'sessionData ServerConfig.t
+```
+
+* `string list`: Split path that will match against incoming requests
+* `string`: Root directory from which to read static files
+* `'sessionData ServerConfig.t`: Naboris server configuration
+* Returns `'sessionData ServerConfig.t`: New configuration with the static middleware
+
+```reason
+// ReasonML
+let serverConfig = Naboris.ServerConfig.create()
+  |> Naboris.ServerConfig.addStaticMiddleware(["static"], Sys.getenv("cur__root") ++ "/public/");
+```
+```ocaml
+(* OCaml *)
+let server_conf = Naboris.ServerConfig.create()
+  |> Naboris.ServerConfig.addStaticMiddleware ["static"] ((Sys.getenv "cur__root") ^ "/static-assets/")
+```
+
+In the case above `/static/images/icon.png` would be served from `$cur__root/public/images/icon.png`
+
+#### Static response
+`Res.static` is available to help make it easy to serve static files.
+
+```reason
+// ReasonML
+let static : (string, list(string), Req.t('sessionData), Res.t) => Lwt.t(Res.t)
+```
+```ocaml
+(* OCaml *)
+val static : string -> string list -> 'sessionData Req.t -> Res.t -> Res.t Lwt.t
 ```
 
 * `string`: Being the root directory from which to read static files
@@ -253,33 +307,37 @@ A pattern matcher for static file routes might look like this
 // ReasonML
 switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
   | (Naboris.Method.GET, ["static", ...staticPath]) =>
-    Naboris.Res.static(
-      Sys.getenv("cur__root") ++ "/static-assets",
-      staticPath,
-      req,
-      res,
-    )
+    let publicDir = Sys.getenv("cur__root") ++ "/public/";
+    Naboris.Res.static(publicDir, staticPath, req, res);
 }
 ```
 ```ocaml
 (* OCaml *)
 match ((Naboris.Route.meth route), (Naboris.Route.path route)) with
   | (Naboris.Method.GET, "static" :: static_path) ->
-    Naboris.Res.static(
-      (Sys.getenv "cur__root") ++ "/static-assets",
-      static_path,
-      req,
-      res,
-    )
+    let public_dir = (Sys.getenv "cur__root") ^ "/static-assets/") in
+    Naboris.Res.static public_dir static_path req res
 ```
 
-In the case above `/static/images/icon.png` would be served from `$cur__root/static-assets/images/icon.png`
+In the case above `/static/images/icon.png` would be served from `$cur__root/public/images/icon.png`
 
 ### Session Data
 Many `Naboris` types take the parameter `'sessionData` this represents a custom data type that will define session data that will be attached to an incoming request.
 
-#### sessionGetter
-__Naboris.ServerConfig.setSessionGetter__ will set the configuration with a function with the signature `option(string) => Lwt.t(option(Naboris.Session.t('sessionData)))`.  That's a complicated type signature that expresses that the request may or may not have a `sessionId`; and given that fact it may or may not return a session.
+#### sessionConfig
+__Naboris.ServerConfig.setSessionConfig__ will return a new server configuration with the desired
+session configuration. This call consists of one required argument `mapSession` and two
+optional arguments `~maxAge` and `~sidKey`.
+
+```reason
+let setSessionConfig: (~maxAge: int=?, ~sidKey: string=?, option(string) => Lwt.t(option(Session.t('sessionData))), ServerConfig.t('sessionData)) => ServerConfig.t('sessionData);
+```
+```ocaml
+val setSessionConfig: ?maxAge: int -> ?sidKey: string -> string option -> 'sessionData Session.t option Lwt.t -> 'sessionData ServerConfig.t -> 'sessionData ServerConfig.t
+```
+
+#### mapSession
+A special function that is used to set session data on an incoming reuquest based on the requests cookies. The signature looks like: `option(string) => Lwt.t(option(Naboris.Session.t('sessionData)))`.  That's a complicated type signature that expresses that the request may or may not have a `sessionId`; and given that fact it may or may not return a session.
 ```reason
 // ReasonML
 // Your custom data type
@@ -292,7 +350,7 @@ type userData = {
 };
 
 let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.setSessionGetter(sessionId => switch(sessionId) {
+  |> Naboris.ServerConfig.setSessionConfig(sessionId => switch(sessionId) {
     | Some(id) =>
       /* for the sake of this example we're not using ppx or infix */
       /* lwt promises can be made much easier to read by using these */
@@ -335,15 +393,15 @@ let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
 (* OCaml *)
 (* Your custom session data *)
 type user_data = {
-  userId: int,
-  username: string,
-  first_name: string,
-  last_name: string,
-  is_admin: bool,
+  userId: int;
+  username: string;
+  first_name: string;
+  last_name: string;
+  is_admin: bool
 }
 
 let serverConfig: user_data Naboris.ServerConfiguserData = Naboris.ServerConfig.create ()
-  |> Naboris.ServerConfig.setSessionGetter (fun session_id ->
+  |> Naboris.ServerConfig.setSessionConfig (fun session_id ->
     match (session_id) with
       | Some(id) =>
         (* for the sake of this example we're not using ppx or infix *)
@@ -359,11 +417,11 @@ let serverConfig: user_data Naboris.ServerConfiguserData = Naboris.ServerConfig.
         let (req2, res2, _session_id) =
         (* Begin a session *)
           Naboris.SessionManager.startSession req res {
-            userId: 1,
-            username: "foo",
-            first_name: "foo",
-            last_name: "bar",
-            is_admin: false,
+            userId= 1;
+            username= "foo";
+            first_name= "foo";
+            last_name= "bar";
+            is_admin= false
           } in
         Naboris.Res.status 200 res2
           |> Naboris.Res.text req2, "OK"
@@ -378,14 +436,74 @@ let serverConfig: user_data Naboris.ServerConfiguserData = Naboris.ServerConfig.
             |> Naboris.Res.text req user_data.username)
 ```
 
+#### sidKey and maxAge
+* `sidKey` - `string` (optional) - The key used to store the session id in browser cookies. Defaults to `"nab.sid"`.
+* `maxAge` - `int` (optional) - The max age of session cookies in seconds.  Defaults to `2592000` (30 days.)
+
+#### SessionManager.startSession
+Generates a new session id `string` value and adds `Set-Cookie` header to a new `Res.t`. Useful for handling a login request.
+
+```reason
+let startSession: (Req.t('sessionData), Res.t, 'sessionData) => (Req.t('sessionData), Res.t, string);
+```
+```ocaml
+val startSession: 'sessionData Req.t -> Res.t -> 'sessionData -> 'sessionData Req.t * Res.t * string
+```
+
+An example login request might look like this:
+
+```reason
+| (Naboris.Method.POST, ["login"]) =>
+  let (req2, res2, _sid) =
+    Naboris.SessionManager.startSession(
+      req,
+      res,
+      TestSession.{username: "realsessionuser"},
+    );
+  Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
+```
+```ocaml
+| (Naboris.Method.POST, ["login"]) ->
+  let (req2, res2, _sid) = Naboris.SessionManager.startSession
+    req
+    res
+    TestSession.{username= "realsessionuser"} in
+  (Naboris.Res.status 200 res2) |> Naboris.Res.text req2 "OK"
+```
+
+#### SessionManager.removeSession
+Adds `Set-Cookie` header to a new `Res.t` to expire the session id cookie. Useful for handling a logout request.
+
+```reason
+let removeSession: (Req.t('sessionData), Res.t) => Res.t;
+```
+```ocaml
+val removeSession: 'sessionData Req.t -> Res.t -> Res.t
+```
+
+An example logout request might look like this:
+
+```reason
+| (Naboris.Method.GET, ["logout"]) =>
+  Naboris.SessionManager.removeSession(req, res)
+    |> Naboris.Res.status(200)
+    |> Naboris.Res.text(req, "OK");
+```
+```ocaml
+| (Naboris.Method.GET, ["logout"]) ->
+  Naboris.SessionManager.removeSession req res
+    |> Naboris.Res.status 200
+    |> Naboris.Res.text req "OK";
+```
+
 ## Advanced
 
 ### Middlewares
 Middlewares have a wide variety of uses.  They are executed __in the order in which they are registered__ so be sure to keep that in mind. Middlewares are functions with the following signature:
 
-`Naboris.RouteHandler.t -> Naboris.Route.t -> Naboris.Req.t -> Naboris.Res.t -> unit Lwt.t`
+`Naboris.RequestHandler.t -> Naboris.Route.t -> Naboris.Req.t -> Naboris.Res.t -> Res.t Lwt.t`
 
-Middlewares can either handle the http request/repsonse lifecycle themselves or call the passed in route handler passing the req/res on to the next middleware in the list.  Once the list of middlewares has been exaused it will then be passed on to the default route handler.
+Middlewares can either handle the http request/repsonse lifecycle themselves or call the passed in request handler, which is the next middleware in the list, passing the route, req, and res.  Once the list of middlewares has been exaused it will then be passed on to the main request handler.
 
 One simple example of a middleware would be one that protects certain routes from users without specific permissions.
 
@@ -419,6 +537,29 @@ let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.create 
       | _ -> next route req res)
 ```
 
+`RequestHandler.t` also return `Lwt.t(Res.t)` and this can be used to inspect the response record _after_
+the request has been served.  This could be useful for logging as an example:
+
+```reason
+  // ResonML
+  let serverConfig = Naboris.ServerConfig.addMiddleware((next, route, req, res) => {
+    Lwt.bind(() => next(route, req, res), (servedResponse) => {
+      print_endline("Server responded with status " ++ int_of_string(Res.status(servedResponse)));
+    });
+  }, oldServerConfig);
+```
+```
+  (* OCaml *)
+  let serverConfig = Naboris.ServerConfig.addMiddleware (fun (next, route, req, res) ->
+    Lwt.bind
+      (fun () -> next route req res)
+      (fun (served_res) ->
+        print_endline "Server responded with status " ^ (int_of_string (Res.status served_res))
+      )
+    )
+    oldServerConfig in
+```
+
 ## Development
 Any help would be greatly appreciated! 👍
 
@@ -429,3 +570,11 @@ esy install
 npm run test
 ```
 [docs html index]: https://shawn-mcginty.github.io/naboris/docs/html/index.html
+
+## Breaking Changes
+
+| From | To | Breaking Change |
+| --- | --- | --- |
+| `0.1.0` | `0.1.1` | `ServerConfig.setSessionGetter` changed to `ServerConfig.setSessionConfig` which also allows `~maxAge` and `~sidKey` to be passed in optionally. |
+| `0.1.0` | `0.1.1` | All `RequestHandler.t` and `Middleware.t` now return `Lwt.t(Res.t)` instead of `Lwt.t(unit)` |
+| `0.1.0` | `0.1.1` | `Res.reportError` now taxes `exn` as the first argument to match more closely the rest of the `Res` API. |

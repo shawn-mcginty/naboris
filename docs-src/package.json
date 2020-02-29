@@ -1,0 +1,49 @@
+{
+  "name": "docs-src",
+  "version": "1.0.0",
+  "description": "Simple http server built for OCaml and ReasonML.",
+  "author": "Shawn McGinty",
+  "private": true,
+  "scripts": {
+    "pre-build": "rm -rf static/fonts/fa && cp -r node_modules/@fortawesome/fontawesome-free/webfonts static/fonts/fa",
+    "dev": "nuxt -p 3999",
+    "build": "npm run prebuild && nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate",
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
+    "test": "jest"
+  },
+  "lint-staged": {
+    "*.{js,vue}": "npm run lint"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.12.1",
+    "@nuxtjs/bulma": "^1.2.1",
+    "frontmatter-markdown-loader": "^3.1.0",
+    "js-cookie": "^2.2.1",
+    "markdown-it": "^10.0.0",
+    "markdown-it-prism": "^2.0.4",
+    "node-sass": "^4.13.1",
+    "nuxt": "^2.0.0",
+    "sass-loader": "^8.0.2",
+    "vue-github-button": "^1.1.2"
+  },
+  "devDependencies": {
+    "@nuxtjs/eslint-config": "^2.0.0",
+    "@nuxtjs/eslint-module": "^1.0.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^6.1.0",
+    "eslint-plugin-nuxt": ">=0.4.2",
+    "husky": "^4.0.0",
+    "lint-staged": "^10.0.0",
+    "@vue/test-utils": "^1.0.0-beta.27",
+    "babel-jest": "^24.1.0",
+    "jest": "^24.1.0",
+    "vue-jest": "^4.0.0-0"
+  }
+}

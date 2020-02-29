@@ -1,0 +1,27 @@
+.button {
+  svg {
+    fill: $white-bis;
+    height: 100%;
+    width: 100%;
+    margin-top: 5px;
+  }
+
+  svg.is-danger {
+    fill: $danger;
+  }
+
+  svg.is-warning {
+    fill: $warning;
+  }
+}
+
+.navbar-item {
+  svg.naboris-svg {
+    height: 36px;
+    width: 36px;
+    margin-right: 5px;
+    path {
+      fill: $white-bis;
+    }
+  }
+}

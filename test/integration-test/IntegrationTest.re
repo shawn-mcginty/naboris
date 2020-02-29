@@ -23,8 +23,7 @@ let sessionConfig: Naboris.SessionConfig.t(TestSession.t) = {
   getSession: sessionId => {
     let userData = TestSession.{username: "realsessionuser"};
     switch (sessionId) {
-    | Some(sid) =>
-      Lwt.return(Some(Naboris.Session.create(sid, userData)));
+    | Some(sid) => Lwt.return(Some(Naboris.Session.create(sid, userData)))
     | _ => Lwt.return(None)
     };
   },
@@ -44,152 +43,165 @@ let startServers = lwtSwitch => {
     },
   );
 
-  let testServerConfig: Naboris.ServerConfig.t(TestSession.t) = Naboris.ServerConfig.create()
+  let testServerConfig: Naboris.ServerConfig.t(TestSession.t) =
+    Naboris.ServerConfig.create()
     |> Naboris.ServerConfig.setOnListen(() => Lwt.wakeup_later(ssr1, ()))
     |> Naboris.ServerConfig.setSessionConfig(sessionConfig.getSession)
-    |> Naboris.ServerConfig.addStaticMiddleware(["static"], Sys.getenv("cur__root") ++ "/test/integration-test/test_assets")
+    |> Naboris.ServerConfig.addStaticMiddleware(
+         ["static"],
+         Sys.getenv("cur__root") ++ "/test/integration-test/test_assets",
+       )
     |> Naboris.ServerConfig.setRequestHandler((route, req, res) =>
-      switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
-      | (Naboris.Method.GET, ["echo", "pre-existing-route"]) =>
-        Naboris.Res.status(200, res)
-        |> Naboris.Res.html(
-             req,
-             "This route should take priority in the matcher.",
+         switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
+         | (Naboris.Method.GET, ["echo", "pre-existing-route"]) =>
+           Naboris.Res.status(200, res)
+           |> Naboris.Res.html(
+                req,
+                "This route should take priority in the matcher.",
+              )
+         | (Naboris.Method.GET, ["html"]) =>
+           Naboris.Res.status(200, res)
+           |> Naboris.Res.html(
+                req,
+                "<!doctype html><html><body>You made it.</body></html>",
+              )
+         | (Naboris.Method.GET, ["user", _userId, "item", _itemId]) =>
+           Naboris.Res.status(200, res)
+           |> Naboris.Res.html(
+                req,
+                "<!doctype html><html><body>You want some user id and item</body></html>",
+              )
+         | (Naboris.Method.GET, ["echo-query", "query"]) =>
+           echoQueryQuery(req, res, Naboris.Route.query(route))
+         | (Naboris.Method.GET, ["echo", str]) =>
+           Naboris.Res.status(200, res) |> Naboris.Res.html(req, str)
+         | (Naboris.Method.GET, ["echo", str1, "multi", str2]) =>
+           Naboris.Res.status(200, res)
+           |> Naboris.Res.html(req, str1 ++ "\n" ++ str2)
+         | (POST, ["echo"]) =>
+           Lwt.bind(Naboris.Req.getBody(req), bodyStr => {
+             Naboris.Res.status(200, res) |> Naboris.Res.html(req, bodyStr)
+           })
+         | (POST, ["login"]) =>
+           let (req2, res2, _sid) =
+             Naboris.SessionManager.startSession(
+               req,
+               res,
+               TestSession.{username: "realsessionuser"},
+             );
+           Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
+         | (GET, ["logout"]) =>
+           Naboris.SessionManager.removeSession(req, res)
+           |> Naboris.Res.status(200)
+           |> Naboris.Res.text(req, "OK")
+         | (GET, ["who-am-i"]) =>
+           switch (Naboris.Req.getSessionData(req)) {
+           | None =>
+             Naboris.Res.status(404, res)
+             |> Naboris.Res.text(req, "Not found")
+           | Some(userData) =>
+             Naboris.Res.status(200, res)
+             |> Naboris.Res.text(req, userData.username)
+           }
+         | (GET, ["redir-launch"]) =>
+           Naboris.Res.redirect("/redir-landing", req, res)
+         | (GET, ["redir-landing"]) =>
+           Naboris.Res.status(200, res)
+           |> Naboris.Res.text(req, "You have landed.")
+         | (GET, ["test-json"]) =>
+           Naboris.Res.status(200, res)
+           |> Naboris.Res.json(req, "{\"test\": \"foo\"}")
+         | (GET, ["test-raw"]) =>
+           Naboris.Res.status(200, res)
+           |> Naboris.Res.addHeader(("Content-Type", "application/xml"))
+           |> Naboris.Res.raw(req, "<xml></xml>")
+         | (GET, ["test-streaming"]) =>
+           let (ch, return) =
+             Naboris.Res.addHeader(("Content-Type", "text/html"), res)
+             |> Naboris.Res.writeChannel(req);
+           Lwt.async(() =>
+             Lwt_io.write(ch, "<html><head><title>Foo</title></head>")
+             >>= (() => Lwt_io.flush(ch))
+             >>= (() => Lwt_io.write(ch, "<body>Some data"))
+             >>= (() => Lwt_io.write(ch, ". And more data.</body></html>"))
+             >>= (() => Lwt_io.close(ch))
            );
-      | (Naboris.Method.GET, ["html"]) =>
-        Naboris.Res.status(200, res)
-        |> Naboris.Res.html(
-             req,
-             "<!doctype html><html><body>You made it.</body></html>",
-           );
-      | (Naboris.Method.GET, ["user", _userId, "item", _itemId]) =>
-        Naboris.Res.status(200, res)
-        |> Naboris.Res.html(
-             req,
-             "<!doctype html><html><body>You want some user id and item</body></html>",
-           );
-      | (Naboris.Method.GET, ["echo-query", "query"]) =>
-        echoQueryQuery(req, res, Naboris.Route.query(route));
-      | (Naboris.Method.GET, ["echo", str]) =>
-        Naboris.Res.status(200, res) |> Naboris.Res.html(req, str);
-      | (Naboris.Method.GET, ["echo", str1, "multi", str2]) =>
-        Naboris.Res.status(200, res)
-        |> Naboris.Res.html(req, str1 ++ "\n" ++ str2);
-      | (POST, ["echo"]) =>
-        Lwt.bind(
-          Naboris.Req.getBody(req),
-          bodyStr => {
-            Naboris.Res.status(200, res) |> Naboris.Res.html(req, bodyStr);
-          },
-        )
-      | (POST, ["login"]) =>
-        let (req2, res2, _sid) =
-          Naboris.SessionManager.startSession(
-            req,
-            res,
-            TestSession.{username: "realsessionuser"},
-          );
-        Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
-      | (GET, ["logout"]) =>
-        Naboris.SessionManager.removeSession(req, res)
-          |> Naboris.Res.status(200)
-          |> Naboris.Res.text(req, "OK");
-      | (GET, ["who-am-i"]) =>
-        switch (Naboris.Req.getSessionData(req)) {
-        | None =>
-          Naboris.Res.status(404, res) |> Naboris.Res.text(req, "Not found")
-        | Some(userData) =>
-          Naboris.Res.status(200, res)
-          |> Naboris.Res.text(req, userData.username)
-        };
-      | (GET, ["redir-launch"]) =>
-        Naboris.Res.redirect("/redir-landing", req, res);
-      | (GET, ["redir-landing"]) =>
-        Naboris.Res.status(200, res)
-        |> Naboris.Res.text(req, "You have landed.");
-      | (GET, ["test-json"]) =>
-        Naboris.Res.status(200, res)
-        |> Naboris.Res.json(req, "{\"test\": \"foo\"}");
-      | (GET, ["test-raw"]) =>
-        Naboris.Res.status(200, res)
-        |> Naboris.Res.addHeader(("Content-Type", "application/xml"))
-        |> Naboris.Res.raw(req, "<xml></xml>");
-      | (GET, ["test-streaming"]) =>
-        let (ch, return) = Naboris.Res.addHeader(("Content-Type", "text/html"), res)
-          |> Naboris.Res.writeChannel(req);
-        Lwt.async(() => Lwt_io.write(ch, "<html><head><title>Foo</title></head>")
-          >>= (() => Lwt_io.flush(ch))
-          >>= (() => Lwt_io.write(ch, "<body>Some data"))
-          >>= (() => Lwt_io.write(ch, ". And more data.</body></html>"))
-          >>= (() => Lwt_io.close(ch)));
-        return;
-      | (GET, ["error", "boys"]) =>
-        Naboris.Res.reportError(SomebodyGoofed("Problems"), req, res);
-      | _ =>
-        Naboris.Res.status(404, res)
-        |> Naboris.Res.html(
-             req,
-             "<!doctype html><html><body>Page not found</body></html>",
-           );
-      });
+           return;
+         | (GET, ["error", "boys"]) =>
+           Naboris.Res.reportError(SomebodyGoofed("Problems"), req, res)
+         | _ =>
+           Naboris.Res.status(404, res)
+           |> Naboris.Res.html(
+                req,
+                "<!doctype html><html><body>Page not found</body></html>",
+              )
+         }
+       );
 
-  let testServerConfig2: Naboris.ServerConfig.t(TestSession.t) = Naboris.ServerConfig.create()
+  let testServerConfig2: Naboris.ServerConfig.t(TestSession.t) =
+    Naboris.ServerConfig.create()
     |> Naboris.ServerConfig.setOnListen(() => Lwt.wakeup_later(ssr2, ()))
     |> Naboris.ServerConfig.setRequestHandler((route, req, res) =>
-      switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
-      | _ =>
-        Naboris.Res.status(404, res)
-        |> Naboris.Res.html(
-             req,
-             "<!doctype html><html><body>Page not found</body></html>",
-           );
-      });
+         switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
+         | _ =>
+           Naboris.Res.status(404, res)
+           |> Naboris.Res.html(
+                req,
+                "<!doctype html><html><body>Page not found</body></html>",
+              )
+         }
+       );
 
   // test the builder functions and middlewares
-  let testServerConfig3: Naboris.ServerConfig.t(TestSession.t) = Naboris.ServerConfig.create()
-    |> Naboris.ServerConfig.setSessionConfig(~sidKey="custom.sid", sessionConfig.getSession)
+  let testServerConfig3: Naboris.ServerConfig.t(TestSession.t) =
+    Naboris.ServerConfig.create()
+    |> Naboris.ServerConfig.setSessionConfig(
+         ~sidKey="custom.sid",
+         sessionConfig.getSession,
+       )
     |> Naboris.ServerConfig.addMiddleware((next, route, req, res) => {
-      switch(Naboris.Route.path(route)) {
-        | ["middleware", "one", _] =>
-          res
-            |> Naboris.Res.status(200)
-            |> Naboris.Res.text(req, "middleware 1");
-        | _ =>
-          next(route, req, res);
-      };
-    })
+         switch (Naboris.Route.path(route)) {
+         | ["middleware", "one", _] =>
+           res
+           |> Naboris.Res.status(200)
+           |> Naboris.Res.text(req, "middleware 1")
+         | _ => next(route, req, res)
+         }
+       })
     |> Naboris.ServerConfig.addMiddleware((next, route, req, res) => {
-      switch(Naboris.Route.path(route)) {
-        | ["middleware", "one", "never"] =>
-          res
-            |> Naboris.Res.status(200)
-            |> Naboris.Res.text(req, "this should never happen");
-        | ["middleware", "two"] =>
-          res
-            |> Naboris.Res.status(200)
-            |> Naboris.Res.text(req, "middleware 2");
-        | _ => next(route, req, res)
-      }
-    })
+         switch (Naboris.Route.path(route)) {
+         | ["middleware", "one", "never"] =>
+           res
+           |> Naboris.Res.status(200)
+           |> Naboris.Res.text(req, "this should never happen")
+         | ["middleware", "two"] =>
+           res
+           |> Naboris.Res.status(200)
+           |> Naboris.Res.text(req, "middleware 2")
+         | _ => next(route, req, res)
+         }
+       })
     |> Naboris.ServerConfig.setOnListen(() => Lwt.wakeup_later(ssr3, ()))
-    |> Naboris.ServerConfig.setRequestHandler((route, req, res) => switch(Naboris.Route.path(route)) {
-      | ["no", "middleware"] =>
-        res
-          |> Naboris.Res.status(200)
-          |> Naboris.Res.text(req, "Regular router");
-      | (["no", "middleware", "login"]) =>
-        let (req2, res2, _sid) =
-          Naboris.SessionManager.startSession(
-            req,
-            res,
-            TestSession.{username: "realsessionuser"},
-          );
-        Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
-      | _ =>
-        res
-          |> Naboris.Res.status(404)
-          |> Naboris.Res.text(req, "Resource not found.");
-    });
+    |> Naboris.ServerConfig.setRequestHandler((route, req, res) =>
+         switch (Naboris.Route.path(route)) {
+         | ["no", "middleware"] =>
+           res
+           |> Naboris.Res.status(200)
+           |> Naboris.Res.text(req, "Regular router")
+         | ["no", "middleware", "login"] =>
+           let (req2, res2, _sid) =
+             Naboris.SessionManager.startSession(
+               req,
+               res,
+               TestSession.{username: "realsessionuser"},
+             );
+           Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
+         | _ =>
+           res
+           |> Naboris.Res.status(404)
+           |> Naboris.Res.text(req, "Resource not found.")
+         }
+       );
   let _foo2 = Naboris.listenAndWaitForever(9991, testServerConfig);
   Lwt.bind(ssp1, () => {
     Lwt.bind(
@@ -200,9 +212,11 @@ let startServers = lwtSwitch => {
           Lwt.bind(
             Lwt_unix.sleep(1.0),
             () => {
-              let _baz = Naboris.listenAndWaitForever(9993, testServerConfig3);
+              let _baz =
+                Naboris.listenAndWaitForever(9993, testServerConfig3);
               ssp3;
-            });
+            },
+          )
         });
       },
     )
@@ -602,13 +616,20 @@ let testSuite = () => (
                 Alcotest.(check(string, "status", codeStr, "200 OK"));
                 let logoutHeaders = Cohttp.Response.headers(resp2);
                 switch (Cohttp.Header.get(logoutHeaders, "Set-Cookie")) {
-                  | Some(setCookie) =>
-                    Alcotest.(check(string, "set header", "nab.sid=; Max-Age=0;", setCookie));
-                    Lwt.return_unit;
-                  | None =>
-                    Alcotest.(check(bool, "failed", false, true));
-                    Lwt.return_unit;
-                }
+                | Some(setCookie) =>
+                  Alcotest.(
+                    check(
+                      string,
+                      "set header",
+                      "nab.sid=; Max-Age=0;",
+                      setCookie,
+                    )
+                  );
+                  Lwt.return_unit;
+                | None =>
+                  Alcotest.(check(bool, "failed", false, true));
+                  Lwt.return_unit;
+                };
               }
             );
           | None =>
@@ -709,7 +730,9 @@ let testSuite = () => (
       )
     }),
     Alcotest_lwt.test_case(
-      "Get \"/test-streaming\" sends chunked header and data", `Slow, (_lwtSwitch, _) => {
+      "Get \"/test-streaming\" sends chunked header and data",
+      `Slow,
+      (_lwtSwitch, _) => {
       Cohttp_lwt_unix.Client.get(
         Uri.of_string("http://localhost:9991/test-streaming"),
       )
@@ -744,7 +767,14 @@ let testSuite = () => (
           Cohttp_lwt.Body.to_string(bod)
           >>= (
             bodyStr => {
-              Alcotest.(check(string, "body", bodyStr, "<html><head><title>Foo</title></head><body>Some data. And more data.</body></html>"));
+              Alcotest.(
+                check(
+                  string,
+                  "body",
+                  bodyStr,
+                  "<html><head><title>Foo</title></head><body>Some data. And more data.</body></html>",
+                )
+              );
               Lwt.return_unit;
             }
           );
@@ -752,7 +782,9 @@ let testSuite = () => (
       )
     }),
     Alcotest_lwt.test_case(
-      "Middleware - Get \"/middleware/one/never\" should be served by the first middleware", `Slow, (_lwtSwitch, _) => {
+      "Middleware - Get \"/middleware/one/never\" should be served by the first middleware",
+      `Slow,
+      (_lwtSwitch, _) => {
       Cohttp_lwt_unix.Client.get(
         Uri.of_string("http://localhost:9993/middleware/one/never"),
       )
@@ -779,7 +811,9 @@ let testSuite = () => (
       )
     }),
     Alcotest_lwt.test_case(
-      "Middleware - Get \"/middleware/two\" should be served by the second middleware", `Slow, (_lwtSwitch, _) => {
+      "Middleware - Get \"/middleware/two\" should be served by the second middleware",
+      `Slow,
+      (_lwtSwitch, _) => {
       Cohttp_lwt_unix.Client.get(
         Uri.of_string("http://localhost:9993/middleware/two"),
       )
@@ -806,7 +840,9 @@ let testSuite = () => (
       )
     }),
     Alcotest_lwt.test_case(
-      "Middleware - Get \"/no/middleware\" should be served by the route handler", `Slow, (_lwtSwitch, _) => {
+      "Middleware - Get \"/no/middleware\" should be served by the route handler",
+      `Slow,
+      (_lwtSwitch, _) => {
       Cohttp_lwt_unix.Client.get(
         Uri.of_string("http://localhost:9993/no/middleware"),
       )
@@ -832,7 +868,8 @@ let testSuite = () => (
         }
       )
     }),
-    Alcotest_lwt.test_case("Can start a session with custom cookie key", `Slow, (_lwtSwitch, _) => {
+    Alcotest_lwt.test_case(
+      "Can start a session with custom cookie key", `Slow, (_lwtSwitch, _) => {
       Cohttp_lwt_unix.Client.post(
         Uri.of_string("http://localhost:9993/no/middleware/login"),
       )

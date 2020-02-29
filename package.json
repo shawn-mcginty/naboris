@@ -43,13 +43,14 @@
     "@opam/uri": ">=2.2.0"
   },
   "devDependencies": {
-    "ocaml": "~4.7",
-    "esy": "^0.5.6",
-    "@opam/cohttp": "*",
-    "@opam/cohttp-lwt-unix": "*",
     "@opam/alcotest": "~1.0.0",
     "@opam/alcotest-lwt": "~1.0.0",
-    "@opam/odoc": "*"
+    "@opam/cohttp": "*",
+    "@opam/cohttp-lwt-unix": "*",
+    "@opam/odoc": "*",
+    "esy": "^0.5.6",
+    "ocaml": "~4.7",
+    "reason-cli": "^3.3.3-macos-1"
   },
   "peerDependencies": {
     "ocaml": ">=4.5.0"

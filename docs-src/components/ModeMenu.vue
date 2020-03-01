@@ -1,12 +1,20 @@
 <template>
   <p v-if="!loading" class="fab buttons">
-    <button class="button is-medium" @click="toggleDarkMode">
+    <button
+      class="button is-medium"
+      aria-label="Toggle between dark and light mode"
+      @click="toggleDarkMode"
+    >
       <span class="icon">
         <i :class="darkModeIconClass" />
       </span>
     </button>
     <br>
-    <button class="button is-medium" @click="toggleLanguage">
+    <button
+      class="button is-medium"
+      aria-label="Toggle between ReasonML and OCaml syntax"
+      @click="toggleLanguage"
+    >
       <span class="icon">
         <i class="icons">
           <svg

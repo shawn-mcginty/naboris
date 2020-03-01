@@ -40,3 +40,8 @@ $fa-font-path: "~static/fonts/fa";
 @import "./fonts.scss";
 @import "./markdown.scss";
 @import "./icons.scss";
+
+.main-hero {
+  background-image: url('~static/images/hero-desert.jpg');
+  background-size: cover;
+}

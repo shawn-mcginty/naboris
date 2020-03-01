@@ -1,7 +1,7 @@
 <template>
   <div>
     <section class="hero is-medium is-light is-bold">
-      <div class="hero-body">
+      <div class="hero-body main-hero">
         <div class="container">
           <h1 class="title">
             naboris <span class="version-number is-size-7 is-family-code">{{ version }}</span>

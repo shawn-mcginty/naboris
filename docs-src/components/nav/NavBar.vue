@@ -38,7 +38,7 @@
         <div class="navbar-item">
           <div class="field">
             <p class="control has-icons-left">
-              <input class="input is-info is-small is-rounded" type="text" placeholder="Search">
+              <input class="input is-info is-small is-rounded" type="text" placeholder="Search" aria-label="Search">
               <span class="icon is-small is-left">
                 <i class="fas fa-search" />
               </span>

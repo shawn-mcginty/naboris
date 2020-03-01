@@ -50,7 +50,7 @@
     "@opam/odoc": "*",
     "esy": "^0.5.6",
     "ocaml": "~4.7",
-    "reason-cli": "^3.3.3-macos-1"
+    "reason-cli": "*"
   },
   "peerDependencies": {
     "ocaml": ">=4.5.0"

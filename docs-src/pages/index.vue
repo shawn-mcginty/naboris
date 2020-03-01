@@ -113,10 +113,10 @@
               <form>
                 <div class="field has-addons">
                   <div class="control">
-                    <input class="input" type="email" placeholder="smarty@coolorg.com">
+                    <input class="input" type="email" placeholder="smarty@coolorg.com" aria-label="Input email for newsletter">
                   </div>
                   <div class="control">
-                    <a class="button is-info">
+                    <a class="button is-info" aria-label="Sign up for newsletter">
                       Sign Up
                     </a>
                   </div>

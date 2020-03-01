@@ -29,7 +29,8 @@ export default {
         loading: this.$store.state.loading,
         'code-dark-mode': this.$store.state.darkMode,
         'show-reason': this.$store.state.language !== 'ocaml',
-        'show-ocaml': this.$store.state.language === 'ocaml'
+        'show-ocaml': this.$store.state.language === 'ocaml',
+        'main-section': true
       };
     }
   },
@@ -38,3 +39,8 @@ export default {
   }
 };
 </script>
+<style lang="scss" scoped>
+  .main-section {
+    min-height: 70vh;
+  }
+</style>

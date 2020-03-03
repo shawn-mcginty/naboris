@@ -46,6 +46,11 @@
         </div>
         <div class="column is-1" />
       </div>
+      <p class="has-text-centered is-size-6">
+        Found a typo? a bug? or something that just doesn't make any sense?
+        Help improve these docs by opening a
+        <a target="_blank" href="https://github.com/shawn-mcginty/naboris/issues">github issue</a>.
+      </p>
       <p class="license-text has-text-centered is-size-7">
         naboris source code is licensed <a href="https://github.com/shawn-mcginty/naboris/blob/master/LICENSE">MIT</a>.
         <br>
@@ -56,3 +61,8 @@
     </div>
   </footer>
 </template>
+<style lang="scss" scoped>
+  .license-text {
+    margin-top: 1.5rem;
+  }
+</style>

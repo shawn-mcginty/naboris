@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-      <nuxt-link class="navbar-item" to="/">
+      <a href="/" class="navbar-item">
         <svg class="naboris-svg" viewBox="24.948 24.958 100.481 99.528" xmlns="http://www.w3.org/2000/svg">
           <g>
             <path d="M 28.119 24.958 C 30.44 25.291 32.992 26.111 35.775 27.419 C 36.27 27.652 36.23 29.191 35.654 32.038 C 35.584 32.385 34.677 32.426 32.932 32.161 C 31.669 31.97 31.59 32.751 32.697 34.506 C 33.44 35.685 34.367 36.726 35.476 37.63 C 36.658 38.593 35.832 39.004 32.998 38.864 C 31.404 38.785 30.257 37.676 29.557 35.536 C 28.878 33.462 28.19 31.392 27.491 29.325 C 27.014 27.914 27.223 26.459 28.119 24.958 Z" />
@@ -18,7 +18,7 @@
           </g>
         </svg>
         naboris
-      </nuxt-link>
+      </a>
 
       <div
         :class="hambergerButtonClass"
@@ -45,9 +45,9 @@
             </p>
           </div>
         </div>
-        <nuxt-link class="navbar-item" to="/">
+        <a href="/" class="navbar-item">
           Home
-        </nuxt-link>
+        </a>
         <div class="navbar-item has-dropdown is-hoverable">
           <a class="navbar-link" href="/quick-start">
             Quick Start
@@ -59,6 +59,12 @@
             </a>
             <a class="navbar-item" href="/quick-start/basic-server">
               Basic Server
+            </a>
+            <a class="navbar-item" href="/quick-start/routing">
+              Routing
+            </a>
+            <a class="navbar-item" href="/quick-start/static-files">
+              Static files
             </a>
           </div>
         </div>

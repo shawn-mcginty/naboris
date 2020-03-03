@@ -42,10 +42,14 @@
 <script>
 import installation from '~/content/docs/quick-start/installation.md';
 import basicserver from '~/content/docs/quick-start/basic-server.md';
+import routing from '~/content/docs/quick-start/routing.md';
+import staticfiles from '~/content/docs/quick-start/static-files.md';
 
 const imports = [
   installation,
-  basicserver
+  basicserver,
+  routing,
+  staticfiles
 ];
 
 export default {

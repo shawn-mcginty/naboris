@@ -48,6 +48,7 @@
     "@opam/cohttp": "*",
     "@opam/cohttp-lwt-unix": "*",
     "@opam/odoc": "*",
+    "@opam/merlin": "*",
     "esy": "^0.5.6",
     "ocaml": "~4.7",
     "reason-cli": "*"

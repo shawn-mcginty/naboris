@@ -68,13 +68,13 @@
             </a>
           </div>
         </div>
-        <a class="navbar-item" href="/">
+        <a class="navbar-item" href="/guides">
           Guides
         </a>
-        <a class="navbar-item" href="/">
+        <a class="navbar-item" href="/odocs">
           Docs
         </a>
-        <a class="navbar-item" href="/">
+        <a class="navbar-item" href="/advanced">
           Advanced
         </a>
         <a class="navbar-item" href="https://github.com/shawn-mcginty/naboris">

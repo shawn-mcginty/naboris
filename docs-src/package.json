@@ -11,7 +11,8 @@
     "start": "nuxt start",
     "generate": "nuxt generate",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
-    "test": "jest"
+    "test": "jest",
+    "load-docs": "rm -rf static/odocs && cp -r ../docs/html static/odocs"
   },
   "lint-staged": {
     "*.{js,vue}": "npm run lint"

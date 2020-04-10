@@ -110,15 +110,15 @@
               </h2>
             </div>
             <div class="column">
-              <form>
+              <form action="https://mail.shawnmcginty.com/subscribe" method="POST" accept-charset="utf-8">
                 <div class="field has-addons">
                   <div class="control">
-                    <input class="input" type="email" placeholder="smarty@coolorg.com" aria-label="Input email for newsletter">
+                    <input class="input" type="email" placeholder="smarty@coolorg.com" aria-label="Input email for newsletter" required>
                   </div>
                   <div class="control">
-                    <a class="button is-info" aria-label="Sign up for newsletter">
+                    <button class="button is-info" aria-label="Sign up for newsletter">
                       Sign Up
-                    </a>
+                    </button>
                   </div>
                 </div>
               </form>

@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+  <nav class="navbar is-primary is-fixed-top" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
       <a href="/" class="navbar-item">
         <svg class="naboris-svg" viewBox="24.948 24.958 100.481 99.528" xmlns="http://www.w3.org/2000/svg">

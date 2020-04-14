@@ -37,7 +37,7 @@
 export default {
   data () {
     return {
-      title: 'Thank You!'
+      title: 'Thank you for signing up to naboris newsletter!'
     };
   },
   head () {

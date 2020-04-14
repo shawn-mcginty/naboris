@@ -37,7 +37,7 @@
 export default {
   data () {
     return {
-      title: 'Advanced'
+      title: 'Advanced naboris usage'
     };
   },
   head () {

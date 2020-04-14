@@ -69,7 +69,7 @@ export default {
     const docs = pages[page];
 
     return {
-      title: docs.attributes.title,
+      title: `naboris - ${docs.attributes.title}`,
       page
     };
   },

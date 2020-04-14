@@ -37,7 +37,7 @@
 export default {
   data () {
     return {
-      title: 'Guides'
+      title: 'Guides for naboris'
     };
   },
   head () {

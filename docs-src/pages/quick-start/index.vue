@@ -61,7 +61,7 @@ export default {
 
     return {
       pages,
-      title: 'Quick Start'
+      title: 'Quick Start with naboris'
     };
   },
   methods: {

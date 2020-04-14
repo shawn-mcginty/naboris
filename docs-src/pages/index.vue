@@ -113,7 +113,14 @@
               <form action="https://mail.shawnmcginty.com/subscribe" method="POST" accept-charset="utf-8">
                 <div class="field has-addons">
                   <div class="control">
-                    <input class="input" type="email" placeholder="smarty@coolorg.com" aria-label="Input email for newsletter" required>
+                    <input
+                      class="input"
+                      type="email"
+                      name="email"
+                      placeholder="smarty@coolorg.com"
+                      aria-label="Input email for newsletter"
+                      required
+                    >
                   </div>
                   <div class="control">
                     <button class="button is-info" aria-label="Sign up for newsletter">
@@ -148,7 +155,7 @@ export default {
     return {
       packageDescription: docsPackage.description,
       version: parentPackage.version,
-      title: `naboris ${docsPackage.description}`
+      title: `naboris - ${docsPackage.description}`
     };
   },
   head () {

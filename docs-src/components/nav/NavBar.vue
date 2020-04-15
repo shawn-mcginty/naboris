@@ -22,14 +22,7 @@
     <div id="naboris-navbar-menu" :class="navbarMenuClass">
       <div class="navbar-end">
         <div class="navbar-item">
-          <!-- <div class="field" style="margin-bottom: 0px">
-            <p class="control has-icons-left">
-              <input v-model="searchString" class="input is-info is-small is-rounded" type="text" placeholder="Search" aria-label="Search">
-              <span class="icon is-small is-left">
-                <i class="fas fa-search" />
-              </span>
-            </p>
-          </div> -->
+          <Search style="margin-bottom: 0px" />
         </div>
         <a href="/" class="navbar-item">
           Home
@@ -73,10 +66,12 @@
 </template>
 <script>
 import NaborisLogo from '../NaborisLogo';
+import Search from './Search';
 
 export default {
   components: {
-    NaborisLogo
+    NaborisLogo,
+    Search
   },
   data () {
     return {

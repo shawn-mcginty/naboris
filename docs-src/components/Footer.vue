@@ -2,6 +2,7 @@
   <footer class="footer">
     <script async defer src="https://buttons.github.io/buttons.js" />
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8" />
+    <script src="https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.js" />
     <div class="container-fluid">
       <div class="columns">
         <div class="column is-1" />

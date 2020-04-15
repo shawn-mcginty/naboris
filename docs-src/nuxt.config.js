@@ -58,7 +58,8 @@ export default {
     link: [
       { rel: 'icon', type: 'image/png', href: '/logos/logo-color-16x16.png', sizes: '16x16' },
       { rel: 'icon', type: 'image/png', href: '/logos/logo-color-32x32.png', sizes: '32x32' },
-      { rel: 'icon', type: 'image/png', href: '/logos/logo-color-96x96.png', sizes: '96x96' }
+      { rel: 'icon', type: 'image/png', href: '/logos/logo-color-96x96.png', sizes: '96x96' },
+      { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.css' }
     ]
   },
   generate: {

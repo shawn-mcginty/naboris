@@ -1,5 +1,8 @@
+/* eslint-disable */
 export default ({ app }) => {
-  if (process.env.NODE_ENV !== 'production') return
+  if (process.env.NODE_ENV !== 'production') {
+    return;
+  }
   // Matomo
   window._paq = window._paq || [];
   /* tracker methods like "setCustomDimension" should be called before "trackPageView" */

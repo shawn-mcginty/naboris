@@ -1,5 +1,14 @@
 <template>
-  <svg version="1.1" preserveAspectRatio="xMinYMin meet" x="0px" y="0px" width="36px" height="36px" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+  <svg
+    version="1.1"
+    preserveAspectRatio="xMinYMin meet"
+    x="0px"
+    y="0px"
+    width="36px"
+    height="36px"
+    viewBox="0 0 36 36"
+    xmlns="http://www.w3.org/2000/svg"
+  >
     <g id="black-group">
       <path d="M 7 0 L 8 0 L 8 1 L 7 1 L 7 0 Z" style="" />
       <path d="M 9 0 L 11 0 L 11 2 L 10 2 L 10 1 L 9 1 L 9 0 Z" style="" />
@@ -134,9 +143,9 @@
   </svg>
 </template>
 <script>
-  export default {
-    data () {
-      return {};
-    }
+export default {
+  data () {
+    return {};
   }
+};
 </script>

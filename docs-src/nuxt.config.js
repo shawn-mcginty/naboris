@@ -80,6 +80,7 @@ export default {
   ** Plugins to load before mounting the App
   */
   plugins: [
+    { src: '~plugins/matomo.js', mode: 'client' }
   ],
   /*
   ** Nuxt.js dev-modules
@@ -92,7 +93,6 @@ export default {
   ** Nuxt.js modules
   */
   modules: [
-    '@nuxtjs/svg'
   ],
   /*
   ** Build configuration

@@ -20,32 +20,40 @@
     height: 36px;
     width: 36px;
     margin-right: 5px;
+  }
+}
 
-    #white-group {
-      path {
-        fill: white !important;
-      }
+svg.naboris-svg {
+  #white-group {
+    path {
+      fill: white !important;
     }
+  }
+}
 
-    #black-group {
-      path {
-        fill: white !important;
-        opacity: 50% !important;
-      }
+svg.naboris-svg {
+  #black-group {
+    path {
+      fill: white !important;
+      fill-opacity: 0.5 !important;
     }
+  }
+}
 
-    #shadow-group {
-      path {
-        fill: white !important;
-        opacity: 70% !important;
-      }
+svg.naboris-svg {
+  #shadow-group {
+    path {
+      fill: white !important;
+      fill-opacity: 0.7 !important;
     }
+  }
+}
 
-    #camel-group {
-      path {
-        fill: white !important;
-        opacity: 80% !important;
-      }
+svg.naboris-svg {
+  #camel-group {
+    path {
+      fill: white !important;
+      fill-opacity: 0.8 !important;
     }
   }
 }

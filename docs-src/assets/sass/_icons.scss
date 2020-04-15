@@ -20,8 +20,32 @@
     height: 36px;
     width: 36px;
     margin-right: 5px;
-    path {
-      fill: $white-bis;
+
+    #white-group {
+      path {
+        fill: white !important;
+      }
+    }
+
+    #black-group {
+      path {
+        fill: white !important;
+        opacity: 50% !important;
+      }
+    }
+
+    #shadow-group {
+      path {
+        fill: white !important;
+        opacity: 70% !important;
+      }
+    }
+
+    #camel-group {
+      path {
+        fill: white !important;
+        opacity: 80% !important;
+      }
     }
   }
 }

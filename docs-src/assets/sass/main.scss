@@ -47,5 +47,6 @@ $fa-font-path: "~static/fonts/fa";
 }
 
 .main-section {
+  // compensate for the fixed navbar on top of the screen
   padding-top: 52px;
 }

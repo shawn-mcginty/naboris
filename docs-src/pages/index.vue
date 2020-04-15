@@ -66,7 +66,7 @@
                   <p>
                     Using a lightweight API and following a middleware pattern makes
                     it easy to create tools and libraries for use with naboris. Add middleware
-                    for protecting certain endpoints from unauthorized useres, encode/decode
+                    for protecting certain endpoints from unauthorized users, encode/decode
                     request data, verify request headers, request/reponse logging, you name it!
                   </p>
                 </div>

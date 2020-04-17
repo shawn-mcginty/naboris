@@ -124,7 +124,10 @@ export default {
   },
   head () {
     return {
-      title: this.title
+      title: this.title,
+      meta: [
+        { hid: 'description', name: 'description', content: `Get started quickly with ${this.title}.` }
+      ]
     };
   }
 };

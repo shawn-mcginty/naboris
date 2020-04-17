@@ -60,6 +60,11 @@ export default {
       { rel: 'icon', type: 'image/png', href: '/logos/logo-color-32x32.png', sizes: '32x32' },
       { rel: 'icon', type: 'image/png', href: '/logos/logo-color-96x96.png', sizes: '96x96' },
       { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.css' }
+    ],
+    script: [
+      { src: 'https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.js' },
+      { async: true, defer: true, src: 'https://buttons.github.io/buttons.js' },
+      { async: true, src: 'https://platform.twitter.com/widgets.js', charset: 'utf-8' }
     ]
   },
   generate: {

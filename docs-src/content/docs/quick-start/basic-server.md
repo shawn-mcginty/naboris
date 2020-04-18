@@ -5,7 +5,7 @@ title: Basic Server
 > All Quick Start examples will use **esy** and **dune** for dependency management and build. These are _not requirements_ of naboris.
 
 ## Basic Server
-An http server with minimal configuaration.
+An http server with minimal configuration.
 
 - [Project Structure](#project-structure)
 - [Esy package.json](#esy-package-json)

@@ -2,10 +2,8 @@
 title: Error Handling
 ---
 
-## Middlewares
-A set of functions that either respond to an http request or pass it on to the next
-middleware on the stack.
+## Error Handling
+Tips for handling errors nicely for the user.
 
-- [Writing Middlewares](#writing-middlewares)
-- [Using Middlewares](#using-middlewares)
-- [Built In Middlewares](#built-in-middlewares)
+- [Report Exception](#report-exception)
+- [Error Handler](#error-handler)

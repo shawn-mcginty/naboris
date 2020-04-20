@@ -73,4 +73,21 @@ The above helper function [`Res.reportException`](/odocs/naboris/Naboris/Res/ind
 
 Use [`ServerConfig.setErrorHandler`](/odocs/naboris/Naboris/ServerConfig/#val-setErrorHandler) and provide an [`ErrorHandler.t`](/odocs/naboris/Naboris/ErrorHandler/index.html).
 
+```reason
+// ServerConfig module
+let setErrorHandler: (ErrorHandler.t, t('sessionData)) => t('sessionData);
+```
+```ocaml
+(* ServerConfig module *)
+val setErrorHandler : ErrorHandler.t -> 'sessionData t -> 'sessionData t
+```
+
+[`ErrorHandler.t`](/odocs/naboris/Naboris/ErrorHandler/index.html) is a function which takes as arguments the `exn` passed in to [`Res.reportException`](/odocs/naboris/Naboris/Res/index.html#val-reportError) and the [`Route.t`](/odocs/naboris/Naboris/Route/index.html) of the current request. It then expects a return value of an `Lwt` promise of a tuple of `(headers * body)`.  `headers` being a `(string * string) list` and body being a `string`.
+```reason
+// ErrorHandler module
+type t = (exn, Route.t) => Lwt.t((list((string, string)), string));
+```
+```ocaml
+(* ErrorHandler module *)
+type t = exn -> Route.t -> ((string * string) list * string) Lwt.t
 ```

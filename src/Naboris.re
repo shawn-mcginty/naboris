@@ -11,6 +11,7 @@ module SessionManager = SessionManager;
 module Cookie = Cookie;
 module ServerConfig = ServerConfig;
 module SessionConfig = SessionConfig;
+module ErrorHandler = ErrorHandler;
 
 open Lwt.Infix;
 
@@ -45,6 +46,6 @@ let listenAndWaitForever =
       port,
       serverConfig: ServerConfig.t('sessionData),
     ) => {
-  let (forever, _) = listen(~inetAddr, port, serverConfig)
+  let (forever, _) = listen(~inetAddr, port, serverConfig);
   forever;
 };

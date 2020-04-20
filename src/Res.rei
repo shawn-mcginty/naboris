@@ -48,7 +48,8 @@ let raw: (Req.t('sessionData), string, t) => Lwt.t(t);
  And a [Lwt.t(t)] promise, which will resolve when the output channel is closed.
  This will set [Transfer-Encoding: chunked] header and follow the protocol for chunked responses.
  */
-let writeChannel: (Req.t('a), t) => (Lwt_io.channel(Lwt_io.output), Lwt.t(t));
+let writeChannel:
+  (Req.t('a), t) => (Lwt_io.channel(Lwt_io.output), Lwt.t(t));
 
 /**
  Creates new response from [t] with header [(string, string)] added.
@@ -71,9 +72,10 @@ let static: (string, list(string), Req.t('sessionData), t) => Lwt.t(t);
  */
 let redirect: (string, Req.t('sessionData), t) => Lwt.t(t);
 
-
 /**
- Report an error [exn] to Httpaf.
+ Report an error [exn] by executing [error_handler] from your [Naboris.ServerConfig].
+
+ {e This function will create a new [Res] and any headers on the current [Res] will be lost.}
  */
 let reportError: (exn, Req.t('sessionData), t) => Lwt.t(t);
 

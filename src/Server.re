@@ -2,6 +2,11 @@ module Req = Req;
 module Res = Res;
 module Router = Router;
 
+exception UnknownError(string);
+
+type unknownError =
+  | UnknownError;
+
 open Lwt.Infix;
 
 let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
@@ -13,7 +18,11 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
     let route = Router.generateRoute(target, meth);
 
     Lwt.async(() => {
-      let rawReq = Req.fromReqd(request_descriptor, ServerConfig.sessionConfig(serverConfig));
+      let rawReq =
+        Req.fromReqd(
+          request_descriptor,
+          ServerConfig.sessionConfig(serverConfig),
+        );
 
       SessionManager.resumeSession(serverConfig, rawReq)
       >>= (
@@ -39,21 +48,72 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
 
             fullHandler(route, req, Res.default());
           }
-      ) >>= ((_res) => Lwt.return_unit);
+      )
+      >>= (_res => Lwt.return_unit);
     });
   };
 
-  let error_handler =
-      (
-        _client_address: Unix.sockaddr,
-        ~request as _=?,
-        _error,
-        start_response,
-      ) => {
-    let response_body = start_response(Httpaf.Headers.empty);
-    Httpaf.Body.write_string(response_body, "Unknown Error");
+  let default_error_handler =
+      (_client_address: Unix.sockaddr, ~request as _=?, error, start_response) => {
+    let msg =
+      switch (error) {
+      | `Exn(e) => Printexc.to_string(e)
+      | `Internal_server_error => "Internal server error"
+      | `Bad_gateway => "Bad gateway"
+      | `Bad_request => "Bad request"
+      };
+    let headers = [
+      ("Content-type", "plain/text"),
+      ("Conent-length", string_of_int(String.length(msg))),
+    ];
+    let response_body = start_response(Httpaf.Headers.of_list(headers));
+    Httpaf.Body.write_string(response_body, msg);
     Httpaf.Body.close_writer(response_body);
   };
+
+  let error_handler =
+    switch (ServerConfig.errorHandler(serverConfig)) {
+    | None => default_error_handler
+    | Some(handler) => (
+        (
+          _client_address: Unix.sockaddr,
+          ~request=?,
+          error: Httpaf.Server_connection.error,
+          start_response,
+        ) =>
+          switch (request) {
+          | None =>
+            let response_body = start_response(Httpaf.Headers.empty);
+            Httpaf.Body.write_string(response_body, "Unknown Error");
+            Httpaf.Body.close_writer(response_body);
+          | Some((httpafReq: Httpaf.Request.t)) =>
+            let target = httpafReq.target;
+            let meth = Method.ofHttpAfMethod(httpafReq.meth);
+            let route = Router.generateRoute(target, meth);
+
+            let realExn =
+              switch (error) {
+              | `Exn(e) => e
+              | `Internal_server_error =>
+                UnknownError("Internal server error")
+              | `Bad_gateway => UnknownError("Bad gateway")
+              | `Bad_request => UnknownError("Bad request")
+              };
+
+            let _async =
+              handler(realExn, route)
+              >>= (
+                ((_headers, _body)) => {
+                  let response_body = start_response(Httpaf.Headers.empty);
+                  Httpaf.Body.write_string(response_body, "Unknown Error");
+                  Httpaf.Body.close_writer(response_body);
+                  Lwt.return_unit;
+                }
+              );
+            ();
+          }
+      )
+    };
 
   Httpaf_lwt_unix.Server.create_connection_handler(
     ~config=?ServerConfig.httpAfConfig(serverConfig),

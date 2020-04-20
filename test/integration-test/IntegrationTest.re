@@ -51,6 +51,12 @@ let startServers = lwtSwitch => {
          ["static"],
          Sys.getenv("cur__root") ++ "/test/integration-test/test_assets",
        )
+    |> Naboris.ServerConfig.setErrorHandler((error, _route) => {
+         switch (error) {
+         | SomebodyGoofed(_) => Lwt.return(([], "Dude, somebody goofed"))
+         | _ => Lwt.return(([], "else"))
+         }
+       })
     |> Naboris.ServerConfig.setRequestHandler((route, req, res) =>
          switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
          | (Naboris.Method.GET, ["echo", "pre-existing-route"]) =>
@@ -664,12 +670,20 @@ let testSuite = () => (
         Uri.of_string("http://localhost:9991/error/boys"),
       )
       >>= (
-        ((resp, _bod)) => {
+        ((resp, bod)) => {
           let codeStr = Cohttp.Code.string_of_status(resp.status);
           Alcotest.(
             check(string, "status", codeStr, "500 Internal Server Error")
           );
-          Lwt.return_unit;
+          Cohttp_lwt.Body.to_string(bod)
+          >>= (
+            bodyStr => {
+              Alcotest.(
+                check(string, "body", bodyStr, "Dude, somebody goofed")
+              );
+              Lwt.return_unit;
+            }
+          );
         }
       )
     }),

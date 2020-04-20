@@ -11,8 +11,8 @@
                 </nuxt-link>
               </li>
               <li>
-                <nuxt-link to="/quick-start">
-                  Quick Start
+                <nuxt-link to="/guides">
+                  Guides
                 </nuxt-link>
               </li>
               <li class="is-active">
@@ -51,16 +51,18 @@
   </div>
 </template>
 <script>
-import installation from '~/content/docs/quick-start/installation.md';
-import basicserver from '~/content/docs/quick-start/basic-server.md';
-import routing from '~/content/docs/quick-start/routing.md';
-import staticfiles from '~/content/docs/quick-start/static-files.md';
+import errorHandling from '~/content/docs/guides/error-handling.md';
+import middlewares from '~/content/docs/guides/middlewares.md';
+import templatingEngines from '~/content/docs/guides/templating-engines.md';
+import securityBestPractices from '~/content/docs/guides/security-best-practices.md';
+import performanceBestPractices from '~/content/docs/guides/performance-best-practices.md';
 
 const pages = {
-  installation,
-  'basic-server': basicserver,
-  routing,
-  'static-files': staticfiles
+  'error-handling': errorHandling,
+  middlewares,
+  'templating-engines': templatingEngines,
+  'security-best-practices': securityBestPractices,
+  'performance-best-practices': performanceBestPractices
 };
 
 export default {
@@ -75,7 +77,7 @@ export default {
   },
   computed: {
     fullSlug () {
-      return `/quick-start/${this.page}`;
+      return `/guides/${this.page}`;
     },
     componentInstance () {
       const docs = pages[this.page];
@@ -94,7 +96,7 @@ export default {
       if (prevIndex >= 0) {
         const prevPage = keys[prevIndex];
         return {
-          href: `/quick-start/${prevPage}`,
+          href: `/guides/${prevPage}`,
           title: pages[prevPage].attributes.title
         };
       }
@@ -113,7 +115,7 @@ export default {
       if (nextIndex >= 0) {
         const nextPage = keys[nextIndex];
         return {
-          href: `/quick-start/${nextPage}`,
+          href: `/guides/${nextPage}`,
           title: pages[nextPage].attributes.title
         };
       }
@@ -126,7 +128,7 @@ export default {
     return {
       title: `naboris - ${this.title}`,
       meta: [
-        { hid: 'description', name: 'description', content: `Get started quickly with ${this.title}.` }
+        { hid: 'description', name: 'description', content: `Guide for ${this.title} with naboris.` }
       ]
     };
   }

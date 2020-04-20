@@ -69,7 +69,8 @@ export default {
   },
   generate: {
     routes: getDynamicPaths({
-      '/quick-start': 'docs/quick-start/*.md'
+      '/quick-start': 'docs/quick-start/*.md',
+      '/guides': 'docs/guides/*.md'
     })
   },
   /*

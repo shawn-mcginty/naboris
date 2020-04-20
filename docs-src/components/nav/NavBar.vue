@@ -47,14 +47,31 @@
             </a>
           </div>
         </div>
-        <a class="navbar-item" href="/guides">
-          Guides
-        </a>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" href="/guides">
+            Guides
+          </a>
+
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="/guides/error-handling">
+              Error Handling
+            </a>
+            <a class="navbar-item" href="/guides/middlewares">
+              Middlewares
+            </a>
+            <a class="navbar-item" href="/guides/templating-engines">
+              Templating Engines
+            </a>
+            <a class="navbar-item" href="/guides/security-best-practices">
+              Security Best Practices
+            </a>
+            <a class="navbar-item" href="/guides/performance-best-practices">
+              Performance Best Practices
+            </a>
+          </div>
+        </div>
         <a class="navbar-item" href="/odocs">
           Docs
-        </a>
-        <a class="navbar-item" href="/advanced">
-          Advanced
         </a>
         <a class="navbar-item" href="https://github.com/shawn-mcginty/naboris">
           GitHub

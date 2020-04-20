@@ -74,6 +74,7 @@ let redirect: (string, Req.t('sessionData), t) => Lwt.t(t);
 
 /**
  Report an error [exn] by executing [error_handler] from your [Naboris.ServerConfig].
+ Final response code is always [500].
 
  {e This function will create a new [Res] and any headers on the current [Res] will be lost.}
  */

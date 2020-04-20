@@ -28,18 +28,32 @@ let setOnListen: (unit => unit, t('sessionData)) => t('sessionData);
  [~maxAge] Optional param to set max age for session cookies in seconds (defaults to 30 days)
  [~sidKey] Optional param to set key for session cookies (defaults to ["nab.sid"])
  */
-let setSessionConfig: (~maxAge: int=?, ~sidKey: string=?, option(string) => Lwt.t(option(Session.t('sessionData))), t('sessionData)) => t('sessionData);
+let setSessionConfig:
+  (
+    ~maxAge: int=?,
+    ~sidKey: string=?,
+    option(string) => Lwt.t(option(Session.t('sessionData))),
+    t('sessionData)
+  ) =>
+  t('sessionData);
 
 /**
  Creates new config from [t('sessionData)] with requestHandler [(Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t)].
 
  [requestHandler] is the main handler function for responding to incoming http requests.
  */
-let setRequestHandler: ((Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t), t('sessionData)) => t('sessionData);
-
+let setRequestHandler:
+  (
+    (Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t),
+    t('sessionData)
+  ) =>
+  t('sessionData);
 
 /**
  Creates new config from [t('sessionData)] with errorHandler [ErrorHandler.t].
+
+ This configuration is optional and by default [Res.reportError] will respond
+ with [500] and the text of the [exn] provided.
  */
 let setErrorHandler: (ErrorHandler.t, t('sessionData)) => t('sessionData);
 
@@ -53,14 +67,16 @@ let setHttpAfConfig: (httpAfConfig, t('sessionData)) => t('sessionData);
 
  Middlewares are executed in the order they are added.  The final "middleware" is the [requestHandler].
  */
-let addMiddleware: (Middleware.t('sessionData), t('sessionData)) => t('sessionData);
+let addMiddleware:
+  (Middleware.t('sessionData), t('sessionData)) => t('sessionData);
 
 /**
  Creates a virtual path prefix [list(string)] and maps it to a local directory [string].
 
  Middlewares are executed in the order they are added.  The final "middleware" is the [requestHandler].
  */
-let addStaticMiddleware: (list(string), string, t('sessionData)) => t('sessionData);
+let addStaticMiddleware:
+  (list(string), string, t('sessionData)) => t('sessionData);
 
 /**
  Returns [SessionConfig.t('sessionData)] from config.
@@ -76,12 +92,13 @@ let middlewares: t('sessionData) => list(Middleware.t('sessionData));
 /**
  Returns [onListen] function of [t].
  */
-let onListen: t('sessionData) => (unit => unit);
+let onListen: (t('sessionData), unit) => unit;
 
 /**
  Returns [routeRequest] function of [t].
  */
-let routeRequest: t('sessionData) => ((Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t));
+let routeRequest:
+  (t('sessionData), Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t);
 
 /**
  Returns [option(ErrorHandler.t)] of [t].

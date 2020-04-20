@@ -103,9 +103,10 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
             let _async =
               handler(realExn, route)
               >>= (
-                ((_headers, _body)) => {
-                  let response_body = start_response(Httpaf.Headers.empty);
-                  Httpaf.Body.write_string(response_body, "Unknown Error");
+                ((headers, body)) => {
+                  let response_body =
+                    start_response(Httpaf.Headers.of_list(headers));
+                  Httpaf.Body.write_string(response_body, body);
                   Httpaf.Body.close_writer(response_body);
                   Lwt.return_unit;
                 }

@@ -1,0 +1,78 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: install0
+  displayName: 'Install'
+  jobs:
+  - job: install1
+    displayName: 'install all of the things'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '10.x'
+      displayName: 'Install Node.js'
+
+    - task: GoTool@0
+      inputs:
+        version: '1.10'
+
+    - task: Go@0
+      inputs:
+        command: 'get'
+        arguments: '-u github.com/tsenart/vegeta'
+
+    - script: |
+        npm install -g esy
+        esy install -q
+        esy @libev install -q
+      displayName: 'install'
+
+- stage: build0
+  displayName: 'Build'
+  dependsOn: install0
+  jobs:
+  - job: build1
+    displayName: 'build naboris'
+    steps:
+    - script: |
+        npm run build
+      displayName: 'before script'
+
+- stage: test0
+  displayName: 'Test'
+  dependsOn: build0
+  jobs:
+  - job: test1
+    displayName: 'perform standard unit tests'
+    steps:
+    - task: Bash@3
+      inputs:
+        filePath: 'ci/test-standard.sh'
+        noProfile: false
+        noRc: false
+  - job: test2
+    displayName: 'perform libev unit tests'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+    dependsOn: test1
+    steps:
+    - task: Bash@3
+      inputs:
+        filePath: 'ci/test-libev.sh'
+        noProfile: false
+        noRc: false
+  - job: test3
+    displayName: 'perform libev load tests'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+    dependsOn: test2
+    steps:
+    - task: Bash@3
+      inputs:
+        filePath: 'ci/test-under-load.sh'
+        noProfile: false
+        noRc: false
+
+

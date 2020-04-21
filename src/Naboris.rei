@@ -49,6 +49,16 @@ module Session = Session;
 module Method = Method;
 
 /**
+   Module defining middleware functions.
+ */
+module Middleware = Middleware;
+
+/**
+   Module defining RequestHandler functions.
+ */
+module RequestHandler = RequestHandler;
+
+/**
    [Map] type for working with queries from routed requests.
    */
 module Query = Query;

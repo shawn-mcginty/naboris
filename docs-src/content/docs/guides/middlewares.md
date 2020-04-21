@@ -10,13 +10,12 @@ middleware on the stack.
 
 For this guide we will be writing two example middlewares. One to log every request and how long it takes and another which will guard a section of the website exclusive to admin users.
 
-- [Basics](#basics)
+- [What are Middlewares?](#what-are-middlewares)
 - [Authorization Example](#authorization-example)
 - [Logger Example](#logger-example)
 - [Combining Middlewares](#combining-middlewares)
-- [Built In Middlewares](#built-in-middlewares)
 
-#### <a name="basics" href="#basics">#</a> Basics
+#### <a name="what-are-middlewares" href="#what-are-middlewares">#</a> What are Middlewares?
 Middlewares have a wide variety of uses.  They are executed __in the order in which they are registered__ so be sure to keep that in mind. Check out the [`Middleware module`](/odocs/naboris/Naboris/Middleware/index.html) for the spec:
 
 ```reason
@@ -104,5 +103,40 @@ let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.create 
 ```
 
 #### <a name="combining-middlewares" href="#combining-middlewares">#</a> Combining Middlewares
+As stated above middlewares are executed in the order in which they are registered. Given the two examples above let's see how they can be used in combination.
 
-#### <a name="built-in-middlewares" href="#built-in-middlewares">#</a> Built In Middlewares
+```reason
+// ...
+let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.create()
+  |> Naboris.ServerConfig.addMiddleware(authorizationMiddleware)
+  |> Naboris.ServerConfig.addMiddleware(loggerMiddleware);
+// ...
+```
+```ocaml
+(* ... *)
+let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.create ()
+  |> Naboris.ServerConfig.addMiddleware authorization_middleware
+  |> Naboris.ServerConfig.addMiddleware logger_middleware in
+(* ... *)
+```
+
+This will work fine but there is a problem. If a non-admin user tries to reach a `/admin/` endpoint the request won't be logged. This is because the `authorizationMiddleware` will finish the lifecycle of the request without ever calling the `next` midddlware.
+
+Easy to solve:
+
+```reason
+// ...
+let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.create()
+  |> Naboris.ServerConfig.addMiddleware(loggerMiddleware)
+  |> Naboris.ServerConfig.addMiddleware(authorizationMiddleware);
+// ...
+```
+```ocaml
+(* ... *)
+let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.create ()
+  |> Naboris.ServerConfig.addMiddleware logger_middleware
+  |> Naboris.ServerConfig.addMiddleware authorization_middleware in
+(* ... *)
+```
+
+Now all requests will be logged. Even the `401 - Unauthorized` requests.

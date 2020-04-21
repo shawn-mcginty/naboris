@@ -53,12 +53,14 @@
 <script>
 import installation from '~/content/docs/quick-start/installation.md';
 import basicserver from '~/content/docs/quick-start/basic-server.md';
+import serverconfig from '~/content/docs/quick-start/server-configuration.md';
 import routing from '~/content/docs/quick-start/routing.md';
 import staticfiles from '~/content/docs/quick-start/static-files.md';
 
 const pages = {
   installation,
   'basic-server': basicserver,
+  'server-configuration': serverconfig,
   routing,
   'static-files': staticfiles
 };

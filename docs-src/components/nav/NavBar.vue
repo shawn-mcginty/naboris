@@ -39,6 +39,9 @@
             <a class="navbar-item" href="/quick-start/basic-server">
               Basic Server
             </a>
+            <a class="navbar-item" href="/quick-start/server-configuration">
+              Server Configuration
+            </a>
             <a class="navbar-item" href="/quick-start/routing">
               Routing
             </a>
@@ -53,6 +56,9 @@
           </a>
 
           <div class="navbar-dropdown">
+            <a class="navbar-item" href="/guides/sessions">
+              Sessions
+            </a>
             <a class="navbar-item" href="/guides/error-handling">
               Error Handling
             </a>

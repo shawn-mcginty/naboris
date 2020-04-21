@@ -51,6 +51,7 @@
   </div>
 </template>
 <script>
+import sessions from '~/content/docs/guides/sessions.md';
 import errorHandling from '~/content/docs/guides/error-handling.md';
 import middlewares from '~/content/docs/guides/middlewares.md';
 import templatingEngines from '~/content/docs/guides/templating-engines.md';
@@ -58,6 +59,7 @@ import securityBestPractices from '~/content/docs/guides/security-best-practices
 import performanceBestPractices from '~/content/docs/guides/performance-best-practices.md';
 
 const pages = {
+  sessions,
   'error-handling': errorHandling,
   middlewares,
   'templating-engines': templatingEngines,

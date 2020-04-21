@@ -16,17 +16,13 @@ stages:
         versionSpec: '10.x'
       displayName: 'Install Node.js'
 
-    - script: |
-        sudo add-apt-repository ppa:longsleep/golang-backports -y
-        sudo apt-get update
-        sudo apt-get install -y golang-go
-        sudo apt-get install -y libev-dev
-        go env | grep GOPATH > gopath.env
-        source gopath.env 
-        export PATH=$PATH:$GOPATH/bin
-        go get -u github.com/tsenart/vegeta
-      displayName: 'Install go and vegeta'
-    
+    - task: GoTool@0
+      inputs:
+        version: '1.14'
+    - task: Go@0
+      inputs:
+        command: 'get'
+        arguments: 'github.com/tsenart/vegeta'
 
     - script: |
         npm install -g esy

@@ -37,7 +37,7 @@
                 {{ previousPage.title }}
               </a>
             </div>
-            <div v-if="nextPage !== null" class="column">
+            <div v-if="nextPage !== null" class="column has-text-right">
               <a :href="nextPage.href">
                 Next:
                 {{ nextPage.title }}

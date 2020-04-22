@@ -27,7 +27,7 @@ val setSessionConfig: ?maxAge: int -> ?sidKey: string -> string option -> 'sessi
 ```
 
 * `sidKey` - `string` (optional) - The key used to store the session id in browser cookies. Defaults to `"nab.sid"`.
-* `maxAge` - `int` (optional) - The max age of session cookies in seconds.  Defaults to `2592000` (30 days.)
+* `maxAge` - `int` (optional) - The max age of session cookies in seconds.  Defaults to `2592000` (30 days).
 * `mapSession` - covered in the section below.
 
 #### <a name="session-mapping" href="#session-mapping">#</a> Session Mapping

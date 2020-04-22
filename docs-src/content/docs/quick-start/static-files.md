@@ -30,9 +30,9 @@ let addStaticMiddleware: (list(string), string, t('sessionData)) => t('sessionDa
 val addStaticMiddleware: string list -> string -> 'sessionData t -> 'sessionData t
 ```
 
-* `list(string)` - Will match against the `Route.path` of each incoming request
+* `list(string)` - Will match against the `Route.path` of each incoming request.
 * `string` - Path to a local directory which will have the rest of the path applied to.
-* `t` - Current `Naboris.ServerConfig`
+* `t` - Current `Naboris.ServerConfig`.
 
 The rest of the incoming request will be applied to the local path
 e.g. given inputs `["static"], "/path/to/public"` a request for `/static/images/logo.png` would map to `/path/to/public/images/logo.png`.

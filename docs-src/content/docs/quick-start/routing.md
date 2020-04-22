@@ -74,7 +74,7 @@ Naboris.ServerConfig.create()
         UserController.createUser(req, res);
       | (GET, ["users", userId]) => // matches /users/:userId with a URI parameter
         UserController.getUser(userId, req, res);
-      | (PUT, ["users", userId]) => // matches /users/:usierId with a URI parameter
+      | (PUT, ["users", userId]) => // matches /users/:userId with a URI parameter
         UserController.updateUser(userId, req, res);
       | (GET, ["blog", "articles"]) => // matches /blog/articles
         ArticleController.getAllArticles(req, res);

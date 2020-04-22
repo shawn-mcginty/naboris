@@ -31,3 +31,5 @@ naboris.install
 esy.lock
 command-env
 libev.esy.lock
+.DS_Store
+deploy_key

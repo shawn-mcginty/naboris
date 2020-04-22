@@ -1,0 +1,52 @@
+@charset "utf-8";
+
+$camel: #c19a6b;
+$inverted_camel: #3e6594;
+
+// general bulma colors
+$cyan: #59a2d3;
+$red: #c16b9a;
+$green: #8cae7e;
+$yellow: #b0ae7c;
+$orange: #cb7c62;
+$purple: #9f74b8;
+$blue: #6579c7;
+$turquoise: #69c3c1;
+
+$grey-darker: #20344b;
+$grey-dark: #28415e;
+$grey:	hsl(32, 21%, 48%);
+$grey-light:	hsl(32, 44%, 71%);
+$grey-lighter:	hsl(30, 46%, 86%);
+$grey-lightest: hsl(32, 49%, 93%);
+$white-ter: hsl(32, 49%, 96%);
+$white-bis: hsl(32, 49%, 98%);
+
+// bulma specifics
+$family-sans-serif: 'Noto Sans', BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+$family-serif: 'Noto Serif', serif;
+
+// font awesome
+$fa-font-path: "~static/fonts/fa";
+
+@import "./bulma.scss";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/fontawesome.scss";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/solid.scss";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/regular.scss";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/brands.scss";
+
+// our imports
+@import "./syntax-highlight-theme.scss";
+@import "./fonts.scss";
+@import "./markdown.scss";
+@import "./icons.scss";
+
+.main-hero {
+  background-image: url('~static/images/hero-desert.jpg');
+  background-size: cover;
+}
+
+.main-section {
+  // compensate for the fixed navbar on top of the screen
+  padding-top: 52px;
+}

@@ -78,7 +78,7 @@ Naboris.ServerConfig.create()
         UserController.updateUser(userId, req, res);
       | (GET, ["blog", "articles"]) => // matches /blog/articles
         ArticleController.getAllArticles(req, res);
-      | (_, ["shop", ..._rest]) => // match all reqeust that begin with /shop
+      | (_, ["shop", ..._rest]) => // match all request that begin with /shop
         ShopRouter.routeShopRequest(route, req, res);
       | _ => // catch any unmatched routes
         res

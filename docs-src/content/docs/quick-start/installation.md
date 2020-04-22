@@ -25,7 +25,7 @@ it is recommended (per [the Lwt documentation](https://ocsigen.org/lwt/5.1.1/man
 to install `libev` and use the `conf-libev` opam package. Read more about it [below](#libev).
 
 #### <a name="scaffolding" href="#scaffolding">#</a> Scaffolding
-For an easy way to get a server up an running there are scaffolding projects available on
+For an easy way to get a server up and running there are scaffolding projects available on
 GitHub. These projects use [esy](https://esy.sh) to sandbox opam and build. This means
 `node.js` is required to run these projects as is.
 

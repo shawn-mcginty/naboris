@@ -67,7 +67,7 @@ let _ = Lwt_main.run(main ())
 ```
 
 #### <a name="error-handler" href="#error-handler">#</a> Error Handler
-The above helper function [`Res.reportException`](/odocs/naboris/Naboris/Res/index.html#val-reportError) will respond to the current http request using the configured `errorHandler`. This handler is provided by your [`ServerConfig.t`](/odocs/naboris/Naboris/ServerConfig) and is optional. By default it will respond with a `plain/text` type and a body containing the output of [Printexc.to_string](https://caml.inria.fr/pub/docs/manual-ocaml/libref/Stdlib.Printexc.html) on the [exn] supplied.
+The above helper function [`Res.reportException`](/odocs/naboris/Naboris/Res/index.html#val-reportError) will respond to the current http request using the configured `errorHandler`. This handler is provided by your [`ServerConfig.t`](/odocs/naboris/Naboris/ServerConfig) and is optional. By default it will respond with a `plain/text` type and a body containing the output of [`Printexc.to_string`](https://caml.inria.fr/pub/docs/manual-ocaml/libref/Stdlib.Printexc.html) on the `exn` supplied.
 
 > Note: This helper always responds with a `500` code.
 

@@ -67,7 +67,7 @@
                     Using a lightweight API and following a middleware pattern makes
                     it easy to create tools and libraries for use with naboris. Add middleware
                     for protecting certain endpoints from unauthorized users, encode/decode
-                    request data, verify request headers, request/reponse logging, you name it!
+                    request data, verify request headers, request/response logging, you name it!
                   </p>
                 </div>
               </article>
@@ -78,7 +78,7 @@
               <div class="content">
                 <h4>🐫 OCaml/ReasonML</h4>
                 <p>
-                  Multi-paradigm goodness: functional, imperative, and object-oritented,
+                  Multi-paradigm goodness: functional, imperative, and object-oriented,
                   oh my!
                 </p>
                 <p>

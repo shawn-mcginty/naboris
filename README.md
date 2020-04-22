@@ -1,4 +1,4 @@
-# naboris
+# ![alt text](https://raw.githubusercontent.com/shawn-mcginty/naboris/master/docs-src/static/logos/logo-w-text.png "naboris")
 Simple, fast, minimalist web framework for [OCaml](https://ocaml.org)/[ReasonML](https://reasonml.github.io) built on [httpaf](https://github.com/inhabitedtype/httpaf) and [lwt](https://github.com/ocsigen/lwt).
 
 [https://naboris.dev](https://naboris.dev)

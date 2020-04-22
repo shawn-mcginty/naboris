@@ -1,10 +1,11 @@
-# Naboris
+![naboris](https://raw.githubusercontent.com/shawn-mcginty/naboris/master/docs-src/static/logos/logo-w-text.png "naboris")
+
 Simple, fast, minimalist web framework for [OCaml](https://ocaml.org)/[ReasonML](https://reasonml.github.io) built on [httpaf](https://github.com/inhabitedtype/httpaf) and [lwt](https://github.com/ocsigen/lwt).
 
-[![Build Status](https://travis-ci.com/shawn-mcginty/naboris.svg?branch=master)](https://travis-ci.com/shawn-mcginty/naboris)
-[![opam version 0.1.1](https://img.shields.io/static/v1?label=opam&message=0.1.1&color=E7C162)](https://opam.ocaml.org/packages/naboris/)
+[https://naboris.dev](https://naboris.dev)
 
-[odocs avialable here][docs html index]
+[![Build Status](https://travis-ci.com/shawn-mcginty/naboris.svg?branch=master)](https://travis-ci.com/shawn-mcginty/naboris)
+[![opam version 0.1.2](https://img.shields.io/static/v1?label=opam&message=0.1.2&color=E7C162)](https://opam.ocaml.org/packages/naboris/)
 
 ```reason
 // ReasonML
@@ -46,50 +47,11 @@ let _ = Lwt_main.run(Naboris.listenAndWaitForever 3000 server_config)
 > Pre `1.0.0` the API may be changing a bit. A list of these changes will be kept below.
 
 ## Contents
-* [Getting Started](#getting-started)
-    * [Installation](#installation)
-    * [Server Config](#server-config)
-    * [Routing](#routing)
-    * [Static Files](#static-files)
-    * [Session Data](#session-data)
-* [Advanced](#advanced)
-	* [Middlewares](#middlewares)
+* [Installation](#installation)
+* [Scaffolding](#scaffolding)
+* [naboris.dev](https://naboris.dev)
 * [Development](#development)
 * [Breaking Changes](#breaking-changes)
-
-```
-                                                           
- @@@@@  @@@@  @@@@@                                        
- *@*   @@@@@@   @@&                                        
-  @@&  .@@@@  @@@/        @@,         (@@@                 
-    ,    @@             @@@@@@@      @@@@@@@               
-                       @@@@@@@@,    @@@@@@@@@              
-        @@@*           @@@@@@@@@@@@@@@@@@@@@@              
-       &@@@@          @@@@@@@@@@@@@.      &@@              
-    @@@@@@@@           @@@@@@@@@@@@@@#(%(                  
-    @@@@@  @@         .@@@@@@@@@@@@@@@@@@@@@*              
-       ,@#  @*       @@@@@@@@@@@@@@@@@@@@@@@@@             
-     # ,@@   @@     ,@@@@@@@@@@@@@@@@@@@@@@@@@@            
-    .@@@@@.  .@@@   @@@@@@@@@@@@@@@@@@@@@@@@@@@@           
-         @@.   @@@@ %@@@@@@@@@@@@@@@@@@@@@@@@@@@&          
-         &@@*       .@@@.@@@@@@@@@@@*     (@@@@@@@@@@@@@@  
-       @@@@@@@       @   @@@@@@@@@@   %@&   @@@@@@@@@@@*   
-        @@  @@@@@      .@@@@@@@@ @  /@@@@@@     #@@@@@     
-             @@@@@@    @@@@@@@@@    @@@@@@@@       @       
-            @@@   %@   @@  , .@@   %@@(@&,@@%              
-              ,          @@@@*       @@@@@                 
-                         @@@@@        @@@@                 
-                         @@@@@        @@@.                 
-                         @@@@@        @@@%                 
-                         @@@@@        @@@                  
-                          %@           @.                  
-                          (@           @                   
-                          .%           ,                   
-                                                           
-                          @@(          @@                  
-```
-
-## Getting Started
 
 ### Installation
 
@@ -112,7 +74,7 @@ opam install naboris
 
 #### esy
 ```json
-"@opam/naboris": "^0.1.1"
+"@opam/naboris": "^0.1.2"
 ```
 
 #### dune
@@ -120,444 +82,23 @@ opam install naboris
 (libraries naboris)
 ```
 
-### Server Config
-The `Naboris.ServerConfig.t('sessionData)` type will define the way your server will handle requests.
-
-#### Creating a Server Config
-
-There are a number of helper functions for building server config records.
-
-##### ServerConfig.create
-__create__ is used to generate a default server config object, this will be the starting point.
-```reason
-// ReasonML
-let create: unit => ServerConfig.t('sessionData);
-```
-```ocaml
-(* OCaml *)
-val create: unit -> 'sessionData ServerConfig.t
+### Scaffolding
+For a basic Reason project
+```bash
+git clone git@github.com:shawn-mcginty/naboris-re-scaffold.git
+cd naboris-re-scaffold
+npm run install
+npm run build
+npm run start
 ```
 
-#### ServerConfig.setOnListen
-__setOnListen__ will set the function that will be called once the server has started and is listening for connections.  The `onListen` function has the type signature `unit => unit`.
-```reason
-// ReasonML
-let setOnListen: (unit => unit, ServerConfig.t('sessionData)) => ServerConfig.t('sessionData)
-```
-```ocaml
-(* OCaml *)
-val setOnListen: (unit -> unit) -> 'sessionData ServerConfig.t -> 'sessionData ServerConfig.t
-```
-
-#### ServerConfig.setRequestHandler
-__setRequestHandler__ will set the main request handler function on the config.  This function is the main entry point for http requests and usually where routing the request happens.  The `requestHandler` function has the type signature `(Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t)`.
-```reason
-// ReasonML
-let setRequestHandler: (
-  (Route.t, Req.t('sessionData), Res.t) => Lwt.t(Res.t),
-  ServerConfig.t('sessionData)
-) => ServerConfig.t('sessionData)
-```
-```ocaml
-(* OCaml *)
-val setRequestHandler: (Route.t -> 'sessionData Req.t -> Res.t -> Res.t Lwt.t)
-  -> 'sessionData ServerConfig.t -> 'sessionData ServerConfig.t
-```
-
-### Routing
-Routin is intended to be done via pattern matching in the main `requestHandler` function.  This function takes as it's first argument a `Route.t` record. The `Route` module looks like this:
-```reason
-// ReasonML
-/* module Naboris.Route */
-module type Route = {
-  type t;
-  let path: t => list(string),
-  let meth: t => Method.t,
-  let rawQuery: t => string,
-  let query: t =>Query.QueryMap.t(list(string)),
-};
-```
-```ocaml
-(* OCaml *)
-module Route : sig
-  type t;
-  val path = t -> string list
-  val meth = t -> Method.t
-  val rawQuery = t -> string
-  val query = t -> string list Qyery.QueryMap.t
-end
-```
-
-For these examples we'll be matching on `path` and `meth`.
-> Note: `path` is the url path broken into an array by the `/` separators.
-> e.g. `/user/1/contacts` would look like this: `["user", "1", "contacts"]`
-
-```reason
-// ReasonML
-let requestHandler = (route, req, res) => switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
-  | (Naboris.Method.GET, ["user", userId, "contacts"]) =>
-    /* Use pattern matching to pull parameters out of the url */
-    let contacts = getContactsByUserId(userId);
-    let contactsJsonString = serializeToJson(contacts);
-    res
-      |> Naboris.Res.status(200)
-      |> Naboris.Res.json(req, contactsJsonString);
-  | (Naboris.Method.PUT, ["user", userId, "contacts"]) =>
-    /* for the sake of this example we're not using ppx or infix */
-    /* lwt promises can be made much easier to read by using these */
-    Lwt.bind(
-      Naboris.Req.getBody(req),
-      bodyStr => {
-      	let newContacts = parseJsonString(bodyStr);
-        let _ = addNewContactsToUser(userId, newContacts);
-        res
-          |> Naboris.Res.status(201)
-          |> Naboris.Res.text(req, "Created");
-      },
-    )
-  | _ =>
-      res
-        |> Naboris.Res.status(404)
-        |> Naboris.Res.text(req, "Resource not found.");
-};
-```
-```ocaml
-(* OCaml *)
-let request_handler route req res =
-  match ((Naboris.Route.meth route), (Naboris.Route.path route)) with
-    | (Naboris.Method.GET, ["user"; user_id; "contacts"]) ->
-      (* Use pattern matching to pull parameters out of the url *)
-      let contatcs = get_contacts_by_user_id user_id in
-      let contacts_json_string = serialize_to_json contacts in
-      res
-        |> Naboris.Res.status 200
-        |> Naboris.Res.json req contacts_json_string;
-    | (Naboris.Method.PUT, ["user"; user_id; "contacts"]) ->
-      (* for the sake of this example we're not using ppx or infix *)
-      (* lwt promises can be made much easier to read by using these *)
-      Lwt.bind
-        (Naboris.Req.getBody req)
-        (fun body_str ->
-          let new_contacts = parse_json_string body_str in
-          let _ = add_new_contacts_to_user user_id new_contacts in
-          res
-            |> Naboris.Res.status 201
-            |> Naboris.Res.text req "Created"
-        )
-    | _ ->
-      res
-        |> Naboris.Res.status 404
-        |> Naboris.Res.text req "Resource not found."
-```
-
-### Static Files
-
-> **Note** For best performance, use a reverse proxy to serve static assets.
-
-#### Static middleware
-`ServerConfig.addStaticMiddleware` makes it easy to add a virtual path prefix for static assets
-during server configuration.
-
-```reason
-// ReasonML
-let addStaticMiddleware : (list(string), string, ServerConfig.t('sessionData)) => ServerConfig.t('sessionData)
-```
-```ocaml
-(* OCaml *)
-val addStaticMiddleware : string list -> string -> 'sessionData ServerConfig.t -> 'sessionData ServerConfig.t
-```
-
-* `string list`: Split path that will match against incoming requests
-* `string`: Root directory from which to read static files
-* `'sessionData ServerConfig.t`: Naboris server configuration
-* Returns `'sessionData ServerConfig.t`: New configuration with the static middleware
-
-```reason
-// ReasonML
-let serverConfig = Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.addStaticMiddleware(["static"], Sys.getenv("cur__root") ++ "/public/");
-```
-```ocaml
-(* OCaml *)
-let server_conf = Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.addStaticMiddleware ["static"] ((Sys.getenv "cur__root") ^ "/static-assets/")
-```
-
-In the case above `/static/images/icon.png` would be served from `$cur__root/public/images/icon.png`
-
-#### Static response
-`Res.static` is available to help make it easy to serve static files.
-
-```reason
-// ReasonML
-let static : (string, list(string), Req.t('sessionData), Res.t) => Lwt.t(Res.t)
-```
-```ocaml
-(* OCaml *)
-val static : string -> string list -> 'sessionData Req.t -> Res.t -> Res.t Lwt.t
-```
-
-* `string`: Being the root directory from which to read static files
-* `string list`: Being the split path from the root directory to read the specific static file
-* `'sessionData Req.t`: The current naboris request
-* `Res.t`: The current naobirs response
-
-A pattern matcher for static file routes might look like this
-```reason
-// ReasonML
-switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
-  | (Naboris.Method.GET, ["static", ...staticPath]) =>
-    let publicDir = Sys.getenv("cur__root") ++ "/public/";
-    Naboris.Res.static(publicDir, staticPath, req, res);
-}
-```
-```ocaml
-(* OCaml *)
-match ((Naboris.Route.meth route), (Naboris.Route.path route)) with
-  | (Naboris.Method.GET, "static" :: static_path) ->
-    let public_dir = (Sys.getenv "cur__root") ^ "/static-assets/") in
-    Naboris.Res.static public_dir static_path req res
-```
-
-In the case above `/static/images/icon.png` would be served from `$cur__root/public/images/icon.png`
-
-### Session Data
-Many `Naboris` types take the parameter `'sessionData` this represents a custom data type that will define session data that will be attached to an incoming request.
-
-#### sessionConfig
-__Naboris.ServerConfig.setSessionConfig__ will return a new server configuration with the desired
-session configuration. This call consists of one required argument `mapSession` and two
-optional arguments `~maxAge` and `~sidKey`.
-
-```reason
-let setSessionConfig: (~maxAge: int=?, ~sidKey: string=?, option(string) => Lwt.t(option(Session.t('sessionData))), ServerConfig.t('sessionData)) => ServerConfig.t('sessionData);
-```
-```ocaml
-val setSessionConfig: ?maxAge: int -> ?sidKey: string -> string option -> 'sessionData Session.t option Lwt.t -> 'sessionData ServerConfig.t -> 'sessionData ServerConfig.t
-```
-
-#### mapSession
-A special function that is used to set session data on an incoming reuquest based on the requests cookies. The signature looks like: `option(string) => Lwt.t(option(Naboris.Session.t('sessionData)))`.  That's a complicated type signature that expresses that the request may or may not have a `sessionId`; and given that fact it may or may not return a session.
-```reason
-// ReasonML
-// Your custom data type
-type userData = {
-  userId: int,
-  username: string,
-  firstName: string,
-  lastName: string,
-  isAdmin: bool,
-};
-
-let serverConfig: Naboris.ServerConfig(userData) = Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.setSessionConfig(sessionId => switch(sessionId) {
-    | Some(id) =>
-      /* for the sake of this example we're not using ppx or infix */
-      /* lwt promises can be made much easier to read by using these */
-      Lwt.bind(getUserDataById(id),
-        userData => {
-          let session = Naboris.Session.create(id, userData);
-          Lwt.return(Some(session));
-        }
-      );
-    | None => Lwt.return(None);
-  })
-  |> Naboris.ServerConfig.setRequestHandler((route, req, res) => switch(Naboris.Route.meth(meth), Naboris.Route.path(route)) {
-    | (Naboris.Method.POST, ["login"]) =>
-      let (req2, res2, _sessionId) =
-        /* Begin a session */
-        Naboris.SessionManager.startSession(
-          req,
-          res,
-          {
-            userId: 1,
-            username: "foo",
-            firstName: "foo",
-            lastName: "bar",
-            isAdmin: false,
-          },
-        );
-        Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
-    | (Naboris.Method.GET, ["who-am-i"]) =>
-      /* Get session data from the request */
-      switch (Naboris.Req.getSessionData(req)) {
-      | None =>
-        Naboris.Res.status(404, res) |> Naboris.Res.text(req, "Not found")
-      | Some(userData) =>
-        Naboris.Res.status(200, res)
-        |> Naboris.Res.text(req, userData.username)
-      };
-  });
-```
-```ocaml
-(* OCaml *)
-(* Your custom session data *)
-type user_data = {
-  userId: int;
-  username: string;
-  first_name: string;
-  last_name: string;
-  is_admin: bool
-}
-
-let serverConfig: user_data Naboris.ServerConfiguserData = Naboris.ServerConfig.create ()
-  |> Naboris.ServerConfig.setSessionConfig (fun session_id ->
-    match (session_id) with
-      | Some(id) =>
-        (* for the sake of this example we're not using ppx or infix *)
-        (* lwt promises can be made much easier to read by using these *)
-        Lwt.bind (get_user_data_by_id id) (fun user_data ->
-          let session = Naboris.Session.create id user_data in
-	  Lwt.return Some(session)
-        )
-    | None => Lwt.return None)
-  |> Naboris.ServerConfig.setRequestHandler (fun route, req, res ->
-    match ((Naboris.Route.meth route), (Naboris.Route.path route)) with
-      | (Naboris.Method.POST, ["login"]) ->
-        let (req2, res2, _session_id) =
-        (* Begin a session *)
-          Naboris.SessionManager.startSession req res {
-            userId= 1;
-            username= "foo";
-            first_name= "foo";
-            last_name= "bar";
-            is_admin= false
-          } in
-        Naboris.Res.status 200 res2
-          |> Naboris.Res.text req2, "OK"
-    | (Naboris.Method.GET, ["who-am-i"]) ->
-      (* Get session data from the request *)
-      match (Naboris.Req.getSessionData req) with
-        | None ->
-          Naboris.Res.status 404 res
-            |> Naboris.Res.text req "Not found"
-        | Some(user_data) ->
-          Naboris.Res.status 200 res
-            |> Naboris.Res.text req user_data.username)
-```
-
-#### sidKey and maxAge
-* `sidKey` - `string` (optional) - The key used to store the session id in browser cookies. Defaults to `"nab.sid"`.
-* `maxAge` - `int` (optional) - The max age of session cookies in seconds.  Defaults to `2592000` (30 days.)
-
-#### SessionManager.startSession
-Generates a new session id `string` value and adds `Set-Cookie` header to a new `Res.t`. Useful for handling a login request.
-
-```reason
-let startSession: (Req.t('sessionData), Res.t, 'sessionData) => (Req.t('sessionData), Res.t, string);
-```
-```ocaml
-val startSession: 'sessionData Req.t -> Res.t -> 'sessionData -> 'sessionData Req.t * Res.t * string
-```
-
-An example login request might look like this:
-
-```reason
-| (Naboris.Method.POST, ["login"]) =>
-  let (req2, res2, _sid) =
-    Naboris.SessionManager.startSession(
-      req,
-      res,
-      TestSession.{username: "realsessionuser"},
-    );
-  Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
-```
-```ocaml
-| (Naboris.Method.POST, ["login"]) ->
-  let (req2, res2, _sid) = Naboris.SessionManager.startSession
-    req
-    res
-    TestSession.{username= "realsessionuser"} in
-  (Naboris.Res.status 200 res2) |> Naboris.Res.text req2 "OK"
-```
-
-#### SessionManager.removeSession
-Adds `Set-Cookie` header to a new `Res.t` to expire the session id cookie. Useful for handling a logout request.
-
-```reason
-let removeSession: (Req.t('sessionData), Res.t) => Res.t;
-```
-```ocaml
-val removeSession: 'sessionData Req.t -> Res.t -> Res.t
-```
-
-An example logout request might look like this:
-
-```reason
-| (Naboris.Method.GET, ["logout"]) =>
-  Naboris.SessionManager.removeSession(req, res)
-    |> Naboris.Res.status(200)
-    |> Naboris.Res.text(req, "OK");
-```
-```ocaml
-| (Naboris.Method.GET, ["logout"]) ->
-  Naboris.SessionManager.removeSession req res
-    |> Naboris.Res.status 200
-    |> Naboris.Res.text req "OK";
-```
-
-## Advanced
-
-### Middlewares
-Middlewares have a wide variety of uses.  They are executed __in the order in which they are registered__ so be sure to keep that in mind. Middlewares are functions with the following signature:
-
-`Naboris.RequestHandler.t -> Naboris.Route.t -> Naboris.Req.t -> Naboris.Res.t -> Res.t Lwt.t`
-
-Middlewares can either handle the http request/repsonse lifecycle themselves or call the passed in request handler, which is the next middleware in the list, passing the route, req, and res.  Once the list of middlewares has been exaused it will then be passed on to the main request handler.
-
-One simple example of a middleware would be one that protects certain routes from users without specific permissions.
-
-Given the __Sesson Data__ example above, one such middleware might look like this:
-```reason
-// ReasonML
-let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.addMiddleware((next, route, req, res) => switch (Naboris.Route.path(route)) {
-    | ["admin", ..._] => switch (Naboris.Req.getSessionData(req)) {
-      | Some({ is_admin: true, ..._}) => next(route, req, res)
-      | _ =>
-        res
-          |> Naboris.Res.status(401)
-          |> Naboris.Res.text(req, "Unauthorized");
-      }
-    | _ => next(route, req, res)
-  });
-```
-```ocaml
-(* OCaml *)
-let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.create ()
-  |> Naboris.ServerConfig.addMiddleware (fun next route req res ->
-    match (Naboris.Route.path route) with
-      | "admin" :: _ ->
-        (match (Naboris.Req.getSessionData req) with
-          | Some({ is_admin = true; _}) -> next route req res
-          | _ ->
-            res
-              |> Naboris.Res.status 401
-              |> Naboris.Res.text req "Unauthorized")
-      | _ -> next route req res)
-```
-
-`RequestHandler.t` also return `Lwt.t(Res.t)` and this can be used to inspect the response record _after_
-the request has been served.  This could be useful for logging as an example:
-
-```reason
-  // ResonML
-  let serverConfig = Naboris.ServerConfig.addMiddleware((next, route, req, res) => {
-    Lwt.bind(() => next(route, req, res), (servedResponse) => {
-      print_endline("Server responded with status " ++ int_of_string(Res.status(servedResponse)));
-    });
-  }, oldServerConfig);
-```
-```
-  (* OCaml *)
-  let serverConfig = Naboris.ServerConfig.addMiddleware (fun (next, route, req, res) ->
-    Lwt.bind
-      (fun () -> next route req res)
-      (fun (served_res) ->
-        print_endline "Server responded with status " ^ (int_of_string (Res.status served_res))
-      )
-    )
-    oldServerConfig in
+For a basic OCaml project
+```bash
+git clone git@github.com:shawn-mcginty/naboris-ml-scaffold.git
+cd naboris-ml-scaffold
+npm run install
+npm run build
+npm run start
 ```
 
 ## Development

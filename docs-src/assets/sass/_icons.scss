@@ -1,0 +1,59 @@
+.button {
+  svg {
+    fill: $white-bis;
+    height: 100%;
+    width: 100%;
+    margin-top: 5px;
+  }
+
+  svg.is-danger {
+    fill: $danger;
+  }
+
+  svg.is-warning {
+    fill: $warning;
+  }
+}
+
+.navbar-item {
+  svg.naboris-svg {
+    height: 36px;
+    width: 36px;
+    margin-right: 5px;
+  }
+}
+
+svg.naboris-svg.is-white {
+  #white-group {
+    path {
+      fill: white !important;
+    }
+  }
+}
+
+svg.naboris-svg.is-white {
+  #black-group {
+    path {
+      fill: white !important;
+      fill-opacity: 0.5 !important;
+    }
+  }
+}
+
+svg.naboris-svg.is-white {
+  #shadow-group {
+    path {
+      fill: white !important;
+      fill-opacity: 0.7 !important;
+    }
+  }
+}
+
+svg.naboris-svg.is-white {
+  #camel-group {
+    path {
+      fill: white !important;
+      fill-opacity: 0.8 !important;
+    }
+  }
+}

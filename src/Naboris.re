@@ -15,8 +15,6 @@ module ServerConfig = ServerConfig;
 module SessionConfig = SessionConfig;
 module ErrorHandler = ErrorHandler;
 
-open Lwt.Infix;
-
 let listen =
     (
       ~inetAddr=Unix.inet_addr_any,
@@ -26,18 +24,14 @@ let listen =
   let listenAddress = Unix.(ADDR_INET(inetAddr, port));
   let connectionHandler = Server.buildConnectionHandler(serverConfig);
 
-  Lwt.async(() =>
-    Lwt_io.establish_server_with_client_socket(
+  Lwt.async(() => {
+    let%lwt _server = Lwt_io.establish_server_with_client_socket(
       listenAddress,
       connectionHandler,
-    )
-    >>= (
-      _server => {
-        ServerConfig.onListen(serverConfig, ());
-        Lwt.return_unit;
-      }
-    )
-  );
+    );
+    ServerConfig.onListen(serverConfig, ());
+    Lwt.return_unit;
+  });
 
   Lwt.wait();
 };

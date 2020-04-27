@@ -1,5 +1,3 @@
-open Lwt.Infix;
-
 type t = {
   status: int,
   headers: list((string, string)),
@@ -67,47 +65,40 @@ let html = (req: Req.t('a), htmlBody: string, res: t) => addHeader(("Content-Typ
 let streamFileContentsToBody = (fullFilePath, responseBody) => {
   let readOnlyFlags = [Unix.O_RDONLY];
   let readOnlyPerm = 444;
-  Lwt_unix.openfile(fullFilePath, readOnlyFlags, readOnlyPerm) >>= ((fd) => {
-    let channel = Lwt_io.of_fd(fd, ~mode=Lwt_io.Input);
-    let bufferSize = Lwt_io.default_buffer_size();
-    let rec pipeBody = (~count, ch, body) =>
-      Lwt.bind(
-        Lwt_io.read(~count, ch),
-        chunk => {
-          Httpaf.Body.write_string(body, chunk);
-          String.length(chunk) < count
-            ? {
-              Lwt.return_unit;
-            }
-            : pipeBody(~count, ch, body);
-        },
-      );
-    Lwt.finalize(
-      () => pipeBody(~count=bufferSize, channel, responseBody),
-      () => {
-        Httpaf.Body.close_writer(responseBody);
-        Lwt_io.close(channel);
-      },
-    );
-  });
+  let%lwt fd = Lwt_unix.openfile(fullFilePath, readOnlyFlags, readOnlyPerm);
+  let channel = Lwt_io.of_fd(fd, ~mode=Lwt_io.Input);
+  let bufferSize = Lwt_io.default_buffer_size();
+  let rec pipeBody = (~count, ch, body) => {
+    let%lwt chunk = Lwt_io.read(~count, ch);
+    Httpaf.Body.write_string(body, chunk);
+    String.length(chunk) < count ? { Lwt.return_unit; } : pipeBody(~count, ch, body);
+  };
+
+  Lwt.finalize(
+    () => pipeBody(~count=bufferSize, channel, responseBody),
+    () => {
+      Httpaf.Body.close_writer(responseBody);
+      Lwt_io.close(channel);
+    },
+  );
 };
 
 let static = (basePath, pathList, req: Req.t('a), res) => {
   let fullFilePath = Static.getFilePath(basePath, pathList);
-  Lwt_unix.file_exists(fullFilePath) >>= ((exists) => switch (exists) {
+  let%lwt exists = Lwt_unix.file_exists(fullFilePath);
+  switch (exists) {
     | true =>
-      Lwt_unix.stat(fullFilePath) >>= ((stats) => {
-        let size = stats.st_size;
-        let resWithHeaders =
-          addHeader(("Content-Type", MimeTypes.getMimeType(fullFilePath)), res)
-          |> addHeader(("Content-Length", string_of_int(size)));
-        let response = createResponse(resWithHeaders);
-        let requestDescriptor = Req.reqd(req);
-        let responseBody =
-          Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
-        streamFileContentsToBody(fullFilePath, responseBody)
-          >>= (() => Lwt.return @@ closeResponse @@ resWithHeaders);
-      });
+      let%lwt stats = Lwt_unix.stat(fullFilePath);
+      let size = stats.st_size;
+      let resWithHeaders =
+        addHeader(("Content-Type", MimeTypes.getMimeType(fullFilePath)), res)
+        |> addHeader(("Content-Length", string_of_int(size)));
+      let response = createResponse(resWithHeaders);
+      let requestDescriptor = Req.reqd(req);
+      let responseBody =
+        Httpaf.Reqd.respond_with_streaming(requestDescriptor, response);
+      let%lwt () = streamFileContentsToBody(fullFilePath, responseBody);
+      Lwt.return @@ closeResponse @@ resWithHeaders;
     | _ =>
       let resWithHeaders =
         status(404, res) |> addHeader(("Content-Length", "9")) |> addHeader(("Connection", "keep-alive"));
@@ -117,7 +108,7 @@ let static = (basePath, pathList, req: Req.t('a), res) => {
       Httpaf.Body.write_string(responseBody, "Not found");
       Httpaf.Body.close_writer(responseBody);
       Lwt.return @@ closeResponse @@ resWithHeaders;
-    });
+  }
 };
 
 let setSessionCookies = (newSessionId, sessionIdKey, maxAge, res) => {

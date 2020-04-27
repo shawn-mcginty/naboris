@@ -1,5 +1,3 @@
-open Lwt.Infix;
-
 let startSession = (req, res, data) => {
   let nowFloat = Unix.time();
   let nowStr = string_of_float(nowFloat);
@@ -20,13 +18,9 @@ let resumeSession = (serverConfig: ServerConfig.t('sessionData), req) => {
   | None => Lwt.return(req)
   | Some(sessionConfig) =>
     let sid = Cookie.sessionIdOfReq(req);
-    sessionConfig.getSession(sid)
-    >>= (
-      maybeSessionData => {
-        let req2 = Req.setSessionData(maybeSessionData, req);
-        Lwt.return(req2);
-      }
-    );
+    let%lwt maybeSessionData = sessionConfig.getSession(sid);
+    let req2 = Req.setSessionData(maybeSessionData, req);
+    Lwt.return(req2);
   };
 };
 

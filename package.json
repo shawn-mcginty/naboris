@@ -40,6 +40,7 @@
     "@opam/httpaf": ">=0.6.0",
     "@opam/httpaf-lwt-unix": ">=0.6.0",
     "@opam/lwt": ">=5.1.1",
+    "@opam/lwt_ppx": ">=2.0.1",
     "@opam/uri": ">=2.2.0"
   },
   "devDependencies": {

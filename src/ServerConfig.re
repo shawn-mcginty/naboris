@@ -83,11 +83,12 @@ let addStaticMiddleware = (pathPrefix, publicPath, conf) =>
      );
 
 let setSessionConfig =
-    (~maxAge=2592000, ~sidKey="nab.sid", getSessionFn, conf) => {
+    (~maxAge=2592000, ~sidKey="nab.sid", ~secret="please set to a secure value", getSessionFn, conf) => {
   let sessionConfig: SessionConfig.t('sessionData) = {
     getSession: getSessionFn,
     maxAge,
     sidKey,
+    secret,
   };
   {...conf, sessionConfig: Some(sessionConfig)};
 };

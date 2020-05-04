@@ -19,6 +19,7 @@ let echoQueryQuery = (req, res, query) => {
 
 let sessionConfig: Naboris.SessionConfig.t(TestSession.t) = {
   sidKey: "nab.sid",
+  secret: "Keep it secret, keep it safe!",
   maxAge: 3600,
   getSession: sessionId => {
     let userData = TestSession.{username: "realsessionuser"};

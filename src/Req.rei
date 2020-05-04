@@ -44,3 +44,8 @@ let sidKey: t('sessionData) => string;
  Get max age for session id cookies (in seconds)
  */
 let maxAge: t('sessionData) => int;
+
+/**
+ Get secret used to sign session id cookies.
+ */
+let secret: t('sessionData) => string;

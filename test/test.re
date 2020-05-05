@@ -13,6 +13,7 @@ let runTests = () => {
       MimeTypesTest.testSuite(),
       MethodTest.testSuite(),
       RouterTest.testSuite(),
+      SessionManagerTest.testSuite(),
       IntegrationTest.testSuite(),
     ]
   );

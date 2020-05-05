@@ -3,6 +3,7 @@ type t('sessionData) = {
   session: option(Session.t('sessionData)),
   sidKey: string,
   maxAge: int,
+  secret: string,
 };
 
 let reqd = req => req.requestDescriptor;
@@ -31,7 +32,8 @@ let getBody = ({requestDescriptor, _}) => {
 let fromReqd = (reqd, sessionConfig) => {
   let sidKey = SessionConfig.sidKey(sessionConfig);
   let maxAge = SessionConfig.maxAge(sessionConfig);
-  let defaultReq = {requestDescriptor: reqd, session: None, sidKey, maxAge};
+  let secret = SessionConfig.secret(sessionConfig);
+  let defaultReq = {requestDescriptor: reqd, session: None, sidKey, maxAge, secret};
   defaultReq;
 };
 
@@ -49,3 +51,5 @@ let setSessionData = (maybeSession, req) => {
 let sidKey = req => req.sidKey;
 
 let maxAge = req => req.maxAge;
+
+let secret = req => req.secret;

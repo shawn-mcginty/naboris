@@ -27,11 +27,13 @@ let setOnListen: (unit => unit, t('sessionData)) => t('sessionData);
 
  [~maxAge] Optional param to set max age for session cookies in seconds (defaults to 30 days)
  [~sidKey] Optional param to set key for session cookies (defaults to ["nab.sid"])
+ [~secret] Optional param but recommended to set this to a secure string.
  */
 let setSessionConfig:
   (
     ~maxAge: int=?,
     ~sidKey: string=?,
+    ~secret: string=?,
     option(string) => Lwt.t(option(Session.t('sessionData))),
     t('sessionData)
   ) =>

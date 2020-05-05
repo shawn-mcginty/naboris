@@ -15,3 +15,18 @@ let removeSession: (Req.t('sessionData), Res.t) => Res.t;
  Returns promise of a new request with session data available if it was found.
  */
 let resumeSession: (ServerConfig.t('sessionData), Req.t('sessionData)) => Lwt.t(Req.t('sessionData));
+
+/**
+ {b Intended for internal use.}
+ */
+let generateSessionId: unit => string;
+
+/**
+ {b Intended for internal use.}
+ */
+let sign: (string, string) => string;
+
+/**
+ {b Intended for internal use.}
+ */
+let unsign: (string, string) => option(string);

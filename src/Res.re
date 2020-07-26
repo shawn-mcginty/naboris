@@ -83,20 +83,36 @@ let streamFileContentsToBody = (fullFilePath, responseBody) => {
   );
 };
 
+let addCacheControl = (req, res) => switch(Req.staticCacheControl(req)) {
+  | None => res
+  | Some(cacheControl) => addHeader(("Cache-Control", cacheControl), res)
+};
+
+let addLastModified = (req, stats: Unix.stats, res) => {
+  let modifiedTime = DateUtils.formatForHeaders(stats.st_mtime);
+
+  switch(Req.staticLastModified(req)) {
+    | true => addHeader(("Last-Modified", modifiedTime), res)
+    | false => res
+  };
+}
+
+let addStaticHeaders = (req, fullFilePath, stats: Unix.stats, res) => {
+  let size = stats.st_size;
+
+  addHeader(("Content-Type", MimeTypes.getMimeType(fullFilePath)), res)
+    |> addHeader(("Content-Length", string_of_int(size)))
+    |> addCacheControl(req)
+    |> addLastModified(req, stats);
+}
+
 let static = (basePath, pathList, req: Req.t('a), res) => {
   let fullFilePath = Static.getFilePath(basePath, pathList);
   let%lwt exists = Lwt_unix.file_exists(fullFilePath);
   switch (exists) {
     | true =>
       let%lwt stats = Lwt_unix.stat(fullFilePath);
-      let size = stats.st_size;
-      let resWithHeaders = switch(Req.staticCacheControl(req)) {
-        | None => addHeader(("Content-Type", MimeTypes.getMimeType(fullFilePath)), res)
-          |> addHeader(("Content-Length", string_of_int(size)))
-        | Some(cacheControl) => addHeader(("Content-Type", MimeTypes.getMimeType(fullFilePath)), res)
-          |> addHeader(("Content-Length", string_of_int(size)))
-          |> addHeader(("Cache-Control", cacheControl))
-      }
+      let resWithHeaders = addStaticHeaders(req, fullFilePath, stats, res);
 
       let response = createResponse(resWithHeaders);
       let requestDescriptor = Req.reqd(req);

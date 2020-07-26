@@ -21,6 +21,7 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
           request_descriptor,
           ServerConfig.sessionConfig(serverConfig),
           ServerConfig.staticCacheControl(serverConfig),
+          ServerConfig.staticLastModified(serverConfig),
         );
 
       let%lwt req = SessionManager.resumeSession(serverConfig, rawReq);

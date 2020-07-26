@@ -499,7 +499,13 @@ let testSuite = () => (
           Alcotest.(check(string, "status", codeStr, "200 OK"));
           let headers = Cohttp.Response.headers(resp);
           let cacheControl = Cohttp.Header.get(headers, "cache-control");
+          let lastModified = Cohttp.Header.get(headers, "last-modified");
+          let hasLastModified = switch(lastModified) {
+            | Some(_) => true
+            | None => false
+          };
           Alcotest.(check(option(string), "cache-control", cacheControl, Some("public, max-age=0")));
+          Alcotest.(check(bool, "has last-modified", hasLastModified, true));
           Lwt.return_unit
         }
       )

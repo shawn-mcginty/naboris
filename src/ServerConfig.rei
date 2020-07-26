@@ -94,6 +94,18 @@ let setStaticCacheControl: (option(string), t('sessionData)) => t('sessionData);
 let sessionConfig: t('sessionData) => option(SessionConfig.t('sessionData));
 
 /**
+ Set [bool] flag which [true] signals the server to send [Last-Modified] headers
+ with static file responses.
+ */
+let setStaticLastModified: (bool, t('sessionData)) => t('sessionData);
+
+/**
+ Returns [bool] from config, which [true] signals the server to send [Last-Modified] headers
+ with static file responses.
+ */
+let staticLastModified: t('sessionData) => bool;
+
+/**
  Returns list of middlewares from the config.
  */
 let middlewares: t('sessionData) => list(Middleware.t('sessionData));

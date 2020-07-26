@@ -59,6 +59,11 @@ module Middleware = Middleware;
 module RequestHandler = RequestHandler;
 
 /**
+ Module with some utility functions for dates for HTTP headers.
+ */
+module DateUtils = DateUtils;
+
+/**
    [Map] type for working with queries from routed requests.
    */
 module Query = Query;

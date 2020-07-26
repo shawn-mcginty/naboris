@@ -10,6 +10,7 @@ let runTests = () => {
     "Naboris_Tests",
     [
       CookieTest.testSuite(),
+      DateUtilsTest.testSuite(),
       MimeTypesTest.testSuite(),
       MethodTest.testSuite(),
       RouterTest.testSuite(),

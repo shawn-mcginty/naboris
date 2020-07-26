@@ -487,6 +487,24 @@ let testSuite = () => (
       )
     }),
     Alcotest_lwt.test_case(
+      "Get static files sends correct headers",
+      `Slow,
+      (_lwtSwitch, _) => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9991/static/text/text_file.txt"),
+      )
+      >>= (
+        ((resp, _bod)) => {
+          let codeStr = Cohttp.Code.string_of_status(resp.status);
+          Alcotest.(check(string, "status", codeStr, "200 OK"));
+          let headers = Cohttp.Response.headers(resp);
+          let cacheControl = Cohttp.Header.get(headers, "cache-control");
+          Alcotest.(check(option(string), "cache-control", cacheControl, Some("public, max-age=0")));
+          Lwt.return_unit
+        }
+      )
+    }),
+    Alcotest_lwt.test_case(
       "Get \"/static/:file_path\" gets files bigger than 512B",
       `Slow,
       (_lwtSwitch, _) => {

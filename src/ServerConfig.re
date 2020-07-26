@@ -12,6 +12,7 @@ type t('sessionData) = {
   errorHandler: option(ErrorHandler.t),
   httpAfConfig: option(httpAfConfig),
   middlewares: list(Middleware.t('sessionData)),
+  staticCacheControl: option(string),
 };
 
 let default = {
@@ -23,6 +24,7 @@ let default = {
   sessionConfig: None,
   httpAfConfig: None,
   middlewares: [],
+  staticCacheControl: Some("public, max-age=0"),
 };
 
 let sessionConfig = conf => conf.sessionConfig;
@@ -92,6 +94,10 @@ let setSessionConfig =
   };
   {...conf, sessionConfig: Some(sessionConfig)};
 };
+
+let staticCacheControl = conf => conf.staticCacheControl;
+
+let setStaticCacheControl = (cacheControl, conf) => {...conf, staticCacheControl: cacheControl};
 
 let httpAfConfig = (conf: t('sessionData)): option(Httpaf.Config.t) =>
   switch (conf.httpAfConfig) {

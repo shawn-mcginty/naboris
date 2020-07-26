@@ -33,7 +33,7 @@ let setSessionData: (option(Session.t('sessionData)), t('sessionData)) => t('ses
  {b Intended for internal use.}
  Creates default req record.
  */
-let fromReqd: (Httpaf.Reqd.t, option(SessionConfig.t('sessionData))) => t('sessionData);
+let fromReqd: (Httpaf.Reqd.t, option(SessionConfig.t('sessionData)), option(string)) => t('sessionData);
 
 /**
  Get key for session id cookie
@@ -49,3 +49,8 @@ let maxAge: t('sessionData) => int;
  Get secret used to sign session id cookies.
  */
 let secret: t('sessionData) => string;
+
+/**
+ Get [Cache-control] header value for static requests based on [ServerConfig.t].
+ */
+let staticCacheControl: t('sessionData) => option(string);

@@ -90,9 +90,14 @@ let static = (basePath, pathList, req: Req.t('a), res) => {
     | true =>
       let%lwt stats = Lwt_unix.stat(fullFilePath);
       let size = stats.st_size;
-      let resWithHeaders =
-        addHeader(("Content-Type", MimeTypes.getMimeType(fullFilePath)), res)
-        |> addHeader(("Content-Length", string_of_int(size)));
+      let resWithHeaders = switch(Req.staticCacheControl(req)) {
+        | None => addHeader(("Content-Type", MimeTypes.getMimeType(fullFilePath)), res)
+          |> addHeader(("Content-Length", string_of_int(size)))
+        | Some(cacheControl) => addHeader(("Content-Type", MimeTypes.getMimeType(fullFilePath)), res)
+          |> addHeader(("Content-Length", string_of_int(size)))
+          |> addHeader(("Cache-Control", cacheControl))
+      }
+
       let response = createResponse(resWithHeaders);
       let requestDescriptor = Req.reqd(req);
       let responseBody =

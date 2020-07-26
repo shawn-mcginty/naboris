@@ -81,6 +81,13 @@ let addStaticMiddleware:
   (list(string), string, t('sessionData)) => t('sessionData);
 
 /**
+ Set [Cache-control] header value which is returned with every request for a static file.
+
+ If [None] then [Cache-control] header is omitted.
+ */
+let setStaticCacheControl: (option(string), t('sessionData)) => t('sessionData);
+
+/**
  Returns [SessionConfig.t('sessionData)] from config.
  [None] if none is configured.
  */
@@ -111,3 +118,8 @@ let errorHandler: t('sessionData) => option(ErrorHandler.t);
  Returns [option(HttpAf.Config.t)] of [t].
  */
 let httpAfConfig: t('sessionData) => option(Httpaf.Config.t);
+
+/**
+ Returns [staticCacheControl] value of [t].
+ */
+let staticCacheControl: t('sessionData) => option(string);

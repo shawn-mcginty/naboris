@@ -5,4 +5,4 @@ cd docs-src
 npm install
 npm run load-docs
 npm run generate
-scp -i ../deploy_key -r dist naboris-docs@shawnmcginty.com:~/www
+scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ../deploy_key -r dist naboris-docs@shawnmcginty.com:~/www

@@ -14,6 +14,8 @@ module Cookie = Cookie;
 module ServerConfig = ServerConfig;
 module SessionConfig = SessionConfig;
 module ErrorHandler = ErrorHandler;
+module DateUtils = DateUtils;
+module Etag = Etag;
 
 let listen =
     (

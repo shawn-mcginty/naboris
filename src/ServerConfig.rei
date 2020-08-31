@@ -81,10 +81,40 @@ let addStaticMiddleware:
   (list(string), string, t('sessionData)) => t('sessionData);
 
 /**
+ Set [Cache-control] header value which is returned with every request for a static file.
+
+ If [None] then [Cache-control] header is omitted.
+ */
+let setStaticCacheControl: (option(string), t('sessionData)) => t('sessionData);
+
+/**
  Returns [SessionConfig.t('sessionData)] from config.
  [None] if none is configured.
  */
 let sessionConfig: t('sessionData) => option(SessionConfig.t('sessionData));
+
+/**
+ Set [bool] flag which [true] signals the server to send [Last-Modified] headers
+ with static file responses.
+ */
+let setStaticLastModified: (bool, t('sessionData)) => t('sessionData);
+
+/**
+ Returns [bool] from config, which [true] signals the server to send [Last-Modified] headers
+ with static file responses.
+ */
+let staticLastModified: t('sessionData) => bool;
+
+/**
+ Set [option([`Storng | `Weak])] which signals the server to set etags as strong or weak.
+ [None] will set no etag headers.
+ */
+let setEtag: (option(Etag.strength), t('sessionData)) => t('sessionData);
+
+/**
+ Returns currently configured etag header strength.
+ */
+let etag: t('sessionData) => option(Etag.strength);
 
 /**
  Returns list of middlewares from the config.
@@ -111,3 +141,8 @@ let errorHandler: t('sessionData) => option(ErrorHandler.t);
  Returns [option(HttpAf.Config.t)] of [t].
  */
 let httpAfConfig: t('sessionData) => option(Httpaf.Config.t);
+
+/**
+ Returns [staticCacheControl] value of [t].
+ */
+let staticCacheControl: t('sessionData) => option(string);

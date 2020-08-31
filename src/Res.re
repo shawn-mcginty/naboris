@@ -40,9 +40,22 @@ let status = (status: int, res: t) => {
 
 let closeResponse = (res) => { ...res, closed: true };
 
+let addDateHeader = (res) => {
+  let now = Unix.time() |> DateUtils.formatForHeaders;
+  addHeaderIfNone(("Date", now), res);
+};
+
+let addEtagHeader = (entity, req, res) => switch (Req.responseEtag(req)) {
+  | None => res
+  | Some(`Weak) => addHeaderIfNone(("Etag", Etag.weakFromString(entity)), res)
+  | Some(`Strong) => addHeaderIfNone(("Etag", Etag.fromString(entity)), res)
+}
+
 let raw = (req: Req.t('a), body: string, res: t) => {
   let resWithHeaders = addHeaderIfNone(("Content-length", String.length(body) |> string_of_int), res)
-    |> addHeaderIfNone(("Connection", "keep-alive"));
+    |> addHeaderIfNone(("Connection", "keep-alive"))
+    |> addDateHeader
+    |> addEtagHeader(body, req);
   let response = createResponse(resWithHeaders);
   let requestDescriptor = Req.reqd(req);
 
@@ -83,16 +96,49 @@ let streamFileContentsToBody = (fullFilePath, responseBody) => {
   );
 };
 
+let addCacheControl = (req, res) => switch(Req.staticCacheControl(req)) {
+  | None => res
+  | Some(cacheControl) => addHeaderIfNone(("Cache-Control", cacheControl), res)
+};
+
+let addLastModified = (req, stats: Unix.stats, res) => {
+  let modifiedTime = DateUtils.formatForHeaders(stats.st_mtime);
+
+  switch(Req.staticLastModified(req)) {
+    | true => addHeaderIfNone(("Last-Modified", modifiedTime), res)
+    | false => res
+  };
+}
+
+let addFileEtagHeaders = (req, fullFilePath, res) => switch(Req.responseEtag(req)) {
+  | None => Lwt.return(res)
+  | Some(`Weak) =>
+    let%lwt etag = Etag.weakFromPath(fullFilePath);
+    addHeaderIfNone(("Etag", etag), res) |> Lwt.return;
+  | Some(`Strong) =>
+    let%lwt etag = Etag.fromFilePath(fullFilePath);
+    addHeaderIfNone(("Etag", etag), res) |> Lwt.return;
+};
+
+let addStaticHeaders = (req, fullFilePath, stats: Unix.stats, res) => {
+  let size = stats.st_size;
+
+  addHeaderIfNone(("Content-Type", MimeTypes.getMimeType(fullFilePath)), res)
+    |> addHeaderIfNone(("Content-Length", string_of_int(size)))
+    |> addCacheControl(req)
+    |> addLastModified(req, stats)
+    |> addDateHeader
+    |> addFileEtagHeaders(req, fullFilePath);
+}
+
 let static = (basePath, pathList, req: Req.t('a), res) => {
   let fullFilePath = Static.getFilePath(basePath, pathList);
   let%lwt exists = Lwt_unix.file_exists(fullFilePath);
   switch (exists) {
     | true =>
       let%lwt stats = Lwt_unix.stat(fullFilePath);
-      let size = stats.st_size;
-      let resWithHeaders =
-        addHeader(("Content-Type", MimeTypes.getMimeType(fullFilePath)), res)
-        |> addHeader(("Content-Length", string_of_int(size)));
+      let%lwt resWithHeaders = addStaticHeaders(req, fullFilePath, stats, res);
+
       let response = createResponse(resWithHeaders);
       let requestDescriptor = Req.reqd(req);
       let responseBody =

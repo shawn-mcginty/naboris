@@ -12,6 +12,9 @@ type t('sessionData) = {
   errorHandler: option(ErrorHandler.t),
   httpAfConfig: option(httpAfConfig),
   middlewares: list(Middleware.t('sessionData)),
+  staticCacheControl: option(string),
+  staticLastModified: bool,
+  etag: option(Etag.strength),
 };
 
 let default = {
@@ -23,6 +26,9 @@ let default = {
   sessionConfig: None,
   httpAfConfig: None,
   middlewares: [],
+  staticCacheControl: Some("public, max-age=0"),
+  staticLastModified: true,
+  etag: Some(`Weak),
 };
 
 let sessionConfig = conf => conf.sessionConfig;
@@ -83,14 +89,27 @@ let addStaticMiddleware = (pathPrefix, publicPath, conf) =>
      );
 
 let setSessionConfig =
-    (~maxAge=2592000, ~sidKey="nab.sid", getSessionFn, conf) => {
+    (~maxAge=2592000, ~sidKey="nab.sid", ~secret="please set to a secure value", getSessionFn, conf) => {
   let sessionConfig: SessionConfig.t('sessionData) = {
     getSession: getSessionFn,
     maxAge,
     sidKey,
+    secret,
   };
   {...conf, sessionConfig: Some(sessionConfig)};
 };
+
+let staticCacheControl = conf => conf.staticCacheControl;
+
+let setStaticCacheControl = (cacheControl, conf) => {...conf, staticCacheControl: cacheControl};
+
+let staticLastModified = conf => conf.staticLastModified;
+
+let setStaticLastModified = (staticLastModified, conf) => {...conf, staticLastModified };
+
+let etag = conf => conf.etag;
+
+let setEtag = (etag, conf: t('sessionData)) => {...conf, etag};
 
 let httpAfConfig = (conf: t('sessionData)): option(Httpaf.Config.t) =>
   switch (conf.httpAfConfig) {

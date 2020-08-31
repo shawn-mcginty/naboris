@@ -31,7 +31,7 @@ GitHub. These projects use [esy](https://esy.sh) to sandbox opam and build. This
 
 OCaml:
 ```bash
-$ git clone git@github.com:shawn-mcginty/naboris-ocaml-scaffold.git
+$ git clone git@github.com:shawn-mcginty/naboris-ml-scaffold.git
 $ npm run install
 $ npm run build
 $ npm run start
@@ -101,3 +101,4 @@ If you use **esy** for sandboxing you'll have to use a special resolution:
 ```
 
 _Notes about esy custom resolution: This is pegged to a specific commit. At the time of this writing the commit listed above worked great. You may need to check the [GitHub repo](https://github.com/esy-packages/libev) and switch to a fresher commit._
+

@@ -19,6 +19,7 @@ let echoQueryQuery = (req, res, query) => {
 
 let sessionConfig: Naboris.SessionConfig.t(TestSession.t) = {
   sidKey: "nab.sid",
+  secret: "Keep it secret, keep it safe!",
   maxAge: 3600,
   getSession: sessionId => {
     let userData = TestSession.{username: "realsessionuser"};
@@ -369,6 +370,33 @@ let testSuite = () => (
       )
     }),
     Alcotest_lwt.test_case(
+      "Get sets headers properly",
+      `Slow,
+      (_lwtSwitch, _) => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9991/echo/test 1"),
+      )
+      >>= (
+        ((resp, _bod)) => {
+          let codeStr = Cohttp.Code.string_of_status(resp.status);
+          let dateHeader =Cohttp.Header.get(Cohttp.Response.headers(resp), "date");
+          let hasDate = switch (dateHeader) {
+            | None => false
+            | _ => true
+          }
+          let etag = Cohttp.Header.get(Cohttp.Response.headers(resp), "etag");
+          let hasEtag = switch (etag) {
+            | None => false
+            | _ => true
+          };
+          Alcotest.(check(string, "status", codeStr, "200 OK"));
+          Alcotest.(check(bool, "has date header", hasDate, true));
+          Alcotest.(check(bool, "has etag header", hasEtag, true));
+          Lwt.return_unit;
+        }
+      )
+    }),
+    Alcotest_lwt.test_case(
       "Get \"/echo/:str1/multi/:str2\" matches and extracts param(s) properly",
       `Slow,
       (_lwtSwitch, _) => {
@@ -486,6 +514,36 @@ let testSuite = () => (
       )
     }),
     Alcotest_lwt.test_case(
+      "Get static files sends correct headers",
+      `Slow,
+      (_lwtSwitch, _) => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9991/static/text/text_file.txt"),
+      )
+      >>= (
+        ((resp, _bod)) => {
+          let codeStr = Cohttp.Code.string_of_status(resp.status);
+          Alcotest.(check(string, "status", codeStr, "200 OK"));
+          let headers = Cohttp.Response.headers(resp);
+          let cacheControl = Cohttp.Header.get(headers, "cache-control");
+          let lastModified = Cohttp.Header.get(headers, "last-modified");
+          let hasLastModified = switch(lastModified) {
+            | Some(_) => true
+            | None => false
+          };
+          let etag = Cohttp.Header.get(headers, "etag");
+          let hasEtag = switch(etag) {
+            | Some(_) => true
+            | None => false
+          };
+          Alcotest.(check(option(string), "cache-control", cacheControl, Some("public, max-age=0")));
+          Alcotest.(check(bool, "has last-modified", hasLastModified, true));
+          Alcotest.(check(bool, "has etag", hasEtag, true));
+          Lwt.return_unit
+        }
+      )
+    }),
+    Alcotest_lwt.test_case(
       "Get \"/static/:file_path\" gets files bigger than 512B",
       `Slow,
       (_lwtSwitch, _) => {
@@ -568,8 +626,8 @@ let testSuite = () => (
 
           let headers = Cohttp.Response.headers(resp);
           switch (Cohttp.Header.get(headers, "Set-Cookie")) {
-          | Some(_cookie) =>
-            let cookie = "_ga=GA1.1.1652070095.1563853850; express.sid=s%3AhSEgvCCmOADa-0Flv4ulT1FltA8TzHeq.G1UoU2xXC8X8wkEO5I0J%2BhE3NCjUoggAlGnz0jA1%2B2w; _gid=GA1.1.1409339010.1564626384; connect.sid=s%3AClROuVLX_Dalzkmf0D4d0Xath-HHG16M.8zaxTWykLFnypEw%2BCAIZRTPJR7IKBDUcAamWUch4Czk; nab.sid=67f67df4c5d9711ef89bbf8b509d49e2cc1ce51e3d95c90d45485a7b3cf40ca4ec9cbbceb0ca6ad844ec4a4779fd9981b130c40f81646f2ef286749c7184e66f";
+          | Some(cookie) =>
+            let cookie = "_ga=GA1.1.1652070095.1563853850; express.sid=s%3AhSEgvCCmOADa-0Flv4ulT1FltA8TzHeq.G1UoU2xXC8X8wkEO5I0J%2BhE3NCjUoggAlGnz0jA1%2B2w; _gid=GA1.1.1409339010.1564626384; connect.sid=s%3AClROuVLX_Dalzkmf0D4d0Xath-HHG16M.8zaxTWykLFnypEw%2BCAIZRTPJR7IKBDUcAamWUch4Czk; " ++ cookie;
             let headers2 = Cohttp.Header.init_with("Cookie", cookie);
             Cohttp_lwt_unix.Client.get(
               ~headers=headers2,

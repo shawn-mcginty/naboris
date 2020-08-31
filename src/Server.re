@@ -7,8 +7,6 @@ exception UnknownError(string);
 type unknownError =
   | UnknownError;
 
-open Lwt.Infix;
-
 let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
   let request_handler =
       (_client_address: Unix.sockaddr, request_descriptor: Httpaf.Reqd.t) => {
@@ -22,34 +20,34 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
         Req.fromReqd(
           request_descriptor,
           ServerConfig.sessionConfig(serverConfig),
+          ServerConfig.staticCacheControl(serverConfig),
+          ServerConfig.staticLastModified(serverConfig),
+          ServerConfig.etag(serverConfig),
         );
 
-      SessionManager.resumeSession(serverConfig, rawReq)
-      >>= (
-        req =>
-          switch (ServerConfig.middlewares(serverConfig)) {
-          | [] =>
-            ServerConfig.routeRequest(serverConfig, route, req, Res.default())
-          | [oneMiddleware] =>
-            oneMiddleware(
+      let%lwt req = SessionManager.resumeSession(serverConfig, rawReq);
+      let%lwt _ = switch (ServerConfig.middlewares(serverConfig)) {
+        | [] =>
+          ServerConfig.routeRequest(serverConfig, route, req, Res.default());
+        | [oneMiddleware] =>
+          oneMiddleware(
+            ServerConfig.routeRequest(serverConfig),
+            route,
+            req,
+            Res.default(),
+          )
+        | _moreThanOneMiddleware =>
+          let fullHandler =
+            ServerConfig.middlewares(serverConfig)
+            |> List.rev
+            |> List.fold_left(
+              (next: RequestHandler.t('a), current) => current(next),
               ServerConfig.routeRequest(serverConfig),
-              route,
-              req,
-              Res.default(),
-            )
-          | _moreThanOneMiddleware =>
-            let fullHandler =
-              ServerConfig.middlewares(serverConfig)
-              |> List.rev
-              |> List.fold_left(
-                   (next: RequestHandler.t('a), current) => current(next),
-                   ServerConfig.routeRequest(serverConfig),
-                 );
-
-            fullHandler(route, req, Res.default());
-          }
-      )
-      >>= (_res => Lwt.return_unit);
+            );
+          
+          fullHandler(route, req, Res.default());
+      }
+      Lwt.return_unit;
     });
   };
 
@@ -100,18 +98,13 @@ let buildConnectionHandler = (serverConfig: ServerConfig.t('sessionData)) => {
               | `Bad_request => UnknownError("Bad request")
               };
 
-            let _async =
-              handler(realExn, route)
-              >>= (
-                ((headers, body)) => {
-                  let response_body =
-                    start_response(Httpaf.Headers.of_list(headers));
-                  Httpaf.Body.write_string(response_body, body);
-                  Httpaf.Body.close_writer(response_body);
-                  Lwt.return_unit;
-                }
-              );
-            ();
+            Lwt.async(() => {
+              let%lwt (headers, body) = handler(realExn, route);
+              let response_body = start_response(Httpaf.Headers.of_list(headers));
+              Httpaf.Body.write_string(response_body, body);
+              Httpaf.Body.close_writer(response_body);
+              Lwt.return_unit;
+            });
           }
       )
     };

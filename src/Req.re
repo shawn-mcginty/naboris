@@ -3,6 +3,10 @@ type t('sessionData) = {
   session: option(Session.t('sessionData)),
   sidKey: string,
   maxAge: int,
+  secret: string,
+  staticCacheControl: option(string),
+  staticLastModified: bool,
+  responseEtag: option(Etag.strength),
 };
 
 let reqd = req => req.requestDescriptor;
@@ -28,10 +32,11 @@ let getBody = ({requestDescriptor, _}) => {
   Lwt_stream.fold((a, b) => a ++ b, bodyStream, "");
 };
 
-let fromReqd = (reqd, sessionConfig) => {
+let fromReqd = (reqd, sessionConfig, staticCacheControl, staticLastModified, responseEtag) => {
   let sidKey = SessionConfig.sidKey(sessionConfig);
   let maxAge = SessionConfig.maxAge(sessionConfig);
-  let defaultReq = {requestDescriptor: reqd, session: None, sidKey, maxAge};
+  let secret = SessionConfig.secret(sessionConfig);
+  let defaultReq = {requestDescriptor: reqd, session: None, sidKey, maxAge, secret, staticCacheControl, staticLastModified, responseEtag};
   defaultReq;
 };
 
@@ -49,3 +54,11 @@ let setSessionData = (maybeSession, req) => {
 let sidKey = req => req.sidKey;
 
 let maxAge = req => req.maxAge;
+
+let secret = req => req.secret;
+
+let staticCacheControl = req => req.staticCacheControl;
+
+let staticLastModified = req => req.staticLastModified;
+
+let responseEtag = req => req.responseEtag;

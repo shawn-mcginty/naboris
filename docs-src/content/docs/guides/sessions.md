@@ -16,18 +16,18 @@ Many `Naboris` types take the parameter `'sessionData` this represents a custom 
 
 #### <a name="session-config" href="#session-config">#</a> Session Config
 [`ServerConfig.setSessionConfig`](/odocs/naboris/Naboris/ServerConfig/index.html#val-setSessionConfig) will return a new server configuration with the desired
-session configuration. This call consists of one required argument `mapSession` and two
-optional arguments `~maxAge` and `~sidKey`.
+session configuration. This call consists of one required argument `mapSession` and three optional arguments `~maxAge`, `~sidKey`, and `~secret`.
 
 ```reason
-let setSessionConfig: (~maxAge: int=?, ~sidKey: string=?, option(string) => Lwt.t(option(Session.t('sessionData))), ServerConfig.t('sessionData)) => ServerConfig.t('sessionData);
+let setSessionConfig: (~maxAge: int=?, ~sidKey: string=?, ~secret: string=?, option(string) => Lwt.t(option(Session.t('sessionData))), ServerConfig.t('sessionData)) => ServerConfig.t('sessionData);
 ```
 ```ocaml
-val setSessionConfig: ?maxAge: int -> ?sidKey: string -> string option -> 'sessionData Session.t option Lwt.t -> 'sessionData ServerConfig.t -> 'sessionData ServerConfig.t
+val setSessionConfig: ?maxAge: int -> ?sidKey: string -> ?secret: string -> string option -> 'sessionData Session.t option Lwt.t -> 'sessionData ServerConfig.t -> 'sessionData ServerConfig.t
 ```
 
 * `sidKey` - `string` (optional) - The key used to store the session id in browser cookies. Defaults to `"nab.sid"`.
 * `maxAge` - `int` (optional) - The max age of session cookies in seconds.  Defaults to `2592000` (30 days).
+* `secret` - `string` (optional) - A secret string used to sign session id cookies.
 * `mapSession` - covered in the section below.
 
 #### <a name="session-mapping" href="#session-mapping">#</a> Session Mapping

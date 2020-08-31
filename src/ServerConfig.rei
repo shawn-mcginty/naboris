@@ -106,6 +106,17 @@ let setStaticLastModified: (bool, t('sessionData)) => t('sessionData);
 let staticLastModified: t('sessionData) => bool;
 
 /**
+ Set [option([`Storng | `Weak])] which signals the server to set etags as strong or weak.
+ [None] will set no etag headers.
+ */
+let setEtag: (option(Etag.strength), t('sessionData)) => t('sessionData);
+
+/**
+ Returns currently configured etag header strength.
+ */
+let etag: t('sessionData) => option(Etag.strength);
+
+/**
  Returns list of middlewares from the config.
  */
 let middlewares: t('sessionData) => list(Middleware.t('sessionData));

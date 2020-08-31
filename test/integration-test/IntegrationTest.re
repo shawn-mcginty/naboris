@@ -370,6 +370,33 @@ let testSuite = () => (
       )
     }),
     Alcotest_lwt.test_case(
+      "Get sets headers properly",
+      `Slow,
+      (_lwtSwitch, _) => {
+      Cohttp_lwt_unix.Client.get(
+        Uri.of_string("http://localhost:9991/echo/test 1"),
+      )
+      >>= (
+        ((resp, _bod)) => {
+          let codeStr = Cohttp.Code.string_of_status(resp.status);
+          let dateHeader =Cohttp.Header.get(Cohttp.Response.headers(resp), "date");
+          let hasDate = switch (dateHeader) {
+            | None => false
+            | _ => true
+          }
+          let etag = Cohttp.Header.get(Cohttp.Response.headers(resp), "etag");
+          let hasEtag = switch (etag) {
+            | None => false
+            | _ => true
+          };
+          Alcotest.(check(string, "status", codeStr, "200 OK"));
+          Alcotest.(check(bool, "has date header", hasDate, true));
+          Alcotest.(check(bool, "has etag header", hasEtag, true));
+          Lwt.return_unit;
+        }
+      )
+    }),
+    Alcotest_lwt.test_case(
       "Get \"/echo/:str1/multi/:str2\" matches and extracts param(s) properly",
       `Slow,
       (_lwtSwitch, _) => {
@@ -504,8 +531,14 @@ let testSuite = () => (
             | Some(_) => true
             | None => false
           };
+          let etag = Cohttp.Header.get(headers, "etag");
+          let hasEtag = switch(etag) {
+            | Some(_) => true
+            | None => false
+          };
           Alcotest.(check(option(string), "cache-control", cacheControl, Some("public, max-age=0")));
           Alcotest.(check(bool, "has last-modified", hasLastModified, true));
+          Alcotest.(check(bool, "has etag", hasEtag, true));
           Lwt.return_unit
         }
       )

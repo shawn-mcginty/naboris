@@ -35,6 +35,7 @@
   },
   "homepage": "https://github.com/shawn-mcginty/naboris#readme",
   "dependencies": {
+    "@opam/base64": ">=3.4.0",
     "@opam/dune": "*",
     "@opam/digestif": ">=0.8.0",
     "@opam/reason": ">=3.4.0",

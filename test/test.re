@@ -12,6 +12,7 @@ let runTests = () => {
       CookieTest.testSuite(),
       DateUtilsTest.testSuite(),
       MimeTypesTest.testSuite(),
+      EtagTest.testSuite(),
       MethodTest.testSuite(),
       RouterTest.testSuite(),
       SessionManagerTest.testSuite(),

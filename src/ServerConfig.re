@@ -14,6 +14,7 @@ type t('sessionData) = {
   middlewares: list(Middleware.t('sessionData)),
   staticCacheControl: option(string),
   staticLastModified: bool,
+  etag: option(Etag.strength),
 };
 
 let default = {
@@ -27,6 +28,7 @@ let default = {
   middlewares: [],
   staticCacheControl: Some("public, max-age=0"),
   staticLastModified: true,
+  etag: Some(`Weak),
 };
 
 let sessionConfig = conf => conf.sessionConfig;
@@ -104,6 +106,10 @@ let setStaticCacheControl = (cacheControl, conf) => {...conf, staticCacheControl
 let staticLastModified = conf => conf.staticLastModified;
 
 let setStaticLastModified = (staticLastModified, conf) => {...conf, staticLastModified };
+
+let etag = conf => conf.etag;
+
+let setEtag = (etag, conf: t('sessionData)) => {...conf, etag};
 
 let httpAfConfig = (conf: t('sessionData)): option(Httpaf.Config.t) =>
   switch (conf.httpAfConfig) {

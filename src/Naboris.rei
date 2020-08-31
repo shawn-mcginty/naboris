@@ -82,3 +82,6 @@ module Router = Router;
 
 /** {b Less commonly used.} */
 module SessionConfig = SessionConfig;
+
+/** {b Less commonly used.} */
+module Etag = Etag;

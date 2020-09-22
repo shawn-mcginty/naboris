@@ -17,10 +17,12 @@ depends: [
   "ocaml" {>= "4.07"}
   "base64" {>= "3.4.0"}
   "dune" {>= "1.6"}
+  "digestif" {>= "0.8.0"}
   "reason" {>= "3.4.0"}
   "httpaf" {>= "0.6.0"}
   "httpaf-lwt-unix" {>= "0.6.0"}
   "lwt" {>= "5.1.1"}
+  "lwt_ppx" {>= "2.0.1"}
   "uri" {>= "2.2.0"}
 ]
 depopts: [

@@ -1,10 +1,10 @@
 os:
 - linux
 dist:
-- xenial
+- bionic
 language: node_js
 node_js:
-- '10'
+- '12'
 before_install:
 - openssl aes-256-cbc -K $encrypted_dfdcfd5172af_key -iv $encrypted_dfdcfd5172af_iv
   -in deploy_key.enc -out ./deploy_key -d
@@ -13,6 +13,7 @@ before_install:
 - ssh-add ./deploy_key
 - sudo add-apt-repository ppa:longsleep/golang-backports -y
 - sudo apt-get update
+- sudo apt-get install -y libc6
 - sudo apt-get install -y golang-go
 - sudo apt-get install -y libev-dev
 - go env | grep GOPATH > gopath.env

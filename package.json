@@ -53,10 +53,10 @@
     "@opam/odoc": "*",
     "@opam/merlin": "*",
     "esy": "^0.5.6",
-    "ocaml": "~4.7",
+    "ocaml": "~4.8",
     "reason-cli": "*"
   },
   "peerDependencies": {
-    "ocaml": ">=4.5.0"
+    "ocaml": ">=4.8.0"
   }
 }

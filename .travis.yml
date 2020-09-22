@@ -13,6 +13,7 @@ before_install:
 - ssh-add ./deploy_key
 - sudo add-apt-repository ppa:longsleep/golang-backports -y
 - sudo apt-get update
+- sudo apt-get install -y libc6
 - sudo apt-get install -y golang-go
 - sudo apt-get install -y libev-dev
 - go env | grep GOPATH > gopath.env

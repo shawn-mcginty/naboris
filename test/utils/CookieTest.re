@@ -2,7 +2,7 @@ let testSuite = () => (
   "utils_Cookie",
   [
     Alcotest_lwt.test_case(
-      "getSessionId returns the id from the ugly string",
+      "get_session_id returns the id from the ugly string",
       `Quick,
       (_lwtSwitch, _) => {
         let expectedSid = "this-is-my-big-ass-session-id-woohoo";
@@ -12,7 +12,7 @@ let testSuite = () => (
           check(
             option(string),
             "same sid",
-            Naboris.Cookie.getSessionId("nab.sid", cookieStr),
+            Naboris.Cookie.get_session_id("nab.sid", cookieStr),
             Some(expectedSid),
           )
         );
@@ -20,11 +20,11 @@ let testSuite = () => (
       },
     ),
     Alcotest_lwt.test_case(
-      "getSessionId fix recursion bug",
+      "get_session_id fix recursion bug",
       `Quick,
       (_lwtSwitch, _) => {
         let cookieStr = "nnect.sid=s%3AadVKe5fVEcZVq4X5ZUrMen2U88jmjy4f.LOwere3akcgCno7WDqinHgL%2BXWXVp2SgbHZzv7%2Btbt4";
-        let maybeCookie = Naboris.Cookie.getSessionId("nab.sid", cookieStr);
+        let maybeCookie = Naboris.Cookie.get_session_id("nab.sid", cookieStr);
         Alcotest.(
           check(option(string), "no matching cookie", None, maybeCookie)
         );
@@ -32,7 +32,7 @@ let testSuite = () => (
       },
     ),
     Alcotest_lwt.test_case(
-      "getSessionId fix big cookie str",
+      "get_session_id fix big cookie str",
       `Quick,
       (_lwtSwitch, _) => {
         let expectedSid = "67f67df4c5d9711ef89bbf8b509d49e2cc1ce51e3d95c90d45485a7b3cf40ca4ec9cbbceb0ca6ad844ec4a4779fd9981b130c40f81646f2ef286749c7184e66f";
@@ -41,7 +41,7 @@ let testSuite = () => (
           check(
             option(string),
             "same sid",
-            Naboris.Cookie.getSessionId("nab.sid", cookieStr),
+            Naboris.Cookie.get_session_id("nab.sid", cookieStr),
             Some(expectedSid),
           )
         );
@@ -49,7 +49,7 @@ let testSuite = () => (
       },
     ),
     Alcotest_lwt.test_case(
-      "getSessionId returns none when cookie str is part of the key",
+      "get_session_id returns none when cookie str is part of the key",
       `Quick,
       (_lwtSwitch, _) => {
         let cookieStr = "nib";
@@ -57,7 +57,7 @@ let testSuite = () => (
           check(
             option(string),
             "empty",
-            Naboris.Cookie.getSessionId("nab.sid", cookieStr),
+            Naboris.Cookie.get_session_id("nab.sid", cookieStr),
             None,
           )
         );

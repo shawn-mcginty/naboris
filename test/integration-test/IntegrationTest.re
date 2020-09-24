@@ -18,13 +18,13 @@ let echoQueryQuery = (req, res, query) => {
 };
 
 let sessionConfig: Naboris.SessionConfig.t(TestSession.t) = {
-  sidKey: "nab.sid",
+  sid_key: "nab.sid",
   secret: "Keep it secret, keep it safe!",
-  maxAge: 3600,
-  getSession: sessionId => {
+  max_age: 3600,
+  get_session: sessionId => {
     let userData = TestSession.{username: "realsessionuser"};
     switch (sessionId) {
-    | Some(sid) => Lwt.return(Some(Naboris.Session.create(sid, userData)))
+    | Some(sid) => Lwt.return(Some(Naboris.Session.make(sid, userData)))
     | _ => Lwt.return(None)
     };
   },
@@ -45,20 +45,20 @@ let startServers = lwtSwitch => {
   );
 
   let testServerConfig: Naboris.ServerConfig.t(TestSession.t) =
-    Naboris.ServerConfig.create()
-    |> Naboris.ServerConfig.setOnListen(() => Lwt.wakeup_later(ssr1, ()))
-    |> Naboris.ServerConfig.setSessionConfig(sessionConfig.getSession)
-    |> Naboris.ServerConfig.addStaticMiddleware(
+    Naboris.ServerConfig.make()
+    |> Naboris.ServerConfig.set_on_listen(() => Lwt.wakeup_later(ssr1, ()))
+    |> Naboris.ServerConfig.set_session_config(sessionConfig.get_session)
+    |> Naboris.ServerConfig.add_static_middleware(
          ["static"],
          Sys.getenv("cur__root") ++ "/test/integration-test/test_assets",
        )
-    |> Naboris.ServerConfig.setErrorHandler((error, _route) => {
+    |> Naboris.ServerConfig.set_error_handler((error, _route) => {
          switch (error) {
          | SomebodyGoofed(_) => Lwt.return(([], "Dude, somebody goofed"))
          | _ => Lwt.return(([], "else"))
          }
        })
-    |> Naboris.ServerConfig.setRequestHandler((route, req, res) =>
+    |> Naboris.ServerConfig.set_request_handler((route, req, res) =>
          switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
          | (Naboris.Method.GET, ["echo", "pre-existing-route"]) =>
            Naboris.Res.status(200, res)
@@ -86,23 +86,23 @@ let startServers = lwtSwitch => {
            Naboris.Res.status(200, res)
            |> Naboris.Res.html(req, str1 ++ "\n" ++ str2)
          | (POST, ["echo"]) =>
-           Lwt.bind(Naboris.Req.getBody(req), bodyStr => {
+           Lwt.bind(Naboris.Req.get_body(req), bodyStr => {
              Naboris.Res.status(200, res) |> Naboris.Res.html(req, bodyStr)
            })
          | (POST, ["login"]) =>
            let (req2, res2, _sid) =
-             Naboris.SessionManager.startSession(
+             Naboris.SessionManager.start_session(
                req,
                res,
                TestSession.{username: "realsessionuser"},
              );
            Naboris.Res.status(200, res2) |> Naboris.Res.text(req2, "OK");
          | (GET, ["logout"]) =>
-           Naboris.SessionManager.removeSession(req, res)
+           Naboris.SessionManager.remove_session(req, res)
            |> Naboris.Res.status(200)
            |> Naboris.Res.text(req, "OK")
          | (GET, ["who-am-i"]) =>
-           switch (Naboris.Req.getSessionData(req)) {
+           switch (Naboris.Req.get_session_data(req)) {
            | None =>
              Naboris.Res.status(404, res)
              |> Naboris.Res.text(req, "Not found")
@@ -120,12 +120,12 @@ let startServers = lwtSwitch => {
            |> Naboris.Res.json(req, "{\"test\": \"foo\"}")
          | (GET, ["test-raw"]) =>
            Naboris.Res.status(200, res)
-           |> Naboris.Res.addHeader(("Content-Type", "application/xml"))
+           |> Naboris.Res.add_header(("Content-Type", "application/xml"))
            |> Naboris.Res.raw(req, "<xml></xml>")
          | (GET, ["test-streaming"]) =>
            let (ch, return) =
-             Naboris.Res.addHeader(("Content-Type", "text/html"), res)
-             |> Naboris.Res.writeChannel(req);
+             Naboris.Res.add_header(("Content-Type", "text/html"), res)
+             |> Naboris.Res.write_channel(req);
            Lwt.async(() =>
              Lwt_io.write(ch, "<html><head><title>Foo</title></head>")
              >>= (() => Lwt_io.flush(ch))
@@ -135,7 +135,7 @@ let startServers = lwtSwitch => {
            );
            return;
          | (GET, ["error", "boys"]) =>
-           Naboris.Res.reportError(SomebodyGoofed("Problems"), req, res)
+           Naboris.Res.report_error(SomebodyGoofed("Problems"), req, res)
          | _ =>
            Naboris.Res.status(404, res)
            |> Naboris.Res.html(
@@ -146,9 +146,9 @@ let startServers = lwtSwitch => {
        );
 
   let testServerConfig2: Naboris.ServerConfig.t(TestSession.t) =
-    Naboris.ServerConfig.create()
-    |> Naboris.ServerConfig.setOnListen(() => Lwt.wakeup_later(ssr2, ()))
-    |> Naboris.ServerConfig.setRequestHandler((route, req, res) =>
+    Naboris.ServerConfig.make()
+    |> Naboris.ServerConfig.set_on_listen(() => Lwt.wakeup_later(ssr2, ()))
+    |> Naboris.ServerConfig.set_request_handler((route, req, res) =>
          switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
          | _ =>
            Naboris.Res.status(404, res)
@@ -161,12 +161,12 @@ let startServers = lwtSwitch => {
 
   // test the builder functions and middlewares
   let testServerConfig3: Naboris.ServerConfig.t(TestSession.t) =
-    Naboris.ServerConfig.create()
-    |> Naboris.ServerConfig.setSessionConfig(
-         ~sidKey="custom.sid",
-         sessionConfig.getSession,
+    Naboris.ServerConfig.make()
+    |> Naboris.ServerConfig.set_session_config(
+         ~sid_key="custom.sid",
+         sessionConfig.get_session,
        )
-    |> Naboris.ServerConfig.addMiddleware((next, route, req, res) => {
+    |> Naboris.ServerConfig.add_middleware((next, route, req, res) => {
          switch (Naboris.Route.path(route)) {
          | ["middleware", "one", _] =>
            res
@@ -175,7 +175,7 @@ let startServers = lwtSwitch => {
          | _ => next(route, req, res)
          }
        })
-    |> Naboris.ServerConfig.addMiddleware((next, route, req, res) => {
+    |> Naboris.ServerConfig.add_middleware((next, route, req, res) => {
          switch (Naboris.Route.path(route)) {
          | ["middleware", "one", "never"] =>
            res
@@ -188,8 +188,8 @@ let startServers = lwtSwitch => {
          | _ => next(route, req, res)
          }
        })
-    |> Naboris.ServerConfig.setOnListen(() => Lwt.wakeup_later(ssr3, ()))
-    |> Naboris.ServerConfig.setRequestHandler((route, req, res) =>
+    |> Naboris.ServerConfig.set_on_listen(() => Lwt.wakeup_later(ssr3, ()))
+    |> Naboris.ServerConfig.set_request_handler((route, req, res) =>
          switch (Naboris.Route.path(route)) {
          | ["no", "middleware"] =>
            res
@@ -197,7 +197,7 @@ let startServers = lwtSwitch => {
            |> Naboris.Res.text(req, "Regular router")
          | ["no", "middleware", "login"] =>
            let (req2, res2, _sid) =
-             Naboris.SessionManager.startSession(
+             Naboris.SessionManager.start_session(
                req,
                res,
                TestSession.{username: "realsessionuser"},
@@ -209,18 +209,18 @@ let startServers = lwtSwitch => {
            |> Naboris.Res.text(req, "Resource not found.")
          }
        );
-  let _foo2 = Naboris.listenAndWaitForever(9991, testServerConfig);
+  let _foo2 = Naboris.listen_and_wait_forever(9991, testServerConfig);
   Lwt.bind(ssp1, () => {
     Lwt.bind(
       Lwt_unix.sleep(1.0),
       () => {
-        let _foo = Naboris.listenAndWaitForever(9992, testServerConfig2);
+        let _foo = Naboris.listen_and_wait_forever(9992, testServerConfig2);
         Lwt.bind(ssp2, () => {
           Lwt.bind(
             Lwt_unix.sleep(1.0),
             () => {
               let _baz =
-                Naboris.listenAndWaitForever(9993, testServerConfig3);
+                Naboris.listen_and_wait_forever(9993, testServerConfig3);
               ssp3;
             },
           )
@@ -370,25 +370,27 @@ let testSuite = () => (
       )
     }),
     Alcotest_lwt.test_case(
-      "Get sets headers properly",
-      `Slow,
-      (_lwtSwitch, _) => {
+      "Get sets headers properly", `Slow, (_lwtSwitch, _) => {
       Cohttp_lwt_unix.Client.get(
         Uri.of_string("http://localhost:9991/echo/test 1"),
       )
       >>= (
         ((resp, _bod)) => {
           let codeStr = Cohttp.Code.string_of_status(resp.status);
-          let dateHeader =Cohttp.Header.get(Cohttp.Response.headers(resp), "date");
-          let hasDate = switch (dateHeader) {
+          let dateHeader =
+            Cohttp.Header.get(Cohttp.Response.headers(resp), "date");
+          let hasDate =
+            switch (dateHeader) {
             | None => false
             | _ => true
-          }
-          let etag = Cohttp.Header.get(Cohttp.Response.headers(resp), "etag");
-          let hasEtag = switch (etag) {
+            };
+          let etag =
+            Cohttp.Header.get(Cohttp.Response.headers(resp), "etag");
+          let hasEtag =
+            switch (etag) {
             | None => false
             | _ => true
-          };
+            };
           Alcotest.(check(string, "status", codeStr, "200 OK"));
           Alcotest.(check(bool, "has date header", hasDate, true));
           Alcotest.(check(bool, "has etag header", hasEtag, true));
@@ -514,9 +516,7 @@ let testSuite = () => (
       )
     }),
     Alcotest_lwt.test_case(
-      "Get static files sends correct headers",
-      `Slow,
-      (_lwtSwitch, _) => {
+      "Get static files sends correct headers", `Slow, (_lwtSwitch, _) => {
       Cohttp_lwt_unix.Client.get(
         Uri.of_string("http://localhost:9991/static/text/text_file.txt"),
       )
@@ -527,19 +527,28 @@ let testSuite = () => (
           let headers = Cohttp.Response.headers(resp);
           let cacheControl = Cohttp.Header.get(headers, "cache-control");
           let lastModified = Cohttp.Header.get(headers, "last-modified");
-          let hasLastModified = switch(lastModified) {
+          let hasLastModified =
+            switch (lastModified) {
             | Some(_) => true
             | None => false
-          };
+            };
           let etag = Cohttp.Header.get(headers, "etag");
-          let hasEtag = switch(etag) {
+          let hasEtag =
+            switch (etag) {
             | Some(_) => true
             | None => false
-          };
-          Alcotest.(check(option(string), "cache-control", cacheControl, Some("public, max-age=0")));
+            };
+          Alcotest.(
+            check(
+              option(string),
+              "cache-control",
+              cacheControl,
+              Some("public, max-age=0"),
+            )
+          );
           Alcotest.(check(bool, "has last-modified", hasLastModified, true));
           Alcotest.(check(bool, "has etag", hasEtag, true));
-          Lwt.return_unit
+          Lwt.return_unit;
         }
       )
     }),
@@ -627,7 +636,9 @@ let testSuite = () => (
           let headers = Cohttp.Response.headers(resp);
           switch (Cohttp.Header.get(headers, "Set-Cookie")) {
           | Some(cookie) =>
-            let cookie = "_ga=GA1.1.1652070095.1563853850; express.sid=s%3AhSEgvCCmOADa-0Flv4ulT1FltA8TzHeq.G1UoU2xXC8X8wkEO5I0J%2BhE3NCjUoggAlGnz0jA1%2B2w; _gid=GA1.1.1409339010.1564626384; connect.sid=s%3AClROuVLX_Dalzkmf0D4d0Xath-HHG16M.8zaxTWykLFnypEw%2BCAIZRTPJR7IKBDUcAamWUch4Czk; " ++ cookie;
+            let cookie =
+              "_ga=GA1.1.1652070095.1563853850; express.sid=s%3AhSEgvCCmOADa-0Flv4ulT1FltA8TzHeq.G1UoU2xXC8X8wkEO5I0J%2BhE3NCjUoggAlGnz0jA1%2B2w; _gid=GA1.1.1409339010.1564626384; connect.sid=s%3AClROuVLX_Dalzkmf0D4d0Xath-HHG16M.8zaxTWykLFnypEw%2BCAIZRTPJR7IKBDUcAamWUch4Czk; "
+              ++ cookie;
             let headers2 = Cohttp.Header.init_with("Cookie", cookie);
             Cohttp_lwt_unix.Client.get(
               ~headers=headers2,

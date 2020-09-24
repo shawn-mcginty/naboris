@@ -6,20 +6,20 @@ let testSuite = () => (
       `Quick,
       (_lwtSwitch, _) => {
         Alcotest.(
-          check(bool, "GET", true, Naboris.Method.ofString("GET") == GET)
+          check(bool, "GET", true, Naboris.Method.of_string("GET") == GET)
         );
         Alcotest.(
-          check(bool, "POST", true, Naboris.Method.ofString("POST") == POST)
+          check(bool, "POST", true, Naboris.Method.of_string("POST") == POST)
         );
         Alcotest.(
-          check(bool, "PUT", true, Naboris.Method.ofString("PUT") == PUT)
+          check(bool, "PUT", true, Naboris.Method.of_string("PUT") == PUT)
         );
         Alcotest.(
           check(
             bool,
             "PATCH",
             true,
-            Naboris.Method.ofString("PATCH") == PATCH,
+            Naboris.Method.of_string("PATCH") == PATCH,
           )
         );
         Alcotest.(
@@ -27,7 +27,7 @@ let testSuite = () => (
             bool,
             "DELETE",
             true,
-            Naboris.Method.ofString("DELETE") == DELETE,
+            Naboris.Method.of_string("DELETE") == DELETE,
           )
         );
         Alcotest.(
@@ -35,7 +35,7 @@ let testSuite = () => (
             bool,
             "CONNECT",
             true,
-            Naboris.Method.ofString("CONNECT") == CONNECT,
+            Naboris.Method.of_string("CONNECT") == CONNECT,
           )
         );
         Alcotest.(
@@ -43,7 +43,7 @@ let testSuite = () => (
             bool,
             "OPTIONS",
             true,
-            Naboris.Method.ofString("OPTIONS") == OPTIONS,
+            Naboris.Method.of_string("OPTIONS") == OPTIONS,
           )
         );
         Alcotest.(
@@ -51,7 +51,7 @@ let testSuite = () => (
             bool,
             "TRACE",
             true,
-            Naboris.Method.ofString("TRACE") == TRACE,
+            Naboris.Method.of_string("TRACE") == TRACE,
           )
         );
         Lwt.return_unit;
@@ -66,7 +66,7 @@ let testSuite = () => (
             bool,
             "foo",
             true,
-            Naboris.Method.ofString("foo") == Other("foo"),
+            Naboris.Method.of_string("foo") == Other("foo"),
           )
         );
         Alcotest.(
@@ -74,7 +74,7 @@ let testSuite = () => (
             bool,
             "bar",
             true,
-            Naboris.Method.ofString("bar") == Other("bar"),
+            Naboris.Method.of_string("bar") == Other("bar"),
           )
         );
         Lwt.return_unit;
@@ -84,22 +84,22 @@ let testSuite = () => (
       "toString converts all standard meths to string values",
       `Quick,
       (_lwtSwitch, _) => {
-        Alcotest.(check(string, "GET", Naboris.Method.toString(GET), "GET"));
+        Alcotest.(check(string, "GET", Naboris.Method.to_string(GET), "GET"));
         Alcotest.(
-          check(string, "POST", Naboris.Method.toString(POST), "POST")
+          check(string, "POST", Naboris.Method.to_string(POST), "POST")
         );
-        Alcotest.(check(string, "PUT", Naboris.Method.toString(PUT), "PUT"));
+        Alcotest.(check(string, "PUT", Naboris.Method.to_string(PUT), "PUT"));
         Alcotest.(
-          check(string, "PATCH", Naboris.Method.toString(PATCH), "PATCH")
+          check(string, "PATCH", Naboris.Method.to_string(PATCH), "PATCH")
         );
         Alcotest.(
-          check(string, "DELETE", Naboris.Method.toString(DELETE), "DELETE")
+          check(string, "DELETE", Naboris.Method.to_string(DELETE), "DELETE")
         );
         Alcotest.(
           check(
             string,
             "CONNECT",
-            Naboris.Method.toString(CONNECT),
+            Naboris.Method.to_string(CONNECT),
             "CONNECT",
           )
         );
@@ -107,12 +107,12 @@ let testSuite = () => (
           check(
             string,
             "OPTIONS",
-            Naboris.Method.toString(OPTIONS),
+            Naboris.Method.to_string(OPTIONS),
             "OPTIONS",
           )
         );
         Alcotest.(
-          check(string, "TRACE", Naboris.Method.toString(TRACE), "TRACE")
+          check(string, "TRACE", Naboris.Method.to_string(TRACE), "TRACE")
         );
         Lwt.return_unit;
       },
@@ -122,10 +122,10 @@ let testSuite = () => (
       `Quick,
       (_lwtSwitch, _) => {
         Alcotest.(
-          check(string, "foo", Naboris.Method.toString(Other("foo")), "foo")
+          check(string, "foo", Naboris.Method.to_string(Other("foo")), "foo")
         );
         Alcotest.(
-          check(string, "bar", Naboris.Method.toString(Other("bar")), "bar")
+          check(string, "bar", Naboris.Method.to_string(Other("bar")), "bar")
         );
         Lwt.return_unit;
       },

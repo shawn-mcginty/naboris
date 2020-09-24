@@ -23,6 +23,7 @@ depends: [
   "httpaf-lwt-unix" {>= "0.6.0"}
   "lwt" {>= "5.1.1"}
   "lwt_ppx" {>= "2.0.1"}
+  "magic-mime" {>= "1.1.2"}
   "uri" {>= "2.2.0"}
 ]
 depopts: [

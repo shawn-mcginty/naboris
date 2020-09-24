@@ -1,7 +1,7 @@
 (library
 	(name naboris)
 	(public_name naboris)
-	(libraries digestif httpaf httpaf-lwt-unix lwt lwt.unix re uri base64)
+	(libraries digestif httpaf httpaf-lwt-unix lwt lwt.unix re uri base64 magic-mime)
 	(preprocess (pps lwt_ppx))
 )
 (include_subdirs unqualified)

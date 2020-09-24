@@ -2,7 +2,7 @@ let testSuite = () => (
   "utils_Etag",
   [
     Alcotest_lwt.test_case(
-      "fromString handles empty payload properly",
+      "of_string handles empty payload properly",
       `Quick,
       (_lwtSwitch, _) => {
         let payload = ""; // empty string response
@@ -11,7 +11,7 @@ let testSuite = () => (
           check(
             string,
             "empty payload etag",
-            Naboris.Etag.fromString(payload),
+            Naboris.Etag.of_string(payload),
             emptyEtag,
           )
         );
@@ -19,7 +19,7 @@ let testSuite = () => (
       },
     ),
 		Alcotest_lwt.test_case(
-      "fromString returns the same etag for the same entity",
+      "of_string returns the same etag for the same entity",
       `Quick,
       (_lwtSwitch, _) => {
         let payload = "Some payload here there and around. And let's make it even longer with another line.";
@@ -28,7 +28,7 @@ let testSuite = () => (
           check(
             string,
             "empty payload etag",
-            Naboris.Etag.fromString(payload),
+            Naboris.Etag.of_string(payload),
             expectedEtag,
           )
         );
@@ -36,7 +36,7 @@ let testSuite = () => (
       },
     ),
 		Alcotest_lwt.test_case(
-      "weakFromString handles empty payload properly",
+      "weak_of_string handles empty payload properly",
       `Quick,
       (_lwtSwitch, _) => {
         let payload = ""; // empty string response
@@ -45,7 +45,7 @@ let testSuite = () => (
           check(
             string,
             "empty payload etag",
-            Naboris.Etag.weakFromString(payload),
+            Naboris.Etag.weak_of_string(payload),
             emptyEtag,
           )
         );
@@ -53,7 +53,7 @@ let testSuite = () => (
       },
     ),
 		Alcotest_lwt.test_case(
-      "weakFromString returns the same etag for the same entity",
+      "weak_of_string returns the same etag for the same entity",
       `Quick,
       (_lwtSwitch, _) => {
         let payload = "Some payload here there and around. And let's make it even longer with another line.";
@@ -62,7 +62,7 @@ let testSuite = () => (
           check(
             string,
             "empty payload etag",
-            Naboris.Etag.weakFromString(payload),
+            Naboris.Etag.weak_of_string(payload),
             expectedEtag,
           )
         );

@@ -2,10 +2,10 @@ let testSuite = () => (
   "Router",
   [
     Alcotest_lwt.test_case(
-      "processPath errors on empty string",
+      "process_path errors on empty string",
       `Quick,
       (_lwtSwitch, _) => {
-        let _ = Naboris.Router.processPath("");
+        let _ = Naboris.Router.process_path("");
         Lwt.return_unit;
       },
     ),

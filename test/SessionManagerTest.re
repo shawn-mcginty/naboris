@@ -5,8 +5,8 @@ let testSuite = () => (
       "generateSessionId() - returns unique 32 char long stringsz",
       `Quick,
       (_lwtSwitch, _) => {
-        let id1 = Naboris.SessionManager.generateSessionId();
-        let id2 = Naboris.SessionManager.generateSessionId();
+        let id1 = Naboris.SessionManager.generate_session_id();
+        let id2 = Naboris.SessionManager.generate_session_id();
         Alcotest.(
           check(bool, "ids should not match", false, id1 == id2)
         );
@@ -25,7 +25,7 @@ let testSuite = () => (
       `Quick,
       (_lwtSwitch, _) => {
         let secret = "keep it secret, keep it safe";
-        let sid = Naboris.SessionManager.generateSessionId();
+        let sid = Naboris.SessionManager.generate_session_id();
         let signedSid = Naboris.SessionManager.sign(secret, sid);
         let (moreSid, hash) = switch(String.split_on_char('.', signedSid)) {
           | [x, y] => (x, y)
@@ -48,7 +48,7 @@ let testSuite = () => (
       `Quick,
       (_lwtSwitch, _) => {
         let secret = "keep it secret, keep it safe";
-        let sid = Naboris.SessionManager.generateSessionId();
+        let sid = Naboris.SessionManager.generate_session_id();
         let signedSid = Naboris.SessionManager.sign(secret, sid);
         let unsignedSid = Naboris.SessionManager.unsign(secret, signedSid);
         Alcotest.(

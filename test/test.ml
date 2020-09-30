@@ -18,7 +18,7 @@ let () =
         Router_test.test_suite ();
         SessionManager_test.test_suite ();
         ServerConfig_test.test_suite ();
-        IntegrationTest.testSuite ();
+        Integration_test.test_suite ();
       ]
     |> Lwt_main.run
   in

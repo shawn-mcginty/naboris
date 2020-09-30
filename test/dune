@@ -1,6 +1,7 @@
 (executable
 	(name test)
 	(libraries alcotest alcotest-lwt httpaf httpaf-lwt-unix lwt lwt.unix cohttp cohttp-lwt-unix re naboris)
+	(preprocess (pps lwt_ppx))
 )
 (include_subdirs unqualified)
 (alias

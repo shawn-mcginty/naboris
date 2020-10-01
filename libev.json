@@ -1,6 +1,6 @@
 {
   "name": "naboris",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Simple http server built on httpaf and lwt.",
   "esy": {
     "build": [
@@ -29,25 +29,28 @@
   },
   "homepage": "https://github.com/shawn-mcginty/naboris#readme",
   "dependencies": {
+    "@opam/base64": ">=3.4.0",
     "@opam/dune": "*",
-    "@opam/reason": ">=3.4.0",
+    "@opam/digestif": ">=0.8.0",
     "@opam/httpaf": ">=0.6.0",
     "@opam/httpaf-lwt-unix": ">=0.6.0",
     "@opam/lwt": ">=5.1.1",
+    "@opam/lwt_ppx": ">=2.0.1",
     "@opam/uri": ">=2.2.0"
   },
   "devDependencies": {
-    "ocaml": "~4.7",
-    "esy": "^0.5.6",
-    "@opam/cohttp": "*",
-    "@opam/cohttp-lwt-unix": "*",
     "@opam/alcotest": "~1.0.0",
     "@opam/alcotest-lwt": "~1.0.0",
+    "@opam/cohttp": "*",
+    "@opam/cohttp-lwt-unix": "*",
     "@opam/conf-libev": "*",
-    "@opam/odoc": "*"
+    "@opam/odoc": "*",
+    "@opam/merlin": "*",
+    "esy": "^0.5.6",
+    "ocaml": "~4.8"
   },
   "peerDependencies": {
-    "ocaml": ">=4.5.0"
+    "ocaml": ">=4.11"
   },
   "resolutions": {
     "@opam/conf-libev": "esy-packages/libev:package.json#0b5eb66"

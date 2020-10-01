@@ -5,7 +5,7 @@ Simple, fast, minimalist web framework for [OCaml](https://ocaml.org)/[ReasonML]
 [https://naboris.dev](https://naboris.dev)
 
 [![Build Status](https://travis-ci.com/shawn-mcginty/naboris.svg?branch=master)](https://travis-ci.com/shawn-mcginty/naboris)
-[![opam version 0.1.3](https://img.shields.io/static/v1?label=opam&message=0.1.3&color=E7C162)](https://opam.ocaml.org/packages/naboris/)
+[![opam version 0.2.0](https://img.shields.io/static/v1?label=opam&message=0.2.0&color=E7C162)](https://opam.ocaml.org/packages/naboris/)
 
 ```reason
 // ReasonML
@@ -74,7 +74,7 @@ opam install naboris
 
 #### esy
 ```json
-"@opam/naboris": "^0.1.3"
+"@opam/naboris": "^0.2.0"
 ```
 
 #### dune
@@ -116,6 +116,7 @@ npm run test
 
 | From | To | Breaking Change |
 | --- | --- | --- |
+| `0.1.3` | `0.2.0` | Most of the API has changed, names were changed to snake case and some names were changed to be more idiomatic. |
 | `0.1.2` | `0.1.3` | `secret` argument added to all session configuration APIs. |
 | `0.1.0` | `0.1.1` | `ServerConfig.setSessionGetter` changed to `ServerConfig.setSessionConfig` which also allows `~maxAge` and `~sidKey` to be passed in optionally. |
 | `0.1.0` | `0.1.1` | All `RequestHandler.t` and `Middleware.t` now return `Lwt.t(Res.t)` instead of `Lwt.t(unit)` |

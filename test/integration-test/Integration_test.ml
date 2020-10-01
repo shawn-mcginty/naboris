@@ -413,371 +413,258 @@ let test_suite () =
             Alcotest.(check string "id" (String.sub cookie 0 7) "nab.sid")
           in
           Lwt.return_unit);
-    ] )
-
-(*open Lwt.Infix;
-    Alcotest_lwt.test_case("Handle no session", `Slow, (_lwtSwitch, _) => {
-      Cohttp_lwt_unix.Client.get(
-        Uri.of_string("http://localhost:9991/who-am-i"),
-      )
-      >>= (
-        ((resp, _bod)) => {
-          let codeStr = Cohttp.Code.string_of_status(resp.status);
-          Alcotest.(check(string, "status", codeStr, "404 Not Found"));
-          Lwt.return_unit;
-        }
-      )
-    }),
-    Alcotest_lwt.test_case(
-      "Access session data across multiple requests", `Slow, (_lwtSwitch, _) => {
-      Cohttp_lwt_unix.Client.post(
-        Uri.of_string("http://localhost:9991/login"),
-      )
-      >>= (
-        ((resp, _bod)) => {
-          let codeStr = Cohttp.Code.string_of_status(resp.status);
-          Alcotest.(check(string, "status", codeStr, "200 OK"));
-
-          let headers = Cohttp.Response.headers(resp);
-          switch (Cohttp.Header.get(headers, "Set-Cookie")) {
-          | Some(cookie) =>
-            let cookie =
-              "_ga=GA1.1.1652070095.1563853850; express.sid=s%3AhSEgvCCmOADa-0Flv4ulT1FltA8TzHeq.G1UoU2xXC8X8wkEO5I0J%2BhE3NCjUoggAlGnz0jA1%2B2w; _gid=GA1.1.1409339010.1564626384; connect.sid=s%3AClROuVLX_Dalzkmf0D4d0Xath-HHG16M.8zaxTWykLFnypEw%2BCAIZRTPJR7IKBDUcAamWUch4Czk; "
-              ++ cookie;
-            let headers2 = Cohttp.Header.init_with("Cookie", cookie);
-            Cohttp_lwt_unix.Client.get(
-              ~headers=headers2,
-              Uri.of_string("http://localhost:9991/who-am-i"),
-            )
-            >>= (
-              ((resp2, bod)) => {
-                let codeStr = Cohttp.Code.string_of_status(resp2.status);
-                Alcotest.(check(string, "status", codeStr, "200 OK"));
-                Cohttp_lwt.Body.to_string(bod)
-                >>= (
-                  bodyStr => {
-                    Alcotest.(
-                      check(string, "body", bodyStr, "realsessionuser")
-                    );
-                    Lwt.return_unit;
-                  }
-                );
-              }
-            );
-          | None =>
-            Alcotest.(check(bool, "failed", false, true));
-            Lwt.return_unit;
-          };
-        }
-      )
-    }),
-    Alcotest_lwt.test_case(
-      "Can remove session cookies", `Slow, (_lwtSwitch, _) => {
-      Cohttp_lwt_unix.Client.post(
-        Uri.of_string("http://localhost:9991/login"),
-      )
-      >>= (
-        ((resp, _bod)) => {
-          let codeStr = Cohttp.Code.string_of_status(resp.status);
-          Alcotest.(check(string, "status", codeStr, "200 OK"));
-
-          let headers = Cohttp.Response.headers(resp);
-          switch (Cohttp.Header.get(headers, "Set-Cookie")) {
-          | Some(_cookie) =>
-            let cookie = "_ga=GA1.1.1652070095.1563853850; express.sid=s%3AhSEgvCCmOADa-0Flv4ulT1FltA8TzHeq.G1UoU2xXC8X8wkEO5I0J%2BhE3NCjUoggAlGnz0jA1%2B2w; _gid=GA1.1.1409339010.1564626384; connect.sid=s%3AClROuVLX_Dalzkmf0D4d0Xath-HHG16M.8zaxTWykLFnypEw%2BCAIZRTPJR7IKBDUcAamWUch4Czk; nab.sid=67f67df4c5d9711ef89bbf8b509d49e2cc1ce51e3d95c90d45485a7b3cf40ca4ec9cbbceb0ca6ad844ec4a4779fd9981b130c40f81646f2ef286749c7184e66f";
-            let headers2 = Cohttp.Header.init_with("Cookie", cookie);
-            Cohttp_lwt_unix.Client.get(
-              ~headers=headers2,
-              Uri.of_string("http://localhost:9991/logout"),
-            )
-            >>= (
-              ((resp2, _bod)) => {
-                let codeStr = Cohttp.Code.string_of_status(resp2.status);
-                Alcotest.(check(string, "status", codeStr, "200 OK"));
-                let logoutHeaders = Cohttp.Response.headers(resp2);
-                switch (Cohttp.Header.get(logoutHeaders, "Set-Cookie")) {
-                | Some(setCookie) =>
-                  Alcotest.(
-                    check(
-                      string,
-                      "set header",
-                      "nab.sid=; Max-Age=0;",
-                      setCookie,
-                    )
-                  );
-                  Lwt.return_unit;
-                | None =>
-                  Alcotest.(check(bool, "failed", false, true));
-                  Lwt.return_unit;
-                };
-              }
-            );
-          | None =>
-            Alcotest.(check(bool, "failed", false, true));
-            Lwt.return_unit;
-          };
-        }
-      )
-    }),
-    Alcotest_lwt.test_case("Redirects properly", `Slow, (_lwtSwitch, _) => {
-      Cohttp_lwt_unix.Client.get(
-        Uri.of_string("http://localhost:9991/redir-launch"),
-      )
-      >>= (
-        ((resp, _bod)) => {
-          let codeStr = Cohttp.Code.string_of_status(resp.status);
-          Alcotest.(check(string, "status", codeStr, "302 Found"));
-          Alcotest.(
-            check(
-              option(string),
-              "redirect",
-              Cohttp.Header.get(resp.headers, "Location"),
-              Some("/redir-landing"),
-            )
-          );
-          Lwt.return_unit;
-        }
-      )
-    }),
-    Alcotest_lwt.test_case("Report error returns 500", `Slow, (_lwtSwitch, _) => {
-      Cohttp_lwt_unix.Client.get(
-        Uri.of_string("http://localhost:9991/error/boys"),
-      )
-      >>= (
-        ((resp, bod)) => {
-          let codeStr = Cohttp.Code.string_of_status(resp.status);
-          Alcotest.(
-            check(string, "status", codeStr, "500 Internal Server Error")
-          );
-          Cohttp_lwt.Body.to_string(bod)
-          >>= (
-            bodyStr => {
-              Alcotest.(
-                check(string, "body", bodyStr, "Dude, somebody goofed")
-              );
-              Lwt.return_unit;
-            }
-          );
-        }
-      )
-    }),
-    Alcotest_lwt.test_case(
-      "Get \"/json-test\" sends json header", `Slow, (_lwtSwitch, _) => {
-      Cohttp_lwt_unix.Client.get(
-        Uri.of_string("http://localhost:9991/test-json"),
-      )
-      >>= (
-        ((resp, bod)) => {
-          let codeStr = Cohttp.Code.string_of_status(resp.status);
-          Alcotest.(
-            check(
-              option(string),
-              "content type",
-              Cohttp.Header.get(resp.headers, "Content-type"),
-              Some("application/json"),
-            )
-          );
-          Alcotest.(check(string, "status", codeStr, "200 OK"));
-          Cohttp_lwt.Body.to_string(bod)
-          >>= (
-            bodyStr => {
-              Alcotest.(
-                check(string, "body", bodyStr, "{\"test\": \"foo\"}")
-              );
-              Lwt.return_unit;
-            }
-          );
-        }
-      )
-    }),
-    Alcotest_lwt.test_case(
-      "Get \"/raw-test\" sends xml header", `Slow, (_lwtSwitch, _) => {
-      Cohttp_lwt_unix.Client.get(
-        Uri.of_string("http://localhost:9991/test-raw"),
-      )
-      >>= (
-        ((resp, bod)) => {
-          let codeStr = Cohttp.Code.string_of_status(resp.status);
-          Alcotest.(
-            check(
-              option(string),
-              "content type",
-              Cohttp.Header.get(resp.headers, "Content-type"),
-              Some("application/xml"),
-            )
-          );
-          Alcotest.(check(string, "status", codeStr, "200 OK"));
-          Cohttp_lwt.Body.to_string(bod)
-          >>= (
-            bodyStr => {
-              Alcotest.(check(string, "body", bodyStr, "<xml></xml>"));
-              Lwt.return_unit;
-            }
-          );
-        }
-      )
-    }),
-    Alcotest_lwt.test_case(
-      "Get \"/test-streaming\" sends chunked header and data",
-      `Slow,
-      (_lwtSwitch, _) => {
-      Cohttp_lwt_unix.Client.get(
-        Uri.of_string("http://localhost:9991/test-streaming"),
-      )
-      >>= (
-        ((resp, bod)) => {
-          let codeStr = Cohttp.Code.string_of_status(resp.status);
-          Alcotest.(
-            check(
-              option(string),
-              "transfer encoding",
-              Cohttp.Header.get(resp.headers, "transfer-encoding"),
-              Some("chunked"),
-            )
-          );
-          Alcotest.(
-            check(
-              option(string),
-              "no content length",
-              Cohttp.Header.get(resp.headers, "content-length"),
-              None,
-            )
-          );
-          Alcotest.(
-            check(
-              option(string),
-              "keep alive",
-              Cohttp.Header.get(resp.headers, "connection"),
-              Some("keep-alive"),
-            )
-          );
-          Alcotest.(check(string, "status", codeStr, "200 OK"));
-          Cohttp_lwt.Body.to_string(bod)
-          >>= (
-            bodyStr => {
-              Alcotest.(
-                check(
-                  string,
-                  "body",
-                  bodyStr,
-                  "<html><head><title>Foo</title></head><body>Some data. And more data.</body></html>",
-                )
-              );
-              Lwt.return_unit;
-            }
-          );
-        }
-      )
-    }),
-    Alcotest_lwt.test_case(
-      "Middleware - Get \"/middleware/one/never\" should be served by the first middleware",
-      `Slow,
-      (_lwtSwitch, _) => {
-      Cohttp_lwt_unix.Client.get(
-        Uri.of_string("http://localhost:9993/middleware/one/never"),
-      )
-      >>= (
-        ((resp, bod)) => {
-          let codeStr = Cohttp.Code.string_of_status(resp.status);
-          Alcotest.(
-            check(
-              option(string),
-              "content type",
-              Some("text/plain"),
-              Cohttp.Header.get(resp.headers, "Content-type"),
-            )
-          );
-          Alcotest.(check(string, "status", "200 OK", codeStr));
-          Cohttp_lwt.Body.to_string(bod)
-          >>= (
-            bodyStr => {
-              Alcotest.(check(string, "body", "middleware 1", bodyStr));
-              Lwt.return_unit;
-            }
-          );
-        }
-      )
-    }),
-    Alcotest_lwt.test_case(
-      "Middleware - Get \"/middleware/two\" should be served by the second middleware",
-      `Slow,
-      (_lwtSwitch, _) => {
-      Cohttp_lwt_unix.Client.get(
-        Uri.of_string("http://localhost:9993/middleware/two"),
-      )
-      >>= (
-        ((resp, bod)) => {
-          let codeStr = Cohttp.Code.string_of_status(resp.status);
-          Alcotest.(
-            check(
-              option(string),
-              "content type",
-              Some("text/plain"),
-              Cohttp.Header.get(resp.headers, "Content-type"),
-            )
-          );
-          Alcotest.(check(string, "status", "200 OK", codeStr));
-          Cohttp_lwt.Body.to_string(bod)
-          >>= (
-            bodyStr => {
-              Alcotest.(check(string, "body", "middleware 2", bodyStr));
-              Lwt.return_unit;
-            }
-          );
-        }
-      )
-    }),
-    Alcotest_lwt.test_case(
-      "Middleware - Get \"/no/middleware\" should be served by the route handler",
-      `Slow,
-      (_lwtSwitch, _) => {
-      Cohttp_lwt_unix.Client.get(
-        Uri.of_string("http://localhost:9993/no/middleware"),
-      )
-      >>= (
-        ((resp, bod)) => {
-          let codeStr = Cohttp.Code.string_of_status(resp.status);
-          Alcotest.(
-            check(
-              option(string),
-              "content type",
-              Some("text/plain"),
-              Cohttp.Header.get(resp.headers, "Content-type"),
-            )
-          );
-          Alcotest.(check(string, "status", "200 OK", codeStr));
-          Cohttp_lwt.Body.to_string(bod)
-          >>= (
-            bodyStr => {
-              Alcotest.(check(string, "body", "Regular router", bodyStr));
-              Lwt.return_unit;
-            }
-          );
-        }
-      )
-    }),
-    Alcotest_lwt.test_case(
-      "Can start a session with custom cookie key", `Slow, (_lwtSwitch, _) => {
-      Cohttp_lwt_unix.Client.post(
-        Uri.of_string("http://localhost:9993/no/middleware/login"),
-      )
-      >>= (
-        ((resp, _bod)) => {
-          let codeStr = Cohttp.Code.string_of_status(resp.status);
-          Alcotest.(check(string, "status", codeStr, "200 OK"));
-
-          let headers = resp |> Cohttp.Response.headers;
-          switch (Cohttp.Header.get(headers, "Set-Cookie")) {
-          | Some(cookie) =>
+      Alcotest_lwt.test_case "Handle no session" `Slow (fun _lwt_switch _ ->
+          let%lwt resp, _bod =
+            Cohttp_lwt_unix.Client.post
+              (Uri.of_string "http://localhost:9991/who-am-i")
+          in
+          let code_str = Cohttp.Code.string_of_status resp.status in
+          let () = Alcotest.(check string "status" code_str "404 Not Found") in
+          Lwt.return_unit);
+      Alcotest_lwt.test_case "Access session data across multiple requests"
+        `Slow (fun _lwt_switch _ ->
+          let%lwt resp, _bod =
+            Cohttp_lwt_unix.Client.post
+              (Uri.of_string "http://localhost:9991/login")
+          in
+          let code_str = Cohttp.Code.string_of_status resp.status in
+          let () = Alcotest.(check string "status" code_str "200 OK") in
+          let headers = Cohttp.Response.headers resp in
+          match Cohttp.Header.get headers "Set-Cookie" with
+          | None ->
+              let () = Alcotest.(check bool "failed" false true) in
+              Lwt.return_unit
+          | Some raw_cookie ->
+              let cookie =
+                "_ga=GA1.1.1652070095.1563853850; \
+                 express.sid=s%3AhSEgvCCmOADa-0Flv4ulT1FltA8TzHeq.G1UoU2xXC8X8wkEO5I0J%2BhE3NCjUoggAlGnz0jA1%2B2w; \
+                 _gid=GA1.1.1409339010.1564626384; \
+                 connect.sid=s%3AClROuVLX_Dalzkmf0D4d0Xath-HHG16M.8zaxTWykLFnypEw%2BCAIZRTPJR7IKBDUcAamWUch4Czk; "
+                ^ raw_cookie
+              in
+              let headers2 = Cohttp.Header.init_with "Cookie" cookie in
+              let%lwt resp2, bod =
+                Cohttp_lwt_unix.Client.get ~headers:headers2
+                  (Uri.of_string "http://localhost:9991/who-am-i")
+              in
+              let code_str = Cohttp.Code.string_of_status resp2.status in
+              let () = Alcotest.(check string "status" code_str "200 OK") in
+              let%lwt body_str = Cohttp_lwt.Body.to_string bod in
+              let () =
+                Alcotest.(check string "body" body_str "realsessionuser")
+              in
+              Lwt.return_unit);
+      Alcotest_lwt.test_case "Can remove session cookies" `Slow
+        (fun _lwt_switch _ ->
+          let%lwt resp, _bod =
+            Cohttp_lwt_unix.Client.post
+              (Uri.of_string "http://localhost:9991/login")
+          in
+          let code_str = Cohttp.Code.string_of_status resp.status in
+          let () = Alcotest.(check string "status" code_str "200 OK") in
+          let headers = Cohttp.Response.headers resp in
+          match Cohttp.Header.get headers "Set-Cookie" with
+          | None ->
+              let () = Alcotest.(check bool "failed" false true) in
+              Lwt.return_unit
+          | Some _ ->
+              let cookie =
+                "_ga=GA1.1.1652070095.1563853850; \
+                 express.sid=s%3AhSEgvCCmOADa-0Flv4ulT1FltA8TzHeq.G1UoU2xXC8X8wkEO5I0J%2BhE3NCjUoggAlGnz0jA1%2B2w; \
+                 _gid=GA1.1.1409339010.1564626384; \
+                 connect.sid=s%3AClROuVLX_Dalzkmf0D4d0Xath-HHG16M.8zaxTWykLFnypEw%2BCAIZRTPJR7IKBDUcAamWUch4Czk; \
+                 nab.sid=67f67df4c5d9711ef89bbf8b509d49e2cc1ce51e3d95c90d45485a7b3cf40ca4ec9cbbceb0ca6ad844ec4a4779fd9981b130c40f81646f2ef286749c7184e66f"
+              in
+              let headers2 = Cohttp.Header.init_with "Cookie" cookie in
+              let%lwt resp2, _bod =
+                Cohttp_lwt_unix.Client.get ~headers:headers2
+                  (Uri.of_string "http://localhost:9991/logout")
+              in
+              let code_str2 = Cohttp.Code.string_of_status resp2.status in
+              let () = Alcotest.(check string "status" code_str2 "200 OK") in
+              let logout_headers = Cohttp.Response.headers resp2 in
+              let set_cookie_header =
+                Cohttp.Header.get logout_headers "Set-Cookie"
+                |> Option.value ~default:""
+              in
+              let () =
+                Alcotest.(
+                  check string "set cookie" set_cookie_header
+                    "nab.sid=; Max-Age=0;")
+              in
+              Lwt.return_unit);
+      Alcotest_lwt.test_case "Redirects properly" `Slow (fun _lwt_switch _ ->
+          let%lwt resp, _bod =
+            Cohttp_lwt_unix.Client.get
+              (Uri.of_string "http://localhost:9991/redir-launch")
+          in
+          let code_str = Cohttp.Code.string_of_status resp.status in
+          let () = Alcotest.(check string "status" code_str "302 Found") in
+          let () =
             Alcotest.(
-              check(string, "id", String.sub(cookie, 0, 10), "custom.sid")
-            )
-          | None => Alcotest.(check(bool, "fail", false, true))
-          };
-          Lwt.return_unit;
-        }
-      )
-    }),
-  ],
-);
-*)
+              check (option string) "redirect"
+                (Cohttp.Header.get resp.headers "Location")
+                (Some "/redir-landing"))
+          in
+          Lwt.return_unit);
+      Alcotest_lwt.test_case "Report error returns 500" `Slow
+        (fun _lwt_switch _ ->
+          let%lwt resp, bod =
+            Cohttp_lwt_unix.Client.get
+              (Uri.of_string "http://localhost:9991/error/boys")
+          in
+          let code_str = Cohttp.Code.string_of_status resp.status in
+          let () =
+            Alcotest.(
+              check string "status" code_str "500 Internal Server Error")
+          in
+          let%lwt body_str = Cohttp_lwt.Body.to_string bod in
+          let () =
+            Alcotest.(check string "body" body_str "Dude, somebody goofed")
+          in
+          Lwt.return_unit);
+      Alcotest_lwt.test_case "Get \"/json-test\" sends json header" `Slow
+        (fun _lwt_switch _ ->
+          let%lwt resp, bod =
+            Cohttp_lwt_unix.Client.get
+              (Uri.of_string "http://localhost:9991/test-json")
+          in
+          let code_str = Cohttp.Code.string_of_status resp.status in
+          let () = Alcotest.(check string "status" code_str "200 OK") in
+          let () =
+            Alcotest.(
+              check (option string) "content type"
+                (Cohttp.Header.get resp.headers "Content-type")
+                (Some "application/json"))
+          in
+          let%lwt body_str = Cohttp_lwt.Body.to_string bod in
+          let () =
+            Alcotest.(check string "body" body_str "{\"test\": \"foo\"}")
+          in
+          Lwt.return_unit);
+      Alcotest_lwt.test_case "Get \"/test-raw\" sends xml header" `Slow
+        (fun _lwt_switch _ ->
+          let%lwt resp, bod =
+            Cohttp_lwt_unix.Client.get
+              (Uri.of_string "http://localhost:9991/test-raw")
+          in
+          let code_str = Cohttp.Code.string_of_status resp.status in
+          let () = Alcotest.(check string "status" code_str "200 OK") in
+          let () =
+            Alcotest.(
+              check (option string) "content type"
+                (Cohttp.Header.get resp.headers "Content-type")
+                (Some "application/xml"))
+          in
+          let%lwt body_str = Cohttp_lwt.Body.to_string bod in
+          let () = Alcotest.(check string "body" body_str "<xml></xml>") in
+          Lwt.return_unit);
+      Alcotest_lwt.test_case
+        "Get \"/test-streaming\" sends chunked header and data" `Slow
+        (fun _lwt_switch _ ->
+          let%lwt resp, bod =
+            Cohttp_lwt_unix.Client.get
+              (Uri.of_string "http://localhost:9991/test-streaming")
+          in
+          let code_str = Cohttp.Code.string_of_status resp.status in
+          let () = Alcotest.(check string "status" code_str "200 OK") in
+          let () =
+            Alcotest.(
+              check (option string) "transfer encoding"
+                (Cohttp.Header.get resp.headers "transfer-encoding")
+                (Some "chunked"))
+          in
+          let () =
+            Alcotest.(
+              check (option string) "no content length"
+                (Cohttp.Header.get resp.headers "content-length")
+                None)
+          in
+          let () =
+            Alcotest.(
+              check (option string) "keep alive"
+                (Cohttp.Header.get resp.headers "connection")
+                (Some "keep-alive"))
+          in
+          let%lwt body_str = Cohttp_lwt.Body.to_string bod in
+          let () =
+            Alcotest.(
+              check string "body" body_str
+                "<html><head><title>Foo</title></head><body>Some data. And \
+                 more data.</body></html>")
+          in
+          Lwt.return_unit);
+      Alcotest_lwt.test_case
+        "Middleware - Get \"/middleware/one/never\" should be served by the \
+         first middleware"
+        `Slow (fun _lwt_switch _ ->
+          let%lwt resp, bod =
+            Cohttp_lwt_unix.Client.post
+              (Uri.of_string "http://localhost:9993/middleware/one/never")
+          in
+          let code_str = Cohttp.Code.string_of_status resp.status in
+          let () = Alcotest.(check string "status" code_str "200 OK") in
+          let () =
+            Alcotest.(
+              check (option string) "content type"
+                (Cohttp.Header.get resp.headers "Content-Type")
+                (Some "text/plain"))
+          in
+          let%lwt body_str = Cohttp_lwt.Body.to_string bod in
+          let () = Alcotest.(check string "body" body_str "middleware 1") in
+          Lwt.return_unit);
+      Alcotest_lwt.test_case
+        "Middleware - Get \"/middleware/two\" should be served by the second \
+         middleware"
+        `Slow (fun _lwt_switch _ ->
+          let%lwt resp, bod =
+            Cohttp_lwt_unix.Client.post
+              (Uri.of_string "http://localhost:9993/middleware/two")
+          in
+          let code_str = Cohttp.Code.string_of_status resp.status in
+          let () = Alcotest.(check string "status" code_str "200 OK") in
+          let () =
+            Alcotest.(
+              check (option string) "content type"
+                (Cohttp.Header.get resp.headers "Content-Type")
+                (Some "text/plain"))
+          in
+          let%lwt body_str = Cohttp_lwt.Body.to_string bod in
+          let () = Alcotest.(check string "body" body_str "middleware 2") in
+          Lwt.return_unit);
+      Alcotest_lwt.test_case
+        "Middleware - Get \"/no/middleware\" should be served by the route \
+         handler"
+        `Slow (fun _lwt_switch _ ->
+          let%lwt resp, bod =
+            Cohttp_lwt_unix.Client.post
+              (Uri.of_string "http://localhost:9993/no/middleware")
+          in
+          let code_str = Cohttp.Code.string_of_status resp.status in
+          let () = Alcotest.(check string "status" code_str "200 OK") in
+          let () =
+            Alcotest.(
+              check (option string) "content type"
+                (Cohttp.Header.get resp.headers "Content-Type")
+                (Some "text/plain"))
+          in
+          let%lwt body_str = Cohttp_lwt.Body.to_string bod in
+          let () = Alcotest.(check string "body" body_str "Regular router") in
+          Lwt.return_unit);
+      Alcotest_lwt.test_case "Can start a session with custom cookie key" `Slow
+        (fun _lwt_switch _ ->
+          let%lwt resp, _bod =
+            Cohttp_lwt_unix.Client.post
+              (Uri.of_string "http://localhost:9993/no/middleware/login")
+          in
+          let code_str = Cohttp.Code.string_of_status resp.status in
+          let () = Alcotest.(check string "status" code_str "200 OK") in
+          let () =
+            match Cohttp.Header.get resp.headers "Set-Cookie" with
+            | Some cookie ->
+                Alcotest.(
+                  check string "id" (String.sub cookie 0 10) "custom.sid")
+            | None -> Alcotest.(check bool "fail" false true)
+          in
+          Lwt.return_unit);
+    ] )

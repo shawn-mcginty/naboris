@@ -18,7 +18,7 @@ Some libraries for templating:
 * [TyXML](https://github.com/ocsigen/tyxml)
 
 #### <a name="full-example" href="#full-example">#</a> Full Example
-Here is a very small example of a `requestHandler` using [Mustache](https://github.com/rgrinberg/ocaml-mustache) to create a dynamic HTML document
+Here is a very small example of a `request_handler` using [Mustache](https://github.com/rgrinberg/ocaml-mustache) to create a dynamic HTML document
 
 ```reason
 let template = Mustache.of_string("<!doctype html>
@@ -32,8 +32,8 @@ let template = Mustache.of_string("<!doctype html>
 
 let startServer = () => {
   let port = 9000;
-  let serverConfig = Naboris.ServerConfig.create()
-    |> Naboris.ServerConfig.setRequestHandler((route, req, res) =>
+  let serverConfig = Naboris.ServerConfig.make()
+    |> Naboris.ServerConfig.set_request_handler((route, req, res) =>
         switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
           | (GET, [pageName]) =>
             let json = `O([("pageName", `String(pageName))]);
@@ -45,7 +45,7 @@ let startServer = () => {
               |> Naboris.Res.text(req, "Not Found.");
         });
 
-  Naboris.listenAndWaitForever(port, serverConfig);
+  Naboris.listen_and_wait_forever(port, serverConfig);
 }
 
 Lwt_main.run(startServer());
@@ -62,8 +62,8 @@ let template = Mustache.of_string "<!doctype html>\
 
 let start_server ()=
   let port = 9000 in
-  let server_config = Naboris.ServerConfig.create()
-    |> Naboris.ServerConfig.setRequestHandler(fun route req res ->
+  let server_config = Naboris.ServerConfig.make()
+    |> Naboris.ServerConfig.set_request_handler(fun route req res ->
       match (Naboris.Route.meth route, Naboris.Route.path route) with
         | (GET, [page_name]) ->
           let json = `O [ ("page_name", `String page_name) ] in
@@ -74,7 +74,7 @@ let start_server ()=
           Naboris.Res.status 404 res
             |> Naboris.Res.text req "Not Found.") in
 
-  Naboris.listenAndWaitForever port server_config
+  Naboris.listen_and_wait_forever port server_config
 
 let _ = Lwt_main.run(start_server ())
 ```

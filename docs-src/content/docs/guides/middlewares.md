@@ -30,13 +30,13 @@ type 'sessionData t = 'sessionData RequestHandler.t -> Route.t -> 'sessionData R
 Middlewares can either handle the http request/response lifecycle themselves or call the passed in request handler (which is the next middleware in the stack) passing the `route`, `req`, and `res`.  Once the list of middlewares has been exhausted it will then be passed on to the main request handler.
 
 #### <a name="authorization-example" href="#authorization-example">#</a> Authorization Example
-We can easily create a middleware function to protect certain endpoints of our application. All middlware functions will be executed before the `requestHandler`, making it easy to stop the request/response lifecycle if needed.
+We can easily create a middleware function to protect certain endpoints of our application. All middlware functions will be executed before the `request_handler`, making it easy to stop the request/response lifecycle if needed.
 
 ```reason
 // ...
-let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.addMiddleware((next, route, req, res) => switch (Naboris.Route.path(route)) {
-    | ["admin", ..._] => switch (Naboris.Req.getSessionData(req)) {
+let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.make()
+  |> Naboris.ServerConfig.add_middleware((next, route, req, res) => switch (Naboris.Route.path(route)) {
+    | ["admin", ..._] => switch (Naboris.Req.get_session_data(req)) {
       | Some({ is_admin: true, ..._}) => next(route, req, res)
       | _ =>
         res
@@ -49,11 +49,11 @@ let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.create()
 ```
 ```ocaml
 (* ... *)
-let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.create ()
-  |> Naboris.ServerConfig.addMiddleware (fun next route req res ->
+let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.make ()
+  |> Naboris.ServerConfig.add_middleware (fun next route req res ->
     match (Naboris.Route.path route) with
       | "admin" :: _ ->
-        (match (Naboris.Req.getSessionData req) with
+        (match (Naboris.Req.get_session_data req) with
           | Some({ is_admin = true; _}) -> next route req res
           | _ ->
             res
@@ -71,10 +71,10 @@ Middlewares can also execute code _after_ the `next` function is called. This wi
 
 ```reason
 // ...
-let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.addMiddleware((next, route, req, res) => {
+let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.make()
+  |> Naboris.ServerConfig.add_middleware((next, route, req, res) => {
     let startTime = Unix.gettimeofday();
-    let path = String.concat("", Naboris.Route.path(route)) ++ Naboris.Route.rawQuery(route);
+    let path = String.concat("", Naboris.Route.path(route)) ++ Naboris.Route.raw_query(route);
     print_endline("Start Serving - " ++ path);
     Lwt.bind(() => next(route, req, res), (servedResponse) => {
       // this code is executed after next() resolves
@@ -88,10 +88,10 @@ let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.create()
 ```
 ```ocaml
 (* ... *)
-let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.create ()
-  |> Naboris.ServerConfig.addMiddleware (fun next route req res ->
+let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.make ()
+  |> Naboris.ServerConfig.add_middleware (fun next route req res ->
     let start_time = Unix.gettimeofday () in
-    let path = (String.concat "" (Naboris.Route.path route)) ^ (Naboris.Route.rawQuery route) in
+    let path = (String.concat "" (Naboris.Route.path route)) ^ (Naboris.Route.raw_query route) in
     let _ = print_endline ("Start Serving - " ^ path) in
     Lwt.bind(fun () -> next(route, req, res), fun servedResponse ->
       (* this code is executed after next() resolves *)
@@ -107,16 +107,16 @@ As stated above middlewares are executed in the order in which they are register
 
 ```reason
 // ...
-let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.addMiddleware(authorizationMiddleware)
-  |> Naboris.ServerConfig.addMiddleware(loggerMiddleware);
+let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.make()
+  |> Naboris.ServerConfig.add_middleware(authorizationMiddleware)
+  |> Naboris.ServerConfig.add_middleware(loggerMiddleware);
 // ...
 ```
 ```ocaml
 (* ... *)
-let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.create ()
-  |> Naboris.ServerConfig.addMiddleware authorization_middleware
-  |> Naboris.ServerConfig.addMiddleware logger_middleware in
+let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.make ()
+  |> Naboris.ServerConfig.add_middleware authorization_middleware
+  |> Naboris.ServerConfig.add_middleware logger_middleware in
 (* ... *)
 ```
 
@@ -126,16 +126,16 @@ Easy to solve:
 
 ```reason
 // ...
-let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.addMiddleware(loggerMiddleware)
-  |> Naboris.ServerConfig.addMiddleware(authorizationMiddleware);
+let serverConf: Naboris.ServerConfig.t(userData) = Naboris.ServerConfig.make()
+  |> Naboris.ServerConfig.add_middleware(loggerMiddleware)
+  |> Naboris.ServerConfig.add_middleware(authorizationMiddleware);
 // ...
 ```
 ```ocaml
 (* ... *)
-let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.create ()
-  |> Naboris.ServerConfig.addMiddleware logger_middleware
-  |> Naboris.ServerConfig.addMiddleware authorization_middleware in
+let server_conf: user_data Naboris.ServerConfig.t = Naboris.ServerConfig.make ()
+  |> Naboris.ServerConfig.add_middleware logger_middleware
+  |> Naboris.ServerConfig.add_middleware authorization_middleware in
 (* ... *)
 ```
 

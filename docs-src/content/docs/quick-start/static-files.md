@@ -17,20 +17,20 @@ which will map incoming requests to a local directory.
 /**
  Creates a virtual path prefix [list(string)] and maps it to a local directory [string].
 
- Middlewares are executed in the order they are added.  The final "middleware" is the [requestHandler].
+ Middlewares are executed in the order they are added.  The final "middleware" is the [request_handler].
  */
-let addStaticMiddleware: (list(string), string, t('sessionData)) => t('sessionData);
+let add_static_middleware: (list(string), string, t('sessionData)) => t('sessionData);
 ```
 ```ocaml
 (**
  Creates a virtual path prefix [string list] and maps it to a local directory [string].
 
- Middlewares are executed in the order they are added.  The final "middleware" is the [requestHandler].
+ Middlewares are executed in the order they are added.  The final "middleware" is the [request_handler].
 *)
-val addStaticMiddleware: string list -> string -> 'sessionData t -> 'sessionData t
+val add_static_middleware: string list -> string -> 'sessionData t -> 'sessionData t
 ```
 
-* `list(string)` - Will match against the `Route.path` of each incoming request.
+* `string list` - Will match against the `Route.path` of each incoming request.
 * `string` - Path to a local directory which will have the rest of the path applied to.
 * `t` - Current `Naboris.ServerConfig`.
 
@@ -38,12 +38,12 @@ The rest of the incoming request will be applied to the local path
 e.g. given inputs `["static"], "/path/to/public"` a request for `/static/images/logo.png` would map to `/path/to/public/images/logo.png`.
 
 ```reason
-let serverConfig = Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.addStaticMiddleware(["static"], Sys.getcwd("cur__root") ++ "/public/");
+let serverConfig = Naboris.ServerConfig.make()
+  |> Naboris.ServerConfig.add_static_middleware(["static"], Sys.getcwd("cur__root") ++ "/public/");
 ```
 ```ocaml
-let server_config = Naboris.ServerConfig.create ()
-  |> Naboris.ServerConfig.addStaticMiddleware
+let server_config = Naboris.ServerConfig.make ()
+  |> Naboris.ServerConfig.add_static_middleware
     ["static"]
     (Sys.getcwd () ^ "/public/") in
 ```
@@ -56,8 +56,8 @@ middleware helper function.
 
 ```reason
 let publicDir = Sys.getcwd() ++ "/public/";
-let serverConfig = Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.setRequestHandler((route, req, res) => {
+let serverConfig = Naboris.ServerConfig.make()
+  |> Naboris.ServerConfig.set_request_handler((route, req, res) => {
     switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
       | _ =>
           Naboris.Res.status(404, res)
@@ -67,8 +67,8 @@ let serverConfig = Naboris.ServerConfig.create()
 ```
 ```ocaml
 let public_dir = Sys.getcwd () ^ "/public/" in
-let server_config = Naboris.ServerConfig.create ()
-  |> Naboris.ServerConfig.setRequestHandler(fun route req res ->
+let server_config = Naboris.ServerConfig.make ()
+  |> Naboris.ServerConfig.set_request_handler(fun route req res ->
     match (Naboris.Route.meth route, Naboris.Route.path route) with
       | _ ->
         Naboris.Res.status 404 res

@@ -31,7 +31,7 @@ server {
 ```
 
 #### <a name="session-configuration" href="#session-configuration">#</a> Session Configuration
-If your server makes use of sessions it is important to change the default session id key. This makes many automated attacks much more difficult. [`ServerConfig.setSessionConfig`](http://localhost:3999/odocs/naboris/Naboris/ServerConfig/index.html#val-setSessionConfig) takes optional parameter `~sidKey` making it very easy to change the default session id key. More importantly the optional parameter `~secret` sets the secret used when signing session id cookies.
+If your server makes use of sessions it is important to change the default session id key. This makes many automated attacks much more difficult. [`ServerConfig.set_session_config`](http://localhost:3999/odocs/naboris/Naboris/ServerConfig/index.html#val-set_session_config) takes optional parameter `~sid_key` making it very easy to change the default session id key. More importantly the optional parameter `~secret` sets the secret used when signing session id cookies.
 
 
 #### <a name="follow-http-best-practices" href="#follow-http-best-practices">#</a> Follow HTTP Best Practices

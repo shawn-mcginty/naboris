@@ -11,7 +11,7 @@ Decide _how_ to **respond** to a clients **request** based on the shape of said 
 
 #### <a name="route-arg" href="#route-arg">#</a> Route Argument
 
-Routing is usually done in the `middleware` and `requestHandler` functions. Both functions take, as their first argument, a `Route.t` record. This is a helper composed of useful information from the client's http request.
+Routing is usually done in the `middleware` and `request_handler` functions. Both functions take, as their first argument, a `Route.t` record. This is a helper composed of useful information from the client's http request.
 
 The `Route` module gives functions for pulling data out of the `Route.t` record.
 
@@ -29,7 +29,7 @@ val meth: t -> Method.t
 (*
  Get query [sring] of [t].
  *)
-val rawQuery: t -> string
+val raw_query: t -> string
 
 (*
  Get query map [string list Query.QueryMap.t] ot [t].
@@ -50,7 +50,7 @@ let meth: t => Method.t;
 /**
  Get query [sring] of [t].
  */
-let rawQuery: t => string;
+let raw_query: t => string;
 
 /**
  Get query map [Query.QueryMap.t(list(string))] ot [t].
@@ -65,8 +65,8 @@ let query: t => Query.QueryMap.t(list(string));
 Routing is most often done via **pattern matching**.  This makes it very simple to route request to functions based on a combination of **http method** and **URI**.
 
 ```reason
-Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.setRequestHandler((route, req, res) => {
+Naboris.ServerConfig.make()
+  |> Naboris.ServerConfig.set_request_handler((route, req, res) => {
     switch(Naboris.Route.meth(route), Naboris.Route.path(route)) {
       | (GET, ["users"]) => // matches /users
         UserController.getAllUsers(req, res);
@@ -88,8 +88,8 @@ Naboris.ServerConfig.create()
   });
 ```
 ```ocaml
-Naboris.ServerConfig.create()
-  |> Naboris.ServerConfig.setRequestHandler (fun route req res ->
+Naboris.ServerConfig.make()
+  |> Naboris.ServerConfig.set_request_handler (fun route req res ->
     match(Naboris.Route.meth route, Naboris.Route.path route) with
       | (GET, ["users"]) -> (* matches /users *)
         UserController.get_all_users req res

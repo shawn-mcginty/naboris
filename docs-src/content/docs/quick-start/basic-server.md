@@ -87,8 +87,8 @@ And one in the `lib` folder with our other source files called `dune`:
 /* lib/App.re */
 let startServer = () => {
   let port = 9000;
-  let serverConfig = Naboris.ServerConfig.create()
-    |> Naboris.ServerConfig.setRequestHandler((route, req, res) =>
+  let serverConfig = Naboris.ServerConfig.make()
+    |> Naboris.ServerConfig.set_request_handler((route, req, res) =>
         switch (Naboris.Route.meth(route), Naboris.Route.path(route)) {
           | (GET, [""]) =>
             Naboris.Res.status(200, res)
@@ -98,7 +98,7 @@ let startServer = () => {
               |> Naboris.Res.text(req, "Not Found.");
         });
 
-  Naboris.listenAndWaitForever(port, serverConfig);
+  Naboris.listen_and_wait_forever(port, serverConfig);
 }
 
 Lwt_main.run(startServer());
@@ -107,8 +107,8 @@ Lwt_main.run(startServer());
 (* lib/App.ml *)
 let start_server ()=
   let port = 9000 in
-  let server_config = Naboris.ServerConfig.create()
-    |> Naboris.ServerConfig.setRequestHandler(fun route req res ->
+  let server_config = Naboris.ServerConfig.make()
+    |> Naboris.ServerConfig.set_request_handler(fun route req res ->
       match (Route.meth route, Route.path route) with
         | (GET, [""]) ->
           Naboris.Res.status 200 res
@@ -117,7 +117,7 @@ let start_server ()=
           Naboris.Res.status 404 res
             |> Naboris.Res.text req "Not Found.") in
 
-  Naboris.listenAndWaitForever port server_config
+  Naboris.listen_and_wait_forever port server_config
 
 let _ = Lwt_main.run(main ())
 ```

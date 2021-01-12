@@ -158,7 +158,7 @@ let set_session_cookies new_sid sid_key max_age res =
   let set_cookie_key = "Set-Cookie" in
   let max_age_str = string_of_int max_age in
   add_header_if_none
-    (set_cookie_key, sid_key ^ "=" ^ new_sid ^ "; Max-Age=" ^ max_age_str ^ ";")
+    (set_cookie_key, sid_key ^ "=" ^ new_sid ^ "; Max-Age=" ^ max_age_str ^ "; SameSite=Strict")
     res
 
 let redirect path req res =

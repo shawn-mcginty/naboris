@@ -412,6 +412,14 @@ let test_suite () =
           let () =
             Alcotest.(check string "id" (String.sub cookie 0 7) "nab.sid")
           in
+          let () =
+            Alcotest.(
+              check
+              string
+              "CSRF protection"
+              (String.sub cookie (String.length cookie - 15) 15)
+              "SameSite=Strict"
+            ) in
           Lwt.return_unit);
       Alcotest_lwt.test_case "Handle no session" `Slow (fun _lwt_switch _ ->
           let%lwt resp, _bod =
@@ -490,7 +498,7 @@ let test_suite () =
               let () =
                 Alcotest.(
                   check string "set cookie" set_cookie_header
-                    "nab.sid=; Max-Age=0;")
+                    "nab.sid=; Max-Age=0; SameSite=Strict")
               in
               Lwt.return_unit);
       Alcotest_lwt.test_case "Redirects properly" `Slow (fun _lwt_switch _ ->

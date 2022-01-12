@@ -27,7 +27,7 @@
     "@nuxtjs/bulma": "^1.2.1",
     "frontmatter-markdown-loader": "^3.1.0",
     "js-cookie": "^2.2.1",
-    "markdown-it": "^10.0.0",
+    "markdown-it": "^12.3.2",
     "markdown-it-prism": "^2.0.4",
     "node-sass": "^4.13.1",
     "nuxt": "^2.0.0",

@@ -29,7 +29,7 @@
     "js-cookie": "^2.2.1",
     "markdown-it": "^10.0.0",
     "markdown-it-prism": "^2.0.4",
-    "node-sass": "^4.13.1",
+    "node-sass": "^7.0.0",
     "nuxt": "^2.0.0",
     "sass-loader": "^8.0.2",
     "vue-github-button": "^1.1.2"

@@ -7,7 +7,7 @@
   "scripts": {
     "pre-build": "rm -rf static/fonts/fa && cp -r node_modules/@fortawesome/fontawesome-free/webfonts static/fonts/fa",
     "dev": "nuxt -p 3999",
-    "build": "npm run prebuild && nuxt build",
+    "build": "npm run pre-build && nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",

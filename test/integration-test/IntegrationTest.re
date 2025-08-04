@@ -50,7 +50,7 @@ let startServers = lwtSwitch => {
     |> Naboris.ServerConfig.setSessionConfig(sessionConfig.getSession)
     |> Naboris.ServerConfig.addStaticMiddleware(
          ["static"],
-         Sys.getenv("cur__root") ++ "/test/integration-test/test_assets",
+         Sys.getcwd() ++ "/../../../test/integration-test/test_assets",
        )
     |> Naboris.ServerConfig.setErrorHandler((error, _route) => {
          switch (error) {

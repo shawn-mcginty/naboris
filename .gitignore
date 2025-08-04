@@ -33,3 +33,4 @@ command-env
 libev.esy.lock
 .DS_Store
 deploy_key
+_opam
